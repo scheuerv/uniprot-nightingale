@@ -1,0 +1,25 @@
+{
+    "compilerOptions": {
+      "composite": false,
+      "target": "es2019",
+      "jsx": "react",
+      "sourceMap": true,
+      "strictNullChecks": true,
+      "module": "commonjs",
+      "moduleResolution": "node",
+      "baseUrl": ".",
+      "alwaysStrict": true,
+      "noImplicitAny": true,
+      "noImplicitThis": true,
+      "noUnusedLocals": true,
+      "strictFunctionTypes": true,
+      "allowUmdGlobalAccess": true,
+      "allowJs": true
+    },
+    "include": [
+      "src/**/*"
+    ],
+    "exclude": [
+      "node_modules"
+    ]
+}
