@@ -26,10 +26,11 @@ export default class BasicTrackRenderer implements TrackRenderer {
             d3.create("div").text("main").node()!,
             this.mainTrack.track as any,
             "main arrow-right"
-        )
+        );
+        this.mainTrackRow.attr("class", this.mainTrackRow.attr("class") + " data")
         this.mainTrackRow.select(".track-label").on('click', () =>
             this.toggle()
-        )
+        );
         categoryDiv!.appendChild(this.mainTrackRow.node()!);
         trackContainers.push(this.mainTrack);
         this.subtracksDiv = d3.create("div").attr("class", "subtracks-container").style("display", "none").node();

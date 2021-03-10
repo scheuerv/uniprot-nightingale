@@ -3,6 +3,12 @@ const ExtraWatchWebpackPlugin = require('extra-watch-webpack-plugin');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 
 const sharedConfig = {
+    mode: 'development',
+    devServer: {
+        contentBase: path.join(__dirname, 'dist'),
+        port: 1340,
+        writeToDisk: true
+    },
     module: {
         rules: [{
                 loader: 'ts-loader',
@@ -49,13 +55,12 @@ const sharedConfig = {
 function createEntryPoint(name) {
     return {
         devtool: "inline-source-map",
-        node: { fs: 'empty' },
         entry: ["@babel/polyfill", path.resolve(__dirname, `src/index.ts`)],
         output: {
-            library: 'App',
-            libraryTarget: 'umd',
             filename: `${name}.js`,
-            path: path.resolve(__dirname, `dist/`)
+            path: path.resolve(__dirname, `dist/`),
+            clean: true,
+            publicPath: '/'
         },
         ...sharedConfig
     }
