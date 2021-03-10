@@ -1,6 +1,7 @@
 import d3 = require('d3');
-import TrackContainer from './track-container';
+import categoryContainer from './category-container';
 import TrackParser from './track-parser';
+import { createRow } from './utils';
 export default class TrackManager {
     private tracks: Track[] = [];
     private sequence: string = "";
@@ -21,9 +22,17 @@ export default class TrackManager {
                     this.sequence += tokens[i];
                 }
                 let navigationElement = d3.create('protvista-navigation').attr("length", this.sequence.length);
-                protvistaManager?.appendChild(navigationElement.node() as any);
+                protvistaManager?.appendChild(
+                    createRow(
+                        d3.create('div').node()!, navigationElement.node() as any
+                    ).node() as any
+                );
                 let sequenceElement = d3.create('protvista-sequence').attr("length", this.sequence.length).attr("sequence", this.sequence);
-                protvistaManager?.appendChild(sequenceElement.node() as any);
+                protvistaManager?.appendChild(
+                    createRow(
+                        d3.create('div').node()!, sequenceElement.node() as any
+                    ).node() as any
+                );
             });
 
         Promise.all(
@@ -40,26 +49,18 @@ export default class TrackManager {
             )
         ).then(renderers => {
 
-            let trackContainers: TrackContainer[] = [];
+            let categoryContainers: categoryContainer[] = [];
             renderers
                 .filter(renderer => renderer != null)
                 .map(renderer => renderer!)
                 .forEach(renderer => {
-                    let subtracks = renderer.getSubtracks();
-                    let div = document.createElement("div");
-                    let mainTrack = renderer.getMainTrack();
-                    d3.select(mainTrack.track as any).attr("length", this.sequence.length);
-                    trackContainers.push(mainTrack);
-                    div.appendChild(mainTrack.track as any);
-                    subtracks.forEach(subtrack => {
-                        div.appendChild(subtrack.track as any);
-                        d3.select(subtrack.track as any).attr("length", this.sequence.length);
-                        trackContainers.push(subtrack);
-                    });
-                    protvistaManager?.appendChild(div as any);
+                    let categoryContainer = renderer.getCategoryContainer(this.sequence);
+                    categoryContainers.push(categoryContainer);
+                    protvistaManager?.appendChild(categoryContainer.categoryDiv);
                 });
+
             element.appendChild(protvistaManager!);
-            trackContainers.forEach(tC => tC.addData());
+            categoryContainers.forEach(categoryContainer => categoryContainer.addData());
 
 
         });

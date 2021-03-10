@@ -1,5 +1,4 @@
-import TrackContainer from './track-container';
+import CategoryContainer from './category-container';
 export default interface TrackRenderer {
-    getMainTrack(): TrackContainer;
-    getSubtracks(): TrackContainer[];
+    getCategoryContainer(sequence:string):CategoryContainer;
 }

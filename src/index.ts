@@ -10,13 +10,15 @@ import ProtvistaNavigation from "protvista-navigation";
 import LimitedTrack from "./limited-track";
 import { ProtvistaWrapper } from "./protvista-wrapper";
 
-import { loadComponent } from "./load-component";
+import { loadComponent } from "./utils";
 
 import TrackManager from "./track-manager";
 import SMRParser from "./SMR-parser";
 import PdbParser from "./pdb-parser";
 import AntigenParser from "./antigen-parser";
 import ProteomicsParser from "./proteomics-parser";
+import "./index.html";
+import './main.css';
 
 
 const registerWebComponents = function () {
