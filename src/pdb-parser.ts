@@ -29,13 +29,14 @@ export default class PdbParser implements TrackParser {
                         result.data[result.source.pdb_id].molecules.forEach((molecule: { entity_id: Number, chains: [{ observed: { start: { residue_number: number; }; end: { residue_number: number; }; }[]; }]; }) => {
                             molecule.chains.forEach(chain => {
                                 const observedFragments = chain.observed.map((element: { start: { residue_number: number; }; end: { residue_number: number; }; }) => {
-                                    const start: number = element.start.residue_number;
-                                    const end: number = element.end.residue_number;
+                                    const start: number = Math.max(element.start.residue_number + result.source.unp_start - result.source.start, result.source.unp_start);
+                                    const end: number = Math.min(element.end.residue_number + result.source.unp_start - result.source.start, result.source.unp_end);
+
                                     return new Fragment(start, end, '#2e86c1', '#2e86c1');
-                                });
-                                const unobservedFragments = this.getUnobservedFragments(observedFragments, result.source.start, result.source.end);
+                                }).filter(fragment => fragment.end >= result.source.unp_start && fragment.start <= result.source.unp_end);
+                                const unobservedFragments = this.getUnobservedFragments(observedFragments, result.source.unp_start, result.source.unp_end);
                                 const fragments = observedFragments.concat(unobservedFragments);
-                                let accessions = [new Accession(null, [new Location(fragments, result.source.unp_start, result.source.unp_end)], 'PDB')];
+                                let accessions = [new Accession(null, [new Location(fragments)], 'PDB')];
                                 trackRows.push(new TrackRow(accessions, result.source.pdb_id + ' ' + result.source.chain_id.toLowerCase()));
                             });
                         });

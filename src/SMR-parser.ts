@@ -18,7 +18,7 @@ export default class SMRParser implements TrackParser {
                 });
 
                 let accesion = new Accession(null, [
-                    new Location(fragments, structure.from, structure.to)
+                    new Location(fragments)
                 ], 'SMR')
                 accesion.experimentalMethod = experimentalMethod;
                 accesion.coordinatesFile = coordinatesFile;

@@ -108,9 +108,7 @@ export class Accession {
 export class Location {
     constructor
         (
-            public fragments: Fragment[],
-            public start?: number,
-            public end?: number
+            public fragments: Fragment[]
         ) { }
 
 }
