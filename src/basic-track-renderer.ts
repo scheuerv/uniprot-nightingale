@@ -10,34 +10,33 @@ export default class BasicTrackRenderer implements TrackRenderer {
     private subtracks: TrackContainer[];
     private subtracksDiv: HTMLDivElement | null;
     private mainTrackRow: d3.Selection<HTMLDivElement, undefined, null, undefined>;
-    constructor(private rows: TrackRow[]) {
-        this.mainTrack = this.getMainTrack();
-        this.subtracks = this.getSubtracks();
+    constructor(private rows: TrackRow[], private mainTrackLabel: string) {
 
     }
     getCategoryContainer(sequence: string): CategoryContainer {
+        this.mainTrack = this.getMainTrack();
+        this.subtracks = this.getSubtracks();
         let trackContainers: TrackContainer[] = [];
         let categoryDiv = d3.create("div").node();
 
         d3.select(this.mainTrack.track as any).attr("length", sequence.length);
-        //  d3.append("div").attr("class", "track-content").node()?.appendChild(this.mainTrack.track as any);
 
         this.mainTrackRow = createRow(
-            d3.create("div").text("main").node()!,
+            d3.create("div").text(this.mainTrackLabel).node()!,
             this.mainTrack.track as any,
-            "main arrow-right"
+            "main"
         );
         this.mainTrackRow.attr("class", this.mainTrackRow.attr("class") + " data")
-        this.mainTrackRow.select(".track-label").on('click', () =>
+        this.mainTrackRow.select(".track-label").attr("class", "track-label main arrow-right").on('click', () =>
             this.toggle()
         );
         categoryDiv!.appendChild(this.mainTrackRow.node()!);
         trackContainers.push(this.mainTrack);
         this.subtracksDiv = d3.create("div").attr("class", "subtracks-container").style("display", "none").node();
-        this.subtracks.forEach(subtrack => {
+        this.subtracks.forEach((subtrack, i) => {
             d3.select(subtrack.track as any).attr("length", sequence.length);
             let trackRowDiv = createRow(
-                d3.create("div").text("sub").node()!,
+                d3.create("div").text(this.rows[i].label).node()!,
                 subtrack.track as any,
                 "sub"
             );
@@ -50,7 +49,7 @@ export default class BasicTrackRenderer implements TrackRenderer {
 
 
     }
-    toggle() {
+    private toggle() {
         if (this.subtracksDiv!.style.display === 'none') {
             this.subtracksDiv!.style.display = 'block';
             d3.select(this.mainTrack.track as any).style('display', 'none');
@@ -61,7 +60,7 @@ export default class BasicTrackRenderer implements TrackRenderer {
             this.mainTrackRow.select('.track-label.main').attr('class', 'track-label main arrow-right');
         }
     }
-    getMainTrack(): TrackContainer {
+    private getMainTrack(): TrackContainer {
         let mainTrackData = this.rows.flatMap(row => row.rowData);
         let d3Track = d3.create("protvista-track")
             .attr("highlight-event", "onmouseover")
@@ -71,7 +70,7 @@ export default class BasicTrackRenderer implements TrackRenderer {
 
         return new TrackContainer(track, mainTrackData);
     }
-    getSubtracks(): TrackContainer[] {
+    private getSubtracks(): TrackContainer[] {
         let subtrackContainers: TrackContainer[] = [];
         this.rows.forEach(subtrackData => {
             let d3Track = d3.create("protvista-track")
@@ -87,14 +86,20 @@ export default class BasicTrackRenderer implements TrackRenderer {
 
 }
 export class TrackRow {
-    constructor(public rowData: Accession[]) {
+    constructor(public rowData: Accession[], public label: string) {
 
     }
 }
 export class Accession {
+    public experimentalMethod: string | null;
+    public coverage: number;
+    public pdbStart: number;
+    public pdbEnd: number;
+    public uniprotStart: number;
+    public uniprotEnd: number;
+    public coordinatesFile: string | null;
     constructor
         (
-            public accession: string,
             public color: string | null,
             public locations: Location[],
             public type: string
@@ -113,7 +118,9 @@ export class Location {
 export class Fragment {
     constructor(
         public start: number,
-        public end: number
+        public end: number,
+        public color?: string,
+        public fill?: string
 
     ) { }
 }
