@@ -6,8 +6,19 @@ export default class PdbParser implements TrackParser {
     async parse(uniprotId: string, data: any): Promise<BasicTrackRenderer | null> {
         const trackRows: TrackRow[] = [];
         if (data[uniprotId]) {
+            let hash: any = [];
+            let dataDeduplicated: any = [];
+            for (let record of data[uniprotId]) {
+                if (!hash[record.pdb_id + "_" + record.chain_id]) {
+                    hash[record.pdb_id + "_" + record.chain_id] = record;
+                    record.tax_id = [record.tax_id];
+                    dataDeduplicated.push(record);
+                } else {
+                    hash[record.pdb_id + "_" + record.chain_id].tax_id.push(record.tax_id)
+                }
+            }
             await Promise.all(
-                data[uniprotId].map(
+                dataDeduplicated.map(
                     (record: { chain_id: string; pdb_id: string }) => {
                         const chain_id = record.chain_id;
                         const pdb_id = record.pdb_id;
@@ -39,11 +50,13 @@ export default class PdbParser implements TrackParser {
                                 let accessions = [new Accession(null, [new Location(fragments)], 'PDB')];
                                 trackRows.push(new TrackRow(accessions, result.source.pdb_id + ' ' + result.source.chain_id.toLowerCase()));
                             });
+
                         });
                     });
-                });
+                })
             return new BasicTrackRenderer(trackRows, this.categoryName);
-        } else {
+        }
+        else {
             return null;
         }
     }
