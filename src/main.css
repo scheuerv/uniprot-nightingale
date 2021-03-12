@@ -28,7 +28,7 @@ div.track-label {
     overflow: hidden;
     box-sizing: border-box;
     width: 198px;
-    min-width: 198px;
+    max-width: 198px;
     padding: .5em;
     vertical-align: middle;
 }
@@ -36,10 +36,6 @@ div.track-label {
 div.track-label.main {
     background-color: #b2f5ff;
     cursor: pointer;
-}
-
-div.track-label div {
-    display: inline-block;
 }
 
 div.track-label.sub {

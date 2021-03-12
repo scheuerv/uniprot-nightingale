@@ -22,7 +22,7 @@ export default class BasicTrackRenderer implements TrackRenderer {
         d3.select(this.mainTrack.track as any).attr("length", sequence.length);
 
         this.mainTrackRow = createRow(
-            d3.create("div").text(this.mainTrackLabel).node()!,
+            document.createTextNode(this.mainTrackLabel),
             this.mainTrack.track as any,
             "main"
         );

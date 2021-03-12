@@ -6,7 +6,7 @@ const loadComponent = function(name: string, className: CustomElementConstructor
     }
 };
 
-function createRow(label: HTMLElement, content: HTMLElement, customClass: string = "") {
+function createRow(label: Node, content: Node, customClass: string = "") {
     let row = d3.create("div")
         .attr("class", "track-row");
     row.append("div").attr("class", "track-label " + customClass).node()?.appendChild(label);
