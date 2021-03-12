@@ -19,6 +19,7 @@ import AntigenParser from "./antigen-parser";
 import ProteomicsParser from "./proteomics-parser";
 import "./index.html";
 import './main.css';
+import FeatureParser from "./feature-parser";
 
 
 const registerWebComponents = function () {
@@ -42,6 +43,8 @@ if (window.customElements) {
 }
 
 let trackManager: TrackManager = new TrackManager(uniProtId =>`https://www.uniprot.org/uniprot/${uniProtId}.fasta`);
+
+trackManager.addTrack(uniProtId => `https://www.ebi.ac.uk/proteins/api/features/${uniProtId}`, new FeatureParser());
 trackManager.addTrack(uniProtId => `https://www.ebi.ac.uk/proteins/api/proteomics/${uniProtId}`, new ProteomicsParser());
 trackManager.addTrack(uniProtId => `https://www.ebi.ac.uk/proteins/api/antigen/${uniProtId}`, new AntigenParser());
 trackManager.addTrack(uniProtId => `https://swissmodel.expasy.org/repository/uniprot/${uniProtId}.json?provider=swissmodel`, new SMRParser());

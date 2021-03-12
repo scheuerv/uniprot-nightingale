@@ -1,9 +1,5 @@
-import TrackContainer from "./track-container";
-export default class CategoryContainer {
-    constructor(public tracks: TrackContainer[],public categoryDiv:HTMLDivElement) {
+export default interface CategoryContainer {
+    getContent(): HTMLElement;
+    addData(): void;
 
-    }
-    addData() {
-        this.tracks.forEach(track=>track.addData());
-    }
 }

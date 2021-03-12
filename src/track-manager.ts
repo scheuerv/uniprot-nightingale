@@ -56,7 +56,7 @@ export default class TrackManager {
                 .forEach(renderer => {
                     let categoryContainer = renderer.getCategoryContainer(this.sequence);
                     categoryContainers.push(categoryContainer);
-                    protvistaManager?.appendChild(categoryContainer.categoryDiv);
+                    protvistaManager?.appendChild(categoryContainer.getContent());
                 });
 
             element.appendChild(protvistaManager!);

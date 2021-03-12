@@ -4,7 +4,7 @@ import { createRow } from './utils';
 // @ts-ignore
 import ProtvistaTrack from 'protvista-track';
 import TrackContainer from './track-container';
-import CategoryContainer from './category-container';
+import BasicCategoryContainer from './basic-category-container';
 export default class BasicTrackRenderer implements TrackRenderer {
     private mainTrack: TrackContainer;
     private subtracks: TrackContainer[];
@@ -13,7 +13,7 @@ export default class BasicTrackRenderer implements TrackRenderer {
     constructor(private rows: TrackRow[], private mainTrackLabel: string) {
 
     }
-    getCategoryContainer(sequence: string): CategoryContainer {
+    getCategoryContainer(sequence: string): BasicCategoryContainer {
         this.mainTrack = this.getMainTrack();
         this.subtracks = this.getSubtracks();
         let trackContainers: TrackContainer[] = [];
@@ -45,7 +45,7 @@ export default class BasicTrackRenderer implements TrackRenderer {
 
         });
         categoryDiv!.append(this.subtracksDiv!);
-        return new CategoryContainer(trackContainers, categoryDiv!);
+        return new BasicCategoryContainer(trackContainers, categoryDiv!);
 
 
     }
