@@ -12,22 +12,22 @@ export default class TrackManager {
 
 
 
-        let protvistaManager = d3.create("protvista-manager")
+        const protvistaManager = d3.create("protvista-manager")
             .attr("attributes", "length displaystart displayend highlightstart highlightend activefilters filters")
             .node();
         fetch(this.sequenceUrlGenerator(uniprotId)).then(data => data.text())
             .then(data => {
-                let tokens = data.split(/\r?\n/);
+                const tokens = data.split(/\r?\n/);
                 for (let i = 1; i < tokens.length; i++) {
                     this.sequence += tokens[i];
                 }
-                let navigationElement = d3.create('protvista-navigation').attr("length", this.sequence.length);
+                const navigationElement = d3.create('protvista-navigation').attr("length", this.sequence.length);
                 protvistaManager?.appendChild(
                     createRow(
                         d3.create('div').node()!, navigationElement.node() as any
                     ).node() as any
                 );
-                let sequenceElement = d3.create('protvista-sequence').attr("length", this.sequence.length).attr("sequence", this.sequence);
+                const sequenceElement = d3.create('protvista-sequence').attr("length", this.sequence.length).attr("sequence", this.sequence);
                 protvistaManager?.appendChild(
                     createRow(
                         d3.create('div').node()!, sequenceElement.node() as any
@@ -49,12 +49,12 @@ export default class TrackManager {
             )
         ).then(renderers => {
 
-            let categoryContainers: categoryContainer[] = [];
+            const categoryContainers: categoryContainer[] = [];
             renderers
                 .filter(renderer => renderer != null)
                 .map(renderer => renderer!)
                 .forEach(renderer => {
-                    let categoryContainer = renderer.getCategoryContainer(this.sequence);
+                    const categoryContainer = renderer.getCategoryContainer(this.sequence);
                     categoryContainers.push(categoryContainer);
                     protvistaManager?.appendChild(categoryContainer.getContent());
                 });

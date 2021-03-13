@@ -16,8 +16,8 @@ export default class BasicTrackRenderer implements TrackRenderer {
     getCategoryContainer(sequence: string): BasicCategoryContainer {
         this.mainTrack = this.getMainTrack();
         this.subtracks = this.getSubtracks();
-        let trackContainers: TrackContainer[] = [];
-        let categoryDiv = d3.create("div").node();
+        const trackContainers: TrackContainer[] = [];
+        const categoryDiv = d3.create("div").node();
 
         d3.select(this.mainTrack.track as any).attr("length", sequence.length);
 
@@ -35,7 +35,7 @@ export default class BasicTrackRenderer implements TrackRenderer {
         this.subtracksDiv = d3.create("div").attr("class", "subtracks-container").style("display", "none").node();
         this.subtracks.forEach((subtrack, i) => {
             d3.select(subtrack.track as any).attr("length", sequence.length);
-            let trackRowDiv = createRow(
+            const trackRowDiv = createRow(
                 d3.create("div").text(this.rows[i].label).node()!,
                 subtrack.track as any,
                 "sub"
@@ -61,23 +61,23 @@ export default class BasicTrackRenderer implements TrackRenderer {
         }
     }
     private getMainTrack(): TrackContainer {
-        let mainTrackData = this.rows.flatMap(row => row.rowData);
-        let d3Track = d3.create("protvista-track")
+        const mainTrackData = this.rows.flatMap(row => row.rowData);
+        const d3Track = d3.create("protvista-track")
             .attr("highlight-event", "onmouseover")
             .attr("height", 40)
             .attr("layout", "non-overlapping");
-        let track = (d3Track.node() as any) as ProtvistaTrack;
+        const track = (d3Track.node() as any) as ProtvistaTrack;
 
         return new TrackContainer(track, mainTrackData);
     }
     private getSubtracks(): TrackContainer[] {
-        let subtrackContainers: TrackContainer[] = [];
+        const subtrackContainers: TrackContainer[] = [];
         this.rows.forEach(subtrackData => {
-            let d3Track = d3.create("protvista-track")
+            const d3Track = d3.create("protvista-track")
                 .attr("highlight-event", "onmouseover")
                 .attr("height", 40)
                 .attr("layout", "non-overlapping");
-            let track = (d3Track.node() as any) as ProtvistaTrack;
+            const track = (d3Track.node() as any) as ProtvistaTrack;
             subtrackContainers.push(new TrackContainer(track, subtrackData.rowData));
         });
         return subtrackContainers;

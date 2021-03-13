@@ -1,6 +1,9 @@
 import TrackParser from './track-parser';
-import BasicTrackRenderer, { Fragment, Location, Accession, TrackRow } from './basic-track-renderer';
+import BasicTrackRenderer, { Fragment, TrackRow } from './basic-track-renderer';
 import TrackRenderer from './track-renderer';
+import FragmentAligner from './fragment-aligner';
+import { getDarkerColor } from './utils';
+const config = require("protvista-track/src/config").config;
 
 export default class ProteomicsParser implements TrackParser {
     private categoryName = "Proteomics";
@@ -9,21 +12,31 @@ export default class ProteomicsParser implements TrackParser {
         if (data.errorMessage) {
             return null;
         }
-        const unique: Accession[] = [];
-        const nonUnique: Accession[] = [];
+
+        const uniqueFragmentAligner = new FragmentAligner('UNIQUE');
+        const nonUniqueFragmentAligner = new FragmentAligner('NON_UNIQUE');
         const features = data.features;
-        features.forEach((feature: { unique: string; begin: number; end: number; }) => {
+        const colorUnique = config[uniqueFragmentAligner.getType()].color;
+        const colorNonUnique = config[nonUniqueFragmentAligner.getType()].color;
+        const borderColorUnique = getDarkerColor(colorUnique);
+        const borderColorNonUnique = getDarkerColor(colorNonUnique);
+        features.forEach((feature: { unique: string; begin: string; end: string; }) => {
             if (feature.unique) {
-                unique.push(new Accession(null, [new Location([new Fragment(feature.begin, feature.end)])], 'UNIQUE'))
+                uniqueFragmentAligner.addFragment(new Fragment(parseInt(feature.begin), parseInt(feature.end), borderColorUnique, colorUnique));
             }
             else {
-                nonUnique.push(new Accession(null, [new Location([new Fragment(feature.begin, feature.end)])], 'NON_UNIQUE'))
+                nonUniqueFragmentAligner.addFragment(new Fragment(parseInt(feature.begin), parseInt(feature.end), borderColorNonUnique, colorNonUnique));
             }
         });
         const trackRows = [
-            new TrackRow(unique, "Unique peptide"),
-            new TrackRow(nonUnique, "Non-unique peptide")
+            new TrackRow(uniqueFragmentAligner.getAccessions(), config[uniqueFragmentAligner.getType()].label),
+            new TrackRow(nonUniqueFragmentAligner.getAccessions(), config[nonUniqueFragmentAligner.getType()].label)
         ];
-        return new BasicTrackRenderer(trackRows, this.categoryName);
+        if (trackRows.length > 0) {
+            return new BasicTrackRenderer(trackRows, this.categoryName);
+        }
+        else {
+            return null;
+        }
     }
 }

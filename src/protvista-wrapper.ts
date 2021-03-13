@@ -14,7 +14,7 @@ export class ProtvistaWrapper extends HTMLElement {
 }
 
 export function addConnectedCallback(el: HTMLElement, connectedCallback: () => void) {
-    let protvistaWrapper = document.createElement("protvista-wrapper") as ProtvistaWrapper;
+    const protvistaWrapper = document.createElement("protvista-wrapper") as ProtvistaWrapper;
     protvistaWrapper.setCallback(connectedCallback);
     (el as any).appendChild(protvistaWrapper);
 

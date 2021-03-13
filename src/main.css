@@ -15,6 +15,10 @@ div.track-content {
     width: 100%;
 }
 
+.rectangle.feature {
+    fill-opacity: 0.6 !important;
+}
+
 protvista-track svg,
 protvista-navigation svg,
 protvista-sequence svg {

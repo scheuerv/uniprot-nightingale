@@ -1,49 +1,48 @@
-import BasicTrackRenderer, { Accession, Fragment, Location, TrackRow } from "./basic-track-renderer";
+import BasicTrackRenderer, { Fragment, TrackRow } from "./basic-track-renderer";
 import CompositeTrackRenderer from "./composite-track-renderer";
+import FragmentAligner from "./fragment-aligner";
 import TrackParser from "./track-parser";
-import trackRenderer from "./track-renderer";
-const config = require("protvista-track/src/config").config;
+import TrackRenderer from "./track-renderer";
+//@ts-ignore
+import { config } from "protvista-track/src/config";
+import { getDarkerColor } from "./utils";
 export default class FeatureParser implements TrackParser {
-    async parse(uniprotId: string, data: any): Promise<trackRenderer | null> {
+    async parse(uniprotId: string, data: any): Promise<TrackRenderer | null> {
 
-        const categories: Map<string, Map<string, Accession[]>> = new Map();
+        const categories: Map<string, Map<string, FragmentAligner>> = new Map();
         const features = data.features;
-        features.forEach((feature: { category: string; begin: number; end: number; type: string; }) => {
+        features.forEach((feature: { category: string; begin: string; end: string; type: string; }) => {
             let category = categories.get(feature.category);
             if (!category) {
                 category = new Map();
                 categories.set(feature.category, category);
             }
-            let type = category.get(feature.type)
-            if (!type) {
-                type = [];
-                category.set(feature.type, type);
+            let typeFeatureAligner = category.get(feature.type)
+            if (!typeFeatureAligner) {
+                typeFeatureAligner = new FragmentAligner(feature.type);
+                category.set(feature.type, typeFeatureAligner);
             }
-            let accessions = categories.get(feature.category)?.get(feature.type)??[];
-            let fragmentAdded=false;
-            accessions.forEach(accession => {
-                const fragments=accession.locations[0].fragments;
-                if (!fragmentAdded&&fragments[fragments.length - 1].end < feature.begin)
-                {
-                    fragments.push(new Fragment(feature.begin, feature.end, '#000000', config[feature.type]?.color))
-                    fragmentAdded=true;
-                }
-            });
-            if(!fragmentAdded)
-            {
-                accessions.push(new Accession(null,[new Location([new Fragment(feature.begin, feature.end, '#000000', config[feature.type]?.color)])],feature.type))
-            }
+            const fillColor = config[feature.type]?.color;
+            const borderColor = getDarkerColor(fillColor);
+
+            typeFeatureAligner.addFragment(new Fragment(parseInt(feature.begin), parseInt(feature.end), borderColor, fillColor));
+
 
         });
         const categoryRenderers: BasicTrackRenderer[] = [];
-        for (let [category, categoryData] of categories.entries()) {
+        for (const [category, categoryData] of categories.entries()) {
             const typeTrackRows: TrackRow[] = [];
-            for (let [type, typeData] of categoryData) {
-                typeTrackRows.push(new TrackRow(typeData, config[type]?.label ?? type));
+            for (const [type, fragmentAligner] of categoryData) {
+                typeTrackRows.push(new TrackRow(fragmentAligner.getAccessions(), config[type]?.label ?? type));
             }
             categoryRenderers.push(new BasicTrackRenderer(typeTrackRows, category));
         }
-        return new CompositeTrackRenderer(categoryRenderers);
+        if (categories.size > 0) {
+            return new CompositeTrackRenderer(categoryRenderers);
+        }
+        else {
+            return null;
+        }
     }
 
 }

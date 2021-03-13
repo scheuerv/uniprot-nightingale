@@ -2,13 +2,15 @@ import TrackParser from './track-parser';
 import BasicTrackRenderer, { Fragment, Location, Accession, TrackRow } from './basic-track-renderer';
 
 export default class PdbParser implements TrackParser {
-    categoryName = "Experimental structures";
+    private readonly categoryName = "Experimental structures";
+    private readonly observedColor = '#2e86c1';
+    private readonly unobservedColor = '#bdbfc1';
     async parse(uniprotId: string, data: any): Promise<BasicTrackRenderer | null> {
         const trackRows: TrackRow[] = [];
         if (data[uniprotId]) {
-            let hash: any = [];
-            let dataDeduplicated: any = [];
-            for (let record of data[uniprotId]) {
+            const hash: any = [];
+            const dataDeduplicated: any = [];
+            for (const record of data[uniprotId]) {
                 if (!hash[record.pdb_id + "_" + record.chain_id]) {
                     hash[record.pdb_id + "_" + record.chain_id] = record;
                     record.tax_id = [record.tax_id];
@@ -36,18 +38,20 @@ export default class PdbParser implements TrackParser {
             ).then(
                 results => {
                     results.forEach(resultJson => {
-                        let result = resultJson as any;
-                        result.data[result.source.pdb_id].molecules.forEach((molecule: { entity_id: Number, chains: [{ observed: { start: { residue_number: number; }; end: { residue_number: number; }; }[]; }]; }) => {
+                        const result = resultJson as any;
+                        result.data[result.source.pdb_id].molecules.forEach((molecule: { entity_id: string, chains: [{ observed: { start: { residue_number: string; }; end: { residue_number: string; }; }[]; }]; }) => {
                             molecule.chains.forEach(chain => {
-                                const observedFragments = chain.observed.map((element: { start: { residue_number: number; }; end: { residue_number: number; }; }) => {
-                                    const start: number = Math.max(element.start.residue_number + result.source.unp_start - result.source.start, result.source.unp_start);
-                                    const end: number = Math.min(element.end.residue_number + result.source.unp_start - result.source.start, result.source.unp_end);
-
-                                    return new Fragment(start, end, '#2e86c1', '#2e86c1');
-                                }).filter(fragment => fragment.end >= result.source.unp_start && fragment.start <= result.source.unp_end);
-                                const unobservedFragments = this.getUnobservedFragments(observedFragments, result.source.unp_start, result.source.unp_end);
+                                const uniprotStart = parseInt(result.source.unp_start);
+                                const uniprotEnd = parseInt(result.source.unp_end);
+                                const pdbStart = parseInt(result.source.start);
+                                const observedFragments = chain.observed.map((element: { start: { residue_number: string; }; end: { residue_number: string; }; }) => {                                    
+                                    const start: number = Math.max(parseInt(element.start.residue_number) + uniprotStart - pdbStart, uniprotStart);
+                                    const end: number = Math.min(parseInt(element.end.residue_number) + uniprotStart - pdbStart, uniprotEnd);
+                                    return new Fragment(start, end, this.observedColor, this.observedColor);
+                                }).filter(fragment => fragment.end >= uniprotStart && fragment.start <= uniprotEnd);
+                                const unobservedFragments = this.getUnobservedFragments(observedFragments, uniprotStart, uniprotEnd);
                                 const fragments = observedFragments.concat(unobservedFragments);
-                                let accessions = [new Accession(null, [new Location(fragments)], 'PDB')];
+                                const accessions = [new Accession(null, [new Location(fragments)], 'PDB')];
                                 trackRows.push(new TrackRow(accessions, result.source.pdb_id + ' ' + result.source.chain_id.toLowerCase()));
                             });
 
@@ -64,21 +68,21 @@ export default class PdbParser implements TrackParser {
         return `https://www.ebi.ac.uk/pdbe/api/pdb/entry/polymer_coverage/${pdbId}/chain/${chainId}`;
     }
     private getUnobservedFragments(observedFragments: Fragment[], start: number, end: number): Fragment[] {
-        const ofs = observedFragments.sort((a, b) => a.start - b.start);
-        let unobservedFragments: Fragment[] = [];
-        if (ofs.length == 0) {
+        const observedFragmentSorted = observedFragments.sort((a, b) => a.start - b.start);
+        const unobservedFragments: Fragment[] = [];
+        if (observedFragmentSorted.length == 0) {
             return [];
         }
-        if (start < ofs[0].start) {
-            unobservedFragments.push(new Fragment(start, ofs[0].start - 1, '#bdbfc1', '#bdbfc1'));
+        if (start < observedFragmentSorted[0].start) {
+            unobservedFragments.push(new Fragment(start, observedFragmentSorted[0].start - 1, this.unobservedColor, this.unobservedColor));
         }
 
-        for (let i = 1; i < ofs.length; i++) {
-            unobservedFragments.push(new Fragment(ofs[i - 1].end + 1, ofs[i].start - 1, '#bdbfc1', '#bdbfc1'))
+        for (let i = 1; i < observedFragmentSorted.length; i++) {
+            unobservedFragments.push(new Fragment(observedFragmentSorted[i - 1].end + 1, observedFragmentSorted[i].start - 1, this.unobservedColor, this.unobservedColor))
         }
 
-        if (end - 1 >= ofs[ofs.length - 1].end) { //+1 because length
-            unobservedFragments.push(new Fragment(ofs[ofs.length - 1].end + 1, end, '#bdbfc1', '#bdbfc1'));
+        if (end - 1 >= observedFragmentSorted[observedFragmentSorted.length - 1].end) {
+            unobservedFragments.push(new Fragment(observedFragmentSorted[observedFragmentSorted.length - 1].end + 1, end, this.unobservedColor, this.unobservedColor));
         }
         return unobservedFragments;
 

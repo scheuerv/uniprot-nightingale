@@ -42,7 +42,7 @@ if (window.customElements) {
     });
 }
 
-let trackManager: TrackManager = new TrackManager(uniProtId =>`https://www.uniprot.org/uniprot/${uniProtId}.fasta`);
+const trackManager: TrackManager = new TrackManager(uniProtId => `https://www.uniprot.org/uniprot/${uniProtId}.fasta`);
 
 trackManager.addTrack(uniProtId => `https://www.ebi.ac.uk/proteins/api/features/${uniProtId}`, new FeatureParser());
 trackManager.addTrack(uniProtId => `https://www.ebi.ac.uk/proteins/api/proteomics/${uniProtId}`, new ProteomicsParser());
