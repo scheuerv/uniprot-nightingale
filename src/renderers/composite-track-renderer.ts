@@ -1,4 +1,4 @@
-import CompositeCategoryContainer from "./composite-category-container";
+import CompositeCategoryContainer from "../manager/composite-category-container";
 import TrackRenderer from "./track-renderer";
 
 export default class CompositeTrackRenderer implements TrackRenderer {

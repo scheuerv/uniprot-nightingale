@@ -1,4 +1,4 @@
-import { Accession, Fragment, Location } from "./basic-track-renderer";
+import { Accession, Fragment, Location } from "../renderers/basic-track-renderer";
 
 export default class FragmentAligner {
     private fragments: Fragment[] = [];

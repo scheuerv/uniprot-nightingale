@@ -1,5 +1,5 @@
 import TrackParser from './track-parser';
-import BasicTrackRenderer, { Fragment, Location, Accession, TrackRow } from './basic-track-renderer';
+import BasicTrackRenderer, { Fragment, Location, Accession, TrackRow } from '../renderers/basic-track-renderer';
 
 export default class PdbParser implements TrackParser {
     private readonly categoryName = "Experimental structures";

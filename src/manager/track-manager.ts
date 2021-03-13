@@ -1,7 +1,7 @@
 import d3 = require('d3');
 import categoryContainer from './category-container';
-import TrackParser from './track-parser';
-import { createRow } from './utils';
+import TrackParser from '../parsers/track-parser';
+import { createRow } from '../utils';
 export default class TrackManager {
     private tracks: Track[] = [];
     private sequence: string = "";

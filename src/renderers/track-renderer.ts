@@ -1,4 +1,4 @@
-import CategoryContainer from './category-container';
+import CategoryContainer from '../manager/category-container';
 export default interface TrackRenderer {
     getCategoryContainer(sequence: string): CategoryContainer;
 }

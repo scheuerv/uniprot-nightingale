@@ -1,11 +1,11 @@
-import BasicTrackRenderer, { Fragment, TrackRow } from "./basic-track-renderer";
-import CompositeTrackRenderer from "./composite-track-renderer";
+import BasicTrackRenderer, { Fragment, TrackRow } from "../renderers/basic-track-renderer";
+import CompositeTrackRenderer from "../renderers/composite-track-renderer";
 import FragmentAligner from "./fragment-aligner";
 import TrackParser from "./track-parser";
-import TrackRenderer from "./track-renderer";
+import TrackRenderer from "../renderers/track-renderer";
 //@ts-ignore
 import { config } from "protvista-track/src/config";
-import { getDarkerColor } from "./utils";
+import { getDarkerColor } from "../utils";
 export default class FeatureParser implements TrackParser {
     async parse(uniprotId: string, data: any): Promise<TrackRenderer | null> {
 

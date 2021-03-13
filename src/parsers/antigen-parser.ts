@@ -1,9 +1,9 @@
 import TrackParser from './track-parser';
-import BasicTrackRenderer, { Fragment, Location, Accession, TrackRow } from './basic-track-renderer';
-import TrackRenderer from './track-renderer';
+import BasicTrackRenderer, { Fragment, Location, Accession, TrackRow } from '../renderers/basic-track-renderer';
+import TrackRenderer from '../renderers/track-renderer';
 //@ts-ignore
 import { config } from "protvista-track/src/config";
-import { getDarkerColor } from './utils';
+import { getDarkerColor } from '../utils';
 
 export default class AntigenParser implements TrackParser {
     private readonly categoryName = "Antigenic sequences";

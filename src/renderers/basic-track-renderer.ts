@@ -1,10 +1,10 @@
 import TrackRenderer from './track-renderer';
 import d3 = require('d3');
-import { createRow } from './utils';
+import { createRow } from '../utils';
 // @ts-ignore
 import ProtvistaTrack from 'protvista-track';
-import TrackContainer from './track-container';
-import BasicCategoryContainer from './basic-category-container';
+import TrackContainer from '../manager/track-container';
+import BasicCategoryContainer from '../manager/basic-category-container';
 export default class BasicTrackRenderer implements TrackRenderer {
     private mainTrack: TrackContainer;
     private subtracks: TrackContainer[];

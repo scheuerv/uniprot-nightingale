@@ -7,19 +7,18 @@ import ProtvistaSequence from "protvista-sequence";
 import ProtvistaFilter from "protvista-filter";
 // @ts-ignore
 import ProtvistaNavigation from "protvista-navigation";
-import LimitedTrack from "./limited-track";
-import { ProtvistaWrapper } from "./protvista-wrapper";
+import LimitedTrack from "./protvista/limited-track";
 
 import { loadComponent } from "./utils";
 
-import TrackManager from "./track-manager";
-import SMRParser from "./SMR-parser";
-import PdbParser from "./pdb-parser";
-import AntigenParser from "./antigen-parser";
-import ProteomicsParser from "./proteomics-parser";
+import TrackManager from "./manager/track-manager";
+import SMRParser from "./parsers/SMR-parser";
+import PdbParser from "./parsers/pdb-parser";
+import AntigenParser from "./parsers/antigen-parser";
+import ProteomicsParser from "./parsers/proteomics-parser";
 import "./index.html";
 import './main.css';
-import FeatureParser from "./feature-parser";
+import FeatureParser from "./parsers/feature-parser";
 
 
 const registerWebComponents = function () {
@@ -29,7 +28,6 @@ const registerWebComponents = function () {
     loadComponent("protvista-sequence", ProtvistaSequence);
     // @ts-ignore
     loadComponent("protvista-track", LimitedTrack);
-    loadComponent("protvista-wrapper", ProtvistaWrapper);
     loadComponent("protvista-navigation", ProtvistaNavigation);
 }
 

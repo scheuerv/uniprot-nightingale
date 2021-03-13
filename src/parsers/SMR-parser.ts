@@ -1,6 +1,6 @@
 import TrackParser from './track-parser';
-import BasicTrackRenderer, { Fragment, Location, Accession, TrackRow } from './basic-track-renderer';
-import { getDarkerColor } from './utils';
+import BasicTrackRenderer, { Fragment, Location, Accession, TrackRow } from '../renderers/basic-track-renderer';
+import { getDarkerColor } from '../utils';
 export default class SMRParser implements TrackParser {
     private readonly categoryName = "Predicted structures";
     private readonly color = '#2e86c1';

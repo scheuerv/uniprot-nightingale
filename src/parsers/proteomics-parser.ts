@@ -1,8 +1,8 @@
 import TrackParser from './track-parser';
-import BasicTrackRenderer, { Fragment, TrackRow } from './basic-track-renderer';
-import TrackRenderer from './track-renderer';
+import BasicTrackRenderer, { Fragment, TrackRow } from '../renderers/basic-track-renderer';
+import TrackRenderer from '../renderers/track-renderer';
 import FragmentAligner from './fragment-aligner';
-import { getDarkerColor } from './utils';
+import { getDarkerColor } from '../utils';
 const config = require("protvista-track/src/config").config;
 
 export default class ProteomicsParser implements TrackParser {
