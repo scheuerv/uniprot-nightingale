@@ -3,7 +3,7 @@ import d3 = require("d3");
 //@ts-ignore
 import ColorConvert from "color-convert";
 
-const loadComponent = function(name: string, className: CustomElementConstructor) {
+const loadComponent = function (name: string, className: CustomElementConstructor) {
     if (!customElements.get(name)) {
         customElements.define(name, className);
     }
@@ -17,10 +17,8 @@ function createRow(label: Node, content: Node, customClass: string = "") {
     return row;
 }
 
-function getDarkerColor(color:string|undefined)
-{
-    if(!color)
-    {
+function getDarkerColor(color: string | undefined) {
+    if (!color) {
         return "#000000";
     }
     const hsv = ColorConvert.hex.hsv(color);
@@ -30,4 +28,22 @@ function getDarkerColor(color:string|undefined)
     }
     return "#000000";
 }
-export { loadComponent, createRow,getDarkerColor };
+
+function groupBy<T, Id>(data: IterableIterator<T> | T[], by: (item: T) => Id): Map<Id, T[]> {
+    return groupByAndMap(data, by, i => i);
+}
+
+function groupByAndMap<T, O, Id>(data: IterableIterator<T> | T[], by: (item: T) => Id, transform: (item: T) => O): Map<Id, O[]> {
+    let grouped: Map<Id, O[]> = new Map();
+    for (let item of data) {
+        const id = by(item);
+        const source = transform(item);
+        if (grouped.get(id)) {
+            grouped.get(id)?.push(source);
+        } else {
+            grouped.set(id, [source]);
+        }
+    }
+    return grouped;
+}
+export { loadComponent, createRow, getDarkerColor, groupBy, groupByAndMap };

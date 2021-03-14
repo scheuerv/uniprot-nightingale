@@ -7,6 +7,8 @@ import ProtvistaSequence from "protvista-sequence";
 import ProtvistaFilter from "protvista-filter";
 // @ts-ignore
 import ProtvistaNavigation from "protvista-navigation";
+//@ts-ignore
+import ProtvistaTooltip from "protvista-tooltip";
 import LimitedTrack from "./protvista/limited-track";
 
 import { loadComponent } from "./utils";
@@ -29,6 +31,7 @@ const registerWebComponents = function () {
     // @ts-ignore
     loadComponent("protvista-track", LimitedTrack);
     loadComponent("protvista-navigation", ProtvistaNavigation);
+    loadComponent("protvista-tooltip", ProtvistaTooltip);
 }
 
 // Conditional loading of polyfill

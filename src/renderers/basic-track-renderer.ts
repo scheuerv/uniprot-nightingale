@@ -5,6 +5,7 @@ import { createRow } from '../utils';
 import ProtvistaTrack from 'protvista-track';
 import TrackContainer from '../manager/track-container';
 import BasicCategoryContainer from '../manager/basic-category-container';
+import TooltipContent from 'src/tooltip-content';
 export default class BasicTrackRenderer implements TrackRenderer {
     private mainTrack: TrackContainer;
     private subtracks: TrackContainer[];
@@ -118,7 +119,7 @@ export class Fragment {
         public start: number,
         public end: number,
         public color?: string,
-        public fill?: string
-
+        public fill?: string,
+        public tooltipContent?:TooltipContent
     ) { }
 }

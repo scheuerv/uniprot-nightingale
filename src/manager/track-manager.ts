@@ -2,6 +2,9 @@ import d3 = require('d3');
 import categoryContainer from './category-container';
 import TrackParser from '../parsers/track-parser';
 import { createRow } from '../utils';
+//@ts-ignore
+import ProtvistaToolip from "protvista-tooltip";
+import { Fragment } from 'src/renderers/basic-track-renderer';
 export default class TrackManager {
     private tracks: Track[] = [];
     private sequence: string = "";
@@ -61,13 +64,36 @@ export default class TrackManager {
 
             element.appendChild(protvistaManager!);
             categoryContainers.forEach(categoryContainer => categoryContainer.addData());
-
-
+            d3.selectAll("protvista-track").on("change", (f, i) => {
+                const e = d3.event;
+                createTooltip(e, e.detail);
+            });
         });
     }
     addTrack(urlGenerator: (url: string) => string, parser: TrackParser) {
         this.tracks.push({ urlGenerator, parser })
     }
+}
+
+function createTooltip(e: { clientY: number; clientX: number; eventtype: string },
+    d: { eventtype: string, coords: number[]; feature: { locations: { fragments: { [x: string]: any; }; }[]; type: any; feature: { type: any; }; }; target: { __data__: any; }; start: any; end: any; variant: any; tooltipContent: any; }) {
+    if (d.eventtype != 'mouseover') {
+        return;
+    }
+    const fragment = d.target.__data__ as Fragment;
+    d3.select("protvista-tooltip")
+        .data([fragment])
+        .enter()
+        .append("protvista-tooltip");
+
+    d3.select("protvista-tooltip")
+        .attr("x", d.coords[0])
+        .attr("y", d.coords[1])
+        .attr("title", fragment.tooltipContent?.getTitle() ?? "")
+        .attr("visible", true)
+        .html(fragment.tooltipContent?.render() ?? "")
+        .exit()
+        .remove();
 }
 type Track = {
     urlGenerator: (url: string) => string;
