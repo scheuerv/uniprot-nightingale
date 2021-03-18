@@ -22,12 +22,16 @@
         "protvista-navigation": "^3.0.0",
         "protvista-sequence": "^3.0.0",
         "protvista-tooltip": "^3.1.2",
-        "protvista-track": "^3.2.1"
+        "protvista-track": "^3.2.1",
+        "protvista-variation": "^3.2.1",
+        "protvista-variation-adapter": "^3.2.1",
+        "protvista-variation-graph": "^3.2.1"
     },
     "devDependencies": {
         "@babel/polyfill": "^7.12.1",
         "@types/d3": "^4.13.0",
         "@webpack-cli/serve": "^1.3.0",
+        "color-convert": "^2.0.1",
         "css-loader": "^5.0.1",
         "extra-watch-webpack-plugin": "^1.0.3",
         "file-loader": "^6.2.0",
@@ -38,7 +42,6 @@
         "typescript": "^4.1.3",
         "webpack": "^5.24.4",
         "webpack-cli": "^4.5.0",
-        "webpack-dev-server": "^3.11.2",
-        "color-convert": "^2.0.1"
+        "webpack-dev-server": "^3.11.2"
     }
 }

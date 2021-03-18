@@ -1,5 +1,5 @@
 import CategoryContainer from "./category-container";
-import TrackContainer from "./track-container";
+import { TrackContainer } from "./track-container";
 export default class BasicCategoryContainer implements CategoryContainer {
     constructor(private tracks: TrackContainer[], private categoryDiv: HTMLDivElement) {
 

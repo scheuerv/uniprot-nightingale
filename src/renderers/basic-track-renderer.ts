@@ -3,13 +3,13 @@ import d3 = require('d3');
 import { createRow } from '../utils';
 // @ts-ignore
 import ProtvistaTrack from 'protvista-track';
-import TrackContainer from '../manager/track-container';
+import BasicTrackContainer from '../manager/track-container';
 import BasicCategoryContainer from '../manager/basic-category-container';
 import TooltipContent from 'src/tooltip-content';
 export default class BasicTrackRenderer implements TrackRenderer {
-    private mainTrack: TrackContainer;
-    private subtracks: TrackContainer[];
-    private subtracksDiv: HTMLDivElement | null;
+    private mainTrack: BasicTrackContainer<Accession[]>;
+    private subtracks: BasicTrackContainer<Accession[]>[];
+    private subtracksDiv: HTMLDivElement ;
     private mainTrackRow: d3.Selection<HTMLDivElement, undefined, null, undefined>;
     constructor(private rows: TrackRow[], private mainTrackLabel: string) {
 
@@ -17,7 +17,7 @@ export default class BasicTrackRenderer implements TrackRenderer {
     getCategoryContainer(sequence: string): BasicCategoryContainer {
         this.mainTrack = this.getMainTrack();
         this.subtracks = this.getSubtracks();
-        const trackContainers: TrackContainer[] = [];
+        const trackContainers: BasicTrackContainer<Accession[]>[] = [];
         const categoryDiv = d3.create("div").node();
 
         d3.select(this.mainTrack.track as any).attr("length", sequence.length);
@@ -33,7 +33,7 @@ export default class BasicTrackRenderer implements TrackRenderer {
         );
         categoryDiv!.appendChild(this.mainTrackRow.node()!);
         trackContainers.push(this.mainTrack);
-        this.subtracksDiv = d3.create("div").attr("class", "subtracks-container").style("display", "none").node();
+        this.subtracksDiv = d3.create("div").attr("class", "subtracks-container").style("display", "none").node()!;
         this.subtracks.forEach((subtrack, i) => {
             d3.select(subtrack.track as any).attr("length", sequence.length);
             const trackRowDiv = createRow(
@@ -61,7 +61,7 @@ export default class BasicTrackRenderer implements TrackRenderer {
             this.mainTrackRow.select('.track-label.main').attr('class', 'track-label main arrow-right');
         }
     }
-    private getMainTrack(): TrackContainer {
+    private getMainTrack(): BasicTrackContainer<Accession[]> {
         const mainTrackData = this.rows.flatMap(row => row.rowData);
         const d3Track = d3.create("protvista-track")
             .attr("highlight-event", "onmouseover")
@@ -69,17 +69,17 @@ export default class BasicTrackRenderer implements TrackRenderer {
             .attr("layout", "non-overlapping");
         const track = (d3Track.node() as any) as ProtvistaTrack;
 
-        return new TrackContainer(track, mainTrackData);
+        return new BasicTrackContainer<Accession[]>(track, mainTrackData);
     }
-    private getSubtracks(): TrackContainer[] {
-        const subtrackContainers: TrackContainer[] = [];
+    private getSubtracks(): BasicTrackContainer<Accession[]>[] {
+        const subtrackContainers: BasicTrackContainer<Accession[]>[] = [];
         this.rows.forEach(subtrackData => {
             const d3Track = d3.create("protvista-track")
                 .attr("highlight-event", "onmouseover")
                 .attr("height", 40)
                 .attr("layout", "non-overlapping");
             const track = (d3Track.node() as any) as ProtvistaTrack;
-            subtrackContainers.push(new TrackContainer(track, subtrackData.rowData));
+            subtrackContainers.push(new BasicTrackContainer<Accession[]>(track, subtrackData.rowData));
         });
         return subtrackContainers;
     }

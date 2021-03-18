@@ -1,7 +1,11 @@
 // @ts-ignore
 import ProtvistaTrack from "protvista-track";
-export default class TrackContainer {
-    constructor(public track: ProtvistaTrack, private data: any[]) {
+export interface TrackContainer {
+    addData(): void;
+}
+
+export default class BasicTrackContainer<T> implements TrackContainer {
+    constructor(public track: ProtvistaTrack, private data: T) {
 
     }
     addData() {

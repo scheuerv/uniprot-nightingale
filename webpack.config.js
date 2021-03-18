@@ -10,11 +10,15 @@ const sharedConfig = {
         writeToDisk: true
     },
     module: {
-        rules: [{
+        rules: [
+            {
                 loader: 'ts-loader',
                 test: /\.(ts|tsx)$/,
-                include: [path.resolve(__dirname, 'src')],
-                exclude: [path.resolve(__dirname, 'node_modules')]
+                include: [path.resolve(__dirname, 'src'), path.resolve(__dirname, 'node_modules/protvista-variation-adapter/src/variants.ts')],
+                options: {
+                    allowTsInNodeModules: true,
+                    configFile: path.resolve(__dirname, 'tsconfig.json')
+                }
             },
             {
                 loader: 'file-loader',
