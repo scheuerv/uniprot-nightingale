@@ -4,13 +4,15 @@ import TrackRenderer from "./track-renderer";
 import ProtvistaVariationGraph from "protvista-variation-graph";
 //@ts-ignore
 import ProtvistaVariation from "protvista-variation";
-
+//@ts-ignore
+import ProtvistaFilter from "protvista-filter";
 
 import BasicTrackContainer from "../manager/track-container";
 import { createRow } from "../utils";
 import BasicCategoryContainer from "../manager/basic-category-container";
 import d3 = require('d3');
-import { VariationData } from "src/parsers/variation-parser";
+import { VariationData } from "../parsers/variation-parser";
+import { filterCases } from "../variation-filter";
 
 export default class VariationRenderer implements TrackRenderer {
     private variationGraph: BasicTrackContainer<VariationData>;
@@ -27,6 +29,7 @@ export default class VariationRenderer implements TrackRenderer {
             .attr("height", 40);
         this.variationGraph = new BasicTrackContainer((variationGraph.node() as any) as ProtvistaVariationGraph, this.data);
         const variation = d3.create("protvista-variation")
+            .attr("id", "variation-graph")
             .attr("length", sequence.length)
             .attr("highlight-event", "onmouseover");
         const variationTrack = (variation.node() as any) as ProtvistaVariation;
@@ -49,13 +52,15 @@ export default class VariationRenderer implements TrackRenderer {
         categoryDiv.appendChild(this.mainTrackRow.node()!);
         this.subtracksDiv = d3.create("div").attr("class", "subtracks-container").style("display", "none").node()!;
 
+        const protvistaFilter = d3.create("protvista-filter").attr("for", "variation-graph").node()!;
         const trackRowDiv = createRow(
-            d3.create("div").node()!,
+            protvistaFilter,
             this.variation.track as any,
             "sub"
         );
         this.subtracksDiv.appendChild(trackRowDiv.node() as any);
         categoryDiv.append(this.subtracksDiv!);
+        (protvistaFilter as ProtvistaFilter).filters = filterCases;
         return new BasicCategoryContainer([this.variationGraph, this.variation], categoryDiv!);
 
 

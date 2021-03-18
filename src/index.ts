@@ -3,8 +3,8 @@
 import ProtvistaManager from "protvista-manager";
 // @ts-ignore
 import ProtvistaSequence from "protvista-sequence";
-// @ts-ignore
-import ProtvistaFilter from "protvista-filter";
+
+import VariationFilter from "./variation-filter";
 // @ts-ignore
 import ProtvistaNavigation from "protvista-navigation";
 //@ts-ignore
@@ -30,7 +30,8 @@ import ProtvistaVariation from "protvista-variation";
 
 const registerWebComponents = function () {
     loadComponent("protvista-manager", ProtvistaManager);
-    loadComponent("protvista-filter", ProtvistaFilter);
+        // @ts-ignore
+    loadComponent("protvista-filter", VariationFilter);
     // @ts-ignore
     loadComponent("protvista-sequence", ProtvistaSequence);
     // @ts-ignore
