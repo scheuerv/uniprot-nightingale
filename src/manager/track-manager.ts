@@ -64,7 +64,7 @@ export default class TrackManager {
             categoryContainers.forEach(categoryContainer => categoryContainer.addData());
             d3.selectAll("protvista-track").on("change", (f, i) => {
                 const e = d3.event;
-                createTooltip(e, e.detail);
+                updateTooltip(e, e.detail);
             });
         });
     }
@@ -73,8 +73,12 @@ export default class TrackManager {
     }
 }
 
-function createTooltip(e: { clientY: number; clientX: number; eventtype: string },
+function updateTooltip(e: { clientY: number; clientX: number; eventtype: string },
     d: { eventtype: string, coords: number[]; feature: Accession; target: { __data__: Fragment; }; }) {
+    if (d.eventtype == 'mouseout') {
+        removeAllTooltips();
+        return;
+    }
     if (d.eventtype != 'mouseover') {
         return;
     }
@@ -93,6 +97,10 @@ function createTooltip(e: { clientY: number; clientX: number; eventtype: string 
         .exit()
         .remove();
 }
+
+function removeAllTooltips() {
+    d3.selectAll("protvista-tooltip").remove();
+  }
 type Track = {
     urlGenerator: (url: string) => string;
     parser: TrackParser;
