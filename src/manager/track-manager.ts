@@ -2,12 +2,28 @@ import d3 = require('d3');
 import categoryContainer from './category-container';
 import TrackParser from '../parsers/track-parser';
 import { createRow } from '../utils';
-import { Accession, Fragment } from 'src/renderers/basic-track-renderer';
+import { Accession, Fragment } from '../renderers/basic-track-renderer';
+import PdbParser from '../parsers/pdb-parser';
+import AntigenParser from '../parsers/antigen-parser';
+import FeatureParser from '../parsers/feature-parser';
+import ProteomicsParser from '../parsers/proteomics-parser';
+import SMRParser from '../parsers/SMR-parser';
+import VariationParser from '../parsers/variation-parser';
 export default class TrackManager {
     private tracks: Track[] = [];
     private sequence: string = "";
     constructor(private sequenceUrlGenerator: (url: string) => string) {
 
+    }
+    static createDefault() {
+        const trackManager = new TrackManager(uniProtId => `https://www.uniprot.org/uniprot/${uniProtId}.fasta`)
+        trackManager.addTrack(uniProtId => `https://www.ebi.ac.uk/pdbe/api/mappings/best_structures/${uniProtId}`, new PdbParser());
+        trackManager.addTrack(uniProtId => `https://swissmodel.expasy.org/repository/uniprot/${uniProtId}.json?provider=swissmodel`, new SMRParser());
+        trackManager.addTrack(uniProtId => `https://www.ebi.ac.uk/proteins/api/features/${uniProtId}`, new FeatureParser());
+        trackManager.addTrack(uniProtId => `https://www.ebi.ac.uk/proteins/api/proteomics/${uniProtId}`, new ProteomicsParser());
+        trackManager.addTrack(uniProtId => `https://www.ebi.ac.uk/proteins/api/antigen/${uniProtId}`, new AntigenParser());
+        trackManager.addTrack(uniProtId => `https://www.ebi.ac.uk/proteins/api/variation/${uniProtId}`, new VariationParser());
+        return trackManager;
     }
     async render(uniprotId: string, element: HTMLElement) {
 
@@ -100,7 +116,7 @@ function updateTooltip(e: { clientY: number; clientX: number; eventtype: string 
 
 function removeAllTooltips() {
     d3.selectAll("protvista-tooltip").remove();
-  }
+}
 type Track = {
     urlGenerator: (url: string) => string;
     parser: TrackParser;

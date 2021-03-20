@@ -5,7 +5,11 @@ import { SourceType, AminoAcid, Variant, Association, ProteinsAPIVariation, Xref
 import { VariantColors } from "../variation-filter";
 export default class VariationParser implements TrackParser {
     private readonly categoryName = "Variation"
-    async parse(uniprotId: string, data: ProteinsAPIVariation): Promise<TrackRenderer | null> {
+    async parse(uniprotId: string, data: ProteinsAPIVariation&{errorMessage:string,requestedURL:string}): Promise<TrackRenderer | null> {
+        if(data.errorMessage)
+        {
+            return null;
+        }
         const transformedData = this.transformData({
             accession: uniprotId,
             entryName: data.entryName,

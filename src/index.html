@@ -16,8 +16,9 @@
 <body>
     <div id="root"></div>
     <script>
-        const accession = 'P37840'; // 'P12345'; 
-        TrackManager.render(accession, document.getElementById("root"));
+       // const accession = 'P37840'; // 'P12345'; 
+       const accession = 'P12345';
+       UniprotNightingale.TrackManager.createDefault().render(accession, document.getElementById("root"));
     </script>
 </body>
 

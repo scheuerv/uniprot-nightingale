@@ -5,9 +5,7 @@ const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 const sharedConfig = {
     mode: 'development',
     devServer: {
-        contentBase: path.join(__dirname, 'dist'),
-        port: 1340,
-        writeToDisk: true
+        port: 1340
     },
     module: {
         rules: [
@@ -59,12 +57,17 @@ const sharedConfig = {
 function createEntryPoint(name) {
     return {
         devtool: "inline-source-map",
-        entry: ["@babel/polyfill", path.resolve(__dirname, `src/index.ts`)],
+        entry: [path.resolve(__dirname, `src/index.ts`)],
         output: {
             filename: `${name}.js`,
             path: path.resolve(__dirname, `dist/`),
             clean: true,
-            publicPath: '/'
+            publicPath: '/',
+            library: {
+                type: 'assign',
+                name: 'UniprotNightingale'
+            }
+
         },
         ...sharedConfig
     }
