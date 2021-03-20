@@ -57,7 +57,7 @@ export default class FeatureParser implements TrackParser {
             for (const [type, fragmentAligner] of categoryData) {
                 typeTrackRows.push(new TrackRow(fragmentAligner.getAccessions(), config[type]?.label ?? type));
             }
-            categoryRenderers.push(new BasicTrackRenderer(typeTrackRows, category));
+            categoryRenderers.push(new BasicTrackRenderer(typeTrackRows, categoriesConfig[category]?.label ? categoriesConfig[category]?.label : this.createLabel(category)));
         }
         if (categories.size > 0) {
             return new CompositeTrackRenderer(categoryRenderers);
@@ -65,6 +65,10 @@ export default class FeatureParser implements TrackParser {
         else {
             return null;
         }
+    }
+    createLabel(category: string) {
+        category = category[0].toUpperCase() + category.slice(1, category.length).replace(/_/g, ' ').toLowerCase();
+        return category;
     }
 
     private getBlast(accession: string, feature: { category: string; type: string; begin: string; end: string; ftId: string | undefined; description: string | undefined; }) {
@@ -137,4 +141,27 @@ export default class FeatureParser implements TrackParser {
     };
 }
 type Source = { name: string, id: string, url: string, alternativeUrl: string };
+const categoriesConfig: Record<string, { label: string }> = {
+    "DOMAINS_AND_SITES": {
+        "label": "Domains & sites"
+    },
+    "MOLECULE_PROCESSING": {
+        "label": "Molecule processing"
+    },
+    "PTM": {
+        "label": "PTM"
+    },
+    "SEQUENCE_INFORMATION": {
+        "label": "Sequence information"
+    },
+    "STRUCTURAL": {
+        "label": "Structural features"
+    },
+    "MUTAGENESIS": {
+        "label": "Mutagenesis"
+    },
+    "VARIANTS": {
+        "label": "Variants"
+    }
+}
 
