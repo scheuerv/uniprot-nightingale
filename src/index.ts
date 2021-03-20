@@ -22,15 +22,14 @@ import VariationParser from "./parsers/variation-parser";
 import "./index.html";
 import './main.css';
 import FeatureParser from "./parsers/feature-parser";
-//@ts-ignore
-import ProtvistaVariationGraph from "protvista-variation-graph";
+import VariationGraph from "./variation-graph";
 //@ts-ignore
 import ProtvistaVariation from "protvista-variation";
 
 
 const registerWebComponents = function () {
     loadComponent("protvista-manager", ProtvistaManager);
-        // @ts-ignore
+    // @ts-ignore
     loadComponent("protvista-filter", VariationFilter);
     // @ts-ignore
     loadComponent("protvista-sequence", ProtvistaSequence);
@@ -38,7 +37,8 @@ const registerWebComponents = function () {
     loadComponent("protvista-track", LimitedTrack);
     loadComponent("protvista-navigation", ProtvistaNavigation);
     loadComponent("protvista-tooltip", ProtvistaTooltip);
-    loadComponent("protvista-variation-graph", ProtvistaVariationGraph);
+    //@ts-ignore
+    loadComponent("protvista-variation-graph", VariationGraph);
     loadComponent("protvista-variation", ProtvistaVariation);
 }
 

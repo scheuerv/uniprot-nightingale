@@ -3,7 +3,9 @@ import { PredAlgorithmNameType, SourceType, Variant } from "protvista-variation-
 import ProtvistaFilter from "protvista-filter";
 import d3 = require("d3");
 import { html, css, CSSResult } from "lit-element";
+import { VariationData } from "./parsers/variation-parser";
 export default class VariationFilter extends ProtvistaFilter {
+    public multiFor: Map<string, (filterCase: FilterCase) => any>;
     getCheckBox(filterItem: FilterCase) {
         const { name, options } = filterItem;
         const { labels } = options;
@@ -18,7 +20,7 @@ export default class VariationFilter extends ProtvistaFilter {
             class="protvista_checkbox_input"
             ?checked="true"
             .value="${name}"
-            @change="${() => super.toggleFilter(name)}"
+            @change="${() => this.toggleFilter(name)}"
           />
           <span
             class="checkmark"
@@ -52,6 +54,33 @@ export default class VariationFilter extends ProtvistaFilter {
         ];
 
     }
+
+    toggleFilter(name: string) {
+        if (!super.selectedFilters.has(name)) {
+            super.selectedFilters.add(name);
+        } else {
+            super.selectedFilters.delete(name);
+        }
+        this.multiFor.forEach((filterFunction, forId) => {
+            super.dispatchEvent(
+                new CustomEvent("change", {
+                    bubbles: true,
+                    composed: true,
+                    detail: {
+                        type: "filters",
+                        handler: "property",
+                        for: forId,
+                        value: super.filters
+                            .filter((filter: FilterCase) => super.selectedFilters.has(filter.name))
+                            .map((filter: FilterCase) => ({
+                                category: filter.type.name,
+                                filterFn: filterFunction(filter)
+                            }))
+                    }
+                })
+            );
+        });
+    }
 }
 
 function getFilterByName(name: string) {
@@ -61,7 +90,7 @@ function getFilterByName(name: string) {
     }
 }
 
-function filterData(filterName: string, data: FilterVariationData[]) {
+function filterDataVariation(filterName: string, data: FilterVariationData[]): FilterVariationData[] {
     var newData: FilterVariationData[] = [];
     const filter = getFilterByName(filterName);
     if (!filter) {
@@ -78,6 +107,17 @@ function filterData(filterName: string, data: FilterVariationData[]) {
     });
     return newData;
 };
+function filterDataVariationGraph(filterName: string, data: VariationData): Variant[] {
+    const filter = getFilterByName(filterName);
+    if (!filter) {
+        return data.variants;
+    }
+    return data.variants.filter((variant: Variant) => {
+        return filter.properties.every(property => {
+            return property(variant);
+        });
+    });
+}
 
 export const VariantColors = {
     UPDiseaseColor: '#990000',
@@ -103,7 +143,8 @@ type FilterCase = {
         colors: string[]
     },
     properties: ((variant: Variant) => boolean)[],
-    filterData: (variants: FilterVariationData[]) => FilterVariationData[]
+    filterDataVariation: (variants: FilterVariationData[]) => FilterVariationData[]
+    filterDataVariationGraph: (variants: VariationData) => Variant[];
 }
 export const filterCases: FilterCase[] = [
     {
@@ -122,8 +163,11 @@ export const filterCases: FilterCase[] = [
                 return false;
             }
         ],
-        filterData: function (variants: FilterVariationData[]) {
-            return filterData("disease", variants);
+        filterDataVariation: function (variants: FilterVariationData[]) {
+            return filterDataVariation("disease", variants);
+        },
+        filterDataVariationGraph: function (variants: VariationData) {
+            return filterDataVariationGraph("disease", variants);
         }
     },
     {
@@ -158,8 +202,11 @@ export const filterCases: FilterCase[] = [
             }*/
         ],
 
-        filterData: function (variants: FilterVariationData[]) {
-            return filterData("prediction", variants);
+        filterDataVariation: function (variants: FilterVariationData[]) {
+            return filterDataVariation("prediction", variants);
+        },
+        filterDataVariationGraph: function (variants: VariationData) {
+            return filterDataVariationGraph("prediction", variants);
         }
     },
     {
@@ -187,8 +234,12 @@ export const filterCases: FilterCase[] = [
                 });
             }
         ],
-        filterData: function (variants: FilterVariationData[]) {
-            return filterData("nonDisease", variants);
+
+        filterDataVariation: function (variants: FilterVariationData[]) {
+            return filterDataVariation("nonDisease", variants);
+        },
+        filterDataVariationGraph: function (variants: VariationData) {
+            return filterDataVariationGraph("nonDisease", variants);
         }
     },
     {
@@ -206,9 +257,11 @@ export const filterCases: FilterCase[] = [
                 return variant.alternativeSequence === '*';
             }
         ],
-
-        filterData: function (variants: FilterVariationData[]) {
-            return filterData("uncertain", variants);
+        filterDataVariation: function (variants: FilterVariationData[]) {
+            return filterDataVariation("uncertain", variants);
+        },
+        filterDataVariationGraph: function (variants: VariationData) {
+            return filterDataVariationGraph("uncertain", variants);
         }
     },
     {
@@ -223,11 +276,11 @@ export const filterCases: FilterCase[] = [
         },
         properties: [
             function (variant) {
-                if(!variant.predictions)return false;
+                if (!variant.predictions) return false;
                 for (const prediction of variant.predictions) {
-                    if (prediction.predAlgorithmNameType == PredAlgorithmNameType.PolyPhen||prediction.predAlgorithmNameType == PredAlgorithmNameType.Sift){
+                    if (prediction.predAlgorithmNameType == PredAlgorithmNameType.PolyPhen || prediction.predAlgorithmNameType == PredAlgorithmNameType.Sift) {
                         return false;
-                    } 
+                    }
                 }
                 return variant.association === undefined;
             },
@@ -241,8 +294,11 @@ export const filterCases: FilterCase[] = [
                 });
             }
         ],
-        filterData: function (variants: FilterVariationData[]) {
-            return filterData("unknown", variants);
+        filterDataVariation: function (variants: FilterVariationData[]) {
+            return filterDataVariation("unknown", variants);
+        },
+        filterDataVariationGraph: function (variants: VariationData) {
+            return filterDataVariationGraph("unknown", variants);
         }
     },
     {
@@ -263,8 +319,11 @@ export const filterCases: FilterCase[] = [
             }
         ],
 
-        filterData: function (variants: FilterVariationData[]) {
-            return filterData("uniprot", variants);
+        filterDataVariation: function (variants: FilterVariationData[]) {
+            return filterDataVariation("uniprot", variants);
+        },
+        filterDataVariationGraph: function (variants: VariationData) {
+            return filterDataVariationGraph("uniprot", variants);
         }
     },
     {
@@ -277,15 +336,19 @@ export const filterCases: FilterCase[] = [
             labels: ["Large scale studies"],
             colors: ["grey"]
         },
-        properties:[
+        properties: [
             function (variant: Variant) {
                 return [SourceType.LargeScaleStudy, SourceType.Mixed].some((orProp) => {
                     return variant.sourceType == orProp;
                 });
             }
         ],
-        filterData: function (variants: FilterVariationData[]) {
-            return filterData("lss", variants);
+
+        filterDataVariation: function (variants: FilterVariationData[]) {
+            return filterDataVariation("lss", variants);
+        },
+        filterDataVariationGraph: function (variants: VariationData) {
+            return filterDataVariationGraph("lss", variants);
         }
     },
 ];

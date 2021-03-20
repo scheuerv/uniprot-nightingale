@@ -4,9 +4,7 @@ import TrackRenderer from "./track-renderer";
 import ProtvistaVariationGraph from "protvista-variation-graph";
 //@ts-ignore
 import ProtvistaVariation from "protvista-variation";
-//@ts-ignore
-import ProtvistaFilter from "protvista-filter";
-
+import VariationFilter from "../variation-filter";
 import BasicTrackContainer from "../manager/track-container";
 import { createRow } from "../utils";
 import BasicCategoryContainer from "../manager/basic-category-container";
@@ -25,11 +23,12 @@ export default class VariationRenderer implements TrackRenderer {
     getCategoryContainer(sequence: string): CategoryContainer {
         const variationGraph = d3.create("protvista-variation-graph")
             .attr("highlight-event", "onmouseover")
+            .attr("id", "protvista-variation-graph")
             .attr("length", sequence.length)
             .attr("height", 40);
         this.variationGraph = new BasicTrackContainer((variationGraph.node() as any) as ProtvistaVariationGraph, this.data);
         const variation = d3.create("protvista-variation")
-            .attr("id", "variation-graph")
+            .attr("id", "protvista-variation")
             .attr("length", sequence.length)
             .attr("highlight-event", "onmouseover");
         const variationTrack = (variation.node() as any) as ProtvistaVariation;
@@ -52,7 +51,7 @@ export default class VariationRenderer implements TrackRenderer {
         categoryDiv.appendChild(this.mainTrackRow.node()!);
         this.subtracksDiv = d3.create("div").attr("class", "subtracks-container").style("display", "none").node()!;
 
-        const protvistaFilter = d3.create("protvista-filter").attr("for", "variation-graph").node()!;
+        const protvistaFilter = d3.create("protvista-filter").node()!;
         const trackRowDiv = createRow(
             protvistaFilter,
             this.variation.track as any,
@@ -60,7 +59,12 @@ export default class VariationRenderer implements TrackRenderer {
         );
         this.subtracksDiv.appendChild(trackRowDiv.node() as any);
         categoryDiv.append(this.subtracksDiv!);
-        (protvistaFilter as ProtvistaFilter).filters = filterCases;
+        //@ts-ignore
+        protvistaFilter.filters = filterCases;
+        ((protvistaFilter as any) as VariationFilter).multiFor = new Map([
+            ['protvista-variation-graph', (filterCase) => filterCase.filterDataVariationGraph as any],
+            ['protvista-variation', (filterCase) => filterCase.filterDataVariation as any]
+        ]);
         return new BasicCategoryContainer([this.variationGraph, this.variation], categoryDiv!);
 
 
