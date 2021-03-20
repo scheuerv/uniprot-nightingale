@@ -1,10 +1,8 @@
 import CategoryContainer from "../manager/category-container";
 import TrackRenderer from "./track-renderer";
-//@ts-ignore
 import ProtvistaVariationGraph from "protvista-variation-graph";
-//@ts-ignore
 import ProtvistaVariation from "protvista-variation";
-import VariationFilter from "../variation-filter";
+import VariationFilter, { FilterCase } from "../variation-filter";
 import BasicTrackContainer from "../manager/track-container";
 import { createRow } from "../utils";
 import BasicCategoryContainer from "../manager/basic-category-container";
@@ -26,12 +24,12 @@ export default class VariationRenderer implements TrackRenderer {
             .attr("id", "protvista-variation-graph")
             .attr("length", sequence.length)
             .attr("height", 40);
-        this.variationGraph = new BasicTrackContainer((variationGraph.node() as any) as ProtvistaVariationGraph, this.data);
+        this.variationGraph = new BasicTrackContainer(variationGraph.node() as ProtvistaVariationGraph, this.data);
         const variation = d3.create("protvista-variation")
             .attr("id", "protvista-variation")
             .attr("length", sequence.length)
             .attr("highlight-event", "onmouseover");
-        const variationTrack = (variation.node() as any) as ProtvistaVariation;
+        const variationTrack = variation.node() as ProtvistaVariation;
         variationTrack.colorConfig = function (e: any) {
             return "black";
         }
@@ -41,7 +39,7 @@ export default class VariationRenderer implements TrackRenderer {
 
         this.mainTrackRow = createRow(
             document.createTextNode(this.mainTrackLabel),
-            this.variationGraph.track as any,
+            this.variationGraph.track,
             "main"
         );
         this.mainTrackRow.attr("class", this.mainTrackRow.attr("class") + " data")
@@ -51,20 +49,18 @@ export default class VariationRenderer implements TrackRenderer {
         categoryDiv.appendChild(this.mainTrackRow.node()!);
         this.subtracksDiv = d3.create("div").attr("class", "subtracks-container").style("display", "none").node()!;
 
-        const protvistaFilter = d3.create("protvista-filter").node()!;
+        const protvistaFilter = d3.create("protvista-filter").node() as VariationFilter;
         const trackRowDiv = createRow(
             protvistaFilter,
-            this.variation.track as any,
+            this.variation.track,
             "sub"
         );
-        this.subtracksDiv.appendChild(trackRowDiv.node() as any);
+        this.subtracksDiv.appendChild(trackRowDiv.node()!);
         categoryDiv.append(this.subtracksDiv!);
-        //@ts-ignore
         protvistaFilter.filters = filterCases;
-        ((protvistaFilter as any) as VariationFilter).multiFor = new Map([
-            ['protvista-variation-graph', (filterCase) => filterCase.filterDataVariationGraph as any],
-            ['protvista-variation', (filterCase) => filterCase.filterDataVariation as any]
-        ]);
+        protvistaFilter.multiFor = new Map();
+        protvistaFilter.multiFor.set('protvista-variation-graph', (filterCase: FilterCase) => filterCase.filterDataVariationGraph);
+        protvistaFilter.multiFor.set('protvista-variation', (filterCase: FilterCase) => filterCase.filterDataVariation);
         return new BasicCategoryContainer([this.variationGraph, this.variation], categoryDiv!);
 
 

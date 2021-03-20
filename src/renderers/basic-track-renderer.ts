@@ -1,7 +1,6 @@
 import TrackRenderer from './track-renderer';
 import d3 = require('d3');
 import { createRow } from '../utils';
-// @ts-ignore
 import ProtvistaTrack from 'protvista-track';
 import BasicTrackContainer from '../manager/track-container';
 import BasicCategoryContainer from '../manager/basic-category-container';
@@ -9,7 +8,7 @@ import TooltipContent from 'src/tooltip-content';
 export default class BasicTrackRenderer implements TrackRenderer {
     private mainTrack: BasicTrackContainer<Accession[]>;
     private subtracks: BasicTrackContainer<Accession[]>[];
-    private subtracksDiv: HTMLDivElement ;
+    private subtracksDiv: HTMLDivElement;
     private mainTrackRow: d3.Selection<HTMLDivElement, undefined, null, undefined>;
     constructor(private rows: TrackRow[], private mainTrackLabel: string) {
 
@@ -20,11 +19,11 @@ export default class BasicTrackRenderer implements TrackRenderer {
         const trackContainers: BasicTrackContainer<Accession[]>[] = [];
         const categoryDiv = d3.create("div").node();
 
-        d3.select(this.mainTrack.track as any).attr("length", sequence.length);
+        d3.select(this.mainTrack.track).attr("length", sequence.length);
 
         this.mainTrackRow = createRow(
             document.createTextNode(this.mainTrackLabel),
-            this.mainTrack.track as any,
+            this.mainTrack.track,
             "main"
         );
         this.mainTrackRow.attr("class", this.mainTrackRow.attr("class") + " data")
@@ -35,13 +34,13 @@ export default class BasicTrackRenderer implements TrackRenderer {
         trackContainers.push(this.mainTrack);
         this.subtracksDiv = d3.create("div").attr("class", "subtracks-container").style("display", "none").node()!;
         this.subtracks.forEach((subtrack, i) => {
-            d3.select(subtrack.track as any).attr("length", sequence.length);
+            d3.select(subtrack.track).attr("length", sequence.length);
             const trackRowDiv = createRow(
                 d3.create("div").text(this.rows[i].label).node()!,
-                subtrack.track as any,
+                subtrack.track,
                 "sub"
             );
-            this.subtracksDiv?.appendChild(trackRowDiv.node() as any);
+            this.subtracksDiv?.appendChild(trackRowDiv.node()!);
             trackContainers.push(subtrack);
 
         });
@@ -53,11 +52,11 @@ export default class BasicTrackRenderer implements TrackRenderer {
     private toggle() {
         if (this.subtracksDiv!.style.display === 'none') {
             this.subtracksDiv!.style.display = 'block';
-            d3.select(this.mainTrack.track as any).style('display', 'none');
+            d3.select(this.mainTrack.track).style('display', 'none');
             this.mainTrackRow.select('.track-label.main').attr("class", "track-label main arrow-down");
         } else {
             this.subtracksDiv!.style.display = 'none';
-            d3.select(this.mainTrack.track as any).style('display', 'block');
+            d3.select(this.mainTrack.track).style('display', 'block');
             this.mainTrackRow.select('.track-label.main').attr('class', 'track-label main arrow-right');
         }
     }
@@ -67,9 +66,7 @@ export default class BasicTrackRenderer implements TrackRenderer {
             .attr("highlight-event", "onmouseover")
             .attr("height", 40)
             .attr("layout", "non-overlapping");
-        const track = (d3Track.node() as any) as ProtvistaTrack;
-
-        return new BasicTrackContainer<Accession[]>(track, mainTrackData);
+        return new BasicTrackContainer<Accession[]>(d3Track.node() as ProtvistaTrack, mainTrackData);
     }
     private getSubtracks(): BasicTrackContainer<Accession[]>[] {
         const subtrackContainers: BasicTrackContainer<Accession[]>[] = [];
@@ -78,8 +75,7 @@ export default class BasicTrackRenderer implements TrackRenderer {
                 .attr("highlight-event", "onmouseover")
                 .attr("height", 40)
                 .attr("layout", "non-overlapping");
-            const track = (d3Track.node() as any) as ProtvistaTrack;
-            subtrackContainers.push(new BasicTrackContainer<Accession[]>(track, subtrackData.rowData));
+            subtrackContainers.push(new BasicTrackContainer<Accession[]>(d3Track.node() as ProtvistaTrack, subtrackData.rowData));
         });
         return subtrackContainers;
     }
@@ -120,6 +116,6 @@ export class Fragment {
         public end: number,
         public color?: string,
         public fill?: string,
-        public tooltipContent?:TooltipContent
+        public tooltipContent?: TooltipContent
     ) { }
 }

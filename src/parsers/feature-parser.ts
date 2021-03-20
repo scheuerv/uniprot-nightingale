@@ -3,11 +3,9 @@ import CompositeTrackRenderer from "../renderers/composite-track-renderer";
 import FragmentAligner from "./fragment-aligner";
 import TrackParser from "./track-parser";
 import TrackRenderer from "../renderers/track-renderer";
-//@ts-ignore
 import { config } from "protvista-track/src/config";
 import { getDarkerColor, groupBy, groupByAndMap } from "../utils";
 import TooltipContent from "../tooltip-content";
-//@ts-ignore
 import ecoMap from "protvista-feature-adapter/src/evidences";
 export default class FeatureParser implements TrackParser {
     async parse(uniprotId: string, data: any): Promise<TrackRenderer | null> {

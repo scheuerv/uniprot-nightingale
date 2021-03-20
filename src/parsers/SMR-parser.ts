@@ -10,7 +10,7 @@ export default class SMRParser implements TrackParser {
         const experimentalMethod = result.provider + " (" + result.method + ")";
         const coordinatesFile = result.coordinates;
         const trackRows: TrackRow[] = [];
-        result.structures.forEach((structure: { template: string; chains: any[]; }) => {
+        result.structures.forEach((structure: { template: string; chains: { id: string, segments: any }[]; }) => {
             const sTemplate = structure.template.match(/(.+)\.(.+)+\.(.+)/);
             let pdbId: string;
             if (sTemplate !== null) {

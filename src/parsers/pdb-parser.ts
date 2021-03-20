@@ -8,8 +8,8 @@ export default class PdbParser implements TrackParser {
     async parse(uniprotId: string, data: any): Promise<BasicTrackRenderer | null> {
         const trackRows: TrackRow[] = [];
         if (data[uniprotId]) {
-            const hash: any = [];
-            const dataDeduplicated: any = [];
+            const hash: Record<string, typeof data> = [];
+            const dataDeduplicated: typeof data = [];
             for (const record of data[uniprotId]) {
                 if (!hash[record.pdb_id + "_" + record.chain_id]) {
                     hash[record.pdb_id + "_" + record.chain_id] = record;
@@ -44,7 +44,7 @@ export default class PdbParser implements TrackParser {
                                 const uniprotStart = parseInt(result.source.unp_start);
                                 const uniprotEnd = parseInt(result.source.unp_end);
                                 const pdbStart = parseInt(result.source.start);
-                                const observedFragments = chain.observed.map((element: { start: { residue_number: string; }; end: { residue_number: string; }; }) => {                                    
+                                const observedFragments = chain.observed.map((element: { start: { residue_number: string; }; end: { residue_number: string; }; }) => {
                                     const start: number = Math.max(parseInt(element.start.residue_number) + uniprotStart - pdbStart, uniprotStart);
                                     const end: number = Math.min(parseInt(element.end.residue_number) + uniprotStart - pdbStart, uniprotEnd);
                                     return new Fragment(start, end, this.observedColor, this.observedColor);

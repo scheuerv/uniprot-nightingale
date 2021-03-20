@@ -1,6 +1,5 @@
 import d3 = require("d3");
 
-//@ts-ignore
 import ColorConvert from "color-convert";
 
 const loadComponent = function (name: string, className: CustomElementConstructor) {

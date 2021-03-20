@@ -1,11 +1,14 @@
 import { PredAlgorithmNameType, SourceType, Variant } from "protvista-variation-adapter/src/variants";
-//@ts-ignore
+
 import ProtvistaFilter from "protvista-filter";
 import d3 = require("d3");
-import { html, css, CSSResult } from "lit-element";
+import { html, css } from "lit-element";
 import { VariationData } from "./parsers/variation-parser";
 export default class VariationFilter extends ProtvistaFilter {
-    public multiFor: Map<string, (filterCase: FilterCase) => any>;
+    public multiFor: Map<string, (
+        ((filterCase: FilterCase) => (variants: FilterVariationData[]) => FilterVariationData[])
+        | ((filterCase: FilterCase) => (variants: VariationData) => Variant[])
+    )>;
     getCheckBox(filterItem: FilterCase) {
         const { name, options } = filterItem;
         const { labels } = options;
@@ -45,7 +48,7 @@ export default class VariationFilter extends ProtvistaFilter {
 
     static get styles() {
         return [
-            ProtvistaFilter.styles as CSSResult | number,
+            ProtvistaFilter.styles,
             css` .protvista_checkbox.compound .checkmark
         {
         align-self: stretch;
@@ -56,13 +59,13 @@ export default class VariationFilter extends ProtvistaFilter {
     }
 
     toggleFilter(name: string) {
-        if (!super.selectedFilters.has(name)) {
-            super.selectedFilters.add(name);
+        if (!this.selectedFilters.has(name)) {
+            this.selectedFilters.add(name);
         } else {
-            super.selectedFilters.delete(name);
+            this.selectedFilters.delete(name);
         }
         this.multiFor.forEach((filterFunction, forId) => {
-            super.dispatchEvent(
+            this.dispatchEvent(
                 new CustomEvent("change", {
                     bubbles: true,
                     composed: true,
@@ -70,8 +73,8 @@ export default class VariationFilter extends ProtvistaFilter {
                         type: "filters",
                         handler: "property",
                         for: forId,
-                        value: super.filters
-                            .filter((filter: FilterCase) => super.selectedFilters.has(filter.name))
+                        value: this.filters
+                            .filter((filter: FilterCase) => this.selectedFilters.has(filter.name))
                             .map((filter: FilterCase) => ({
                                 category: filter.type.name,
                                 filterFn: filterFunction(filter)
@@ -132,7 +135,7 @@ export const VariantColors = {
         .domain([0, 1])
         .range(['#002594', '#8FE3FF'])
 }
-type FilterCase = {
+export type FilterCase = {
     name: string,
     type: {
         name: string,

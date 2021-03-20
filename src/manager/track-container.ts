@@ -1,4 +1,3 @@
-// @ts-ignore
 import ProtvistaTrack from "protvista-track";
 export interface TrackContainer {
     addData(): void;

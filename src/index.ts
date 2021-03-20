@@ -1,13 +1,9 @@
 // original PV components
-// @ts-ignore
 import ProtvistaManager from "protvista-manager";
-// @ts-ignore
 import ProtvistaSequence from "protvista-sequence";
 
 import VariationFilter from "./variation-filter";
-// @ts-ignore
 import ProtvistaNavigation from "protvista-navigation";
-//@ts-ignore
 import ProtvistaTooltip from "protvista-tooltip";
 import LimitedTrack from "./protvista/limited-track";
 
@@ -23,21 +19,16 @@ import "./index.html";
 import './main.css';
 import FeatureParser from "./parsers/feature-parser";
 import VariationGraph from "./variation-graph";
-//@ts-ignore
 import ProtvistaVariation from "protvista-variation";
 
 
 const registerWebComponents = function () {
     loadComponent("protvista-manager", ProtvistaManager);
-    // @ts-ignore
     loadComponent("protvista-filter", VariationFilter);
-    // @ts-ignore
     loadComponent("protvista-sequence", ProtvistaSequence);
-    // @ts-ignore
     loadComponent("protvista-track", LimitedTrack);
     loadComponent("protvista-navigation", ProtvistaNavigation);
     loadComponent("protvista-tooltip", ProtvistaTooltip);
-    //@ts-ignore
     loadComponent("protvista-variation-graph", VariationGraph);
     loadComponent("protvista-variation", ProtvistaVariation);
 }

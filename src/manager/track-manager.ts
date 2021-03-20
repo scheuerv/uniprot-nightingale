@@ -2,9 +2,7 @@ import d3 = require('d3');
 import categoryContainer from './category-container';
 import TrackParser from '../parsers/track-parser';
 import { createRow } from '../utils';
-//@ts-ignore
-import ProtvistaToolip from "protvista-tooltip";
-import { Fragment } from 'src/renderers/basic-track-renderer';
+import { Accession, Fragment } from 'src/renderers/basic-track-renderer';
 export default class TrackManager {
     private tracks: Track[] = [];
     private sequence: string = "";
@@ -27,14 +25,14 @@ export default class TrackManager {
                 const navigationElement = d3.create('protvista-navigation').attr("length", this.sequence.length);
                 protvistaManager?.appendChild(
                     createRow(
-                        d3.create('div').node()!, navigationElement.node() as any
-                    ).node() as any
+                        d3.create('div').node()!, navigationElement.node()!
+                    ).node()!
                 );
                 const sequenceElement = d3.create('protvista-sequence').attr("length", this.sequence.length).attr("sequence", this.sequence);
                 protvistaManager?.appendChild(
                     createRow(
-                        d3.create('div').node()!, sequenceElement.node() as any
-                    ).node() as any
+                        d3.create('div').node()!, sequenceElement.node()!
+                    ).node()!
                 );
             });
 
@@ -76,11 +74,11 @@ export default class TrackManager {
 }
 
 function createTooltip(e: { clientY: number; clientX: number; eventtype: string },
-    d: { eventtype: string, coords: number[]; feature: { locations: { fragments: { [x: string]: any; }; }[]; type: any; feature: { type: any; }; }; target: { __data__: any; }; start: any; end: any; variant: any; tooltipContent: any; }) {
+    d: { eventtype: string, coords: number[]; feature: Accession; target: { __data__: Fragment; }; }) {
     if (d.eventtype != 'mouseover') {
         return;
     }
-    const fragment = d.target.__data__ as Fragment;
+    const fragment = d.target.__data__;
     d3.select("protvista-tooltip")
         .data([fragment])
         .enter()

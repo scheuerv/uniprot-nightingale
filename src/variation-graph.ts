@@ -1,12 +1,8 @@
-//@ts-ignore
 import ProtvistaVariationGraph from "protvista-variation-graph";
-//@ts-ignore
-import ProtvistaTrack from "protvista-track";
 import { VariationData } from "./parsers/variation-parser";
 export default class VariationGraph extends ProtvistaVariationGraph {
-    protected _data: VariationData;
     set data(data: VariationData) {
-        super._originalData = data;
+        this._originalData = data;
         super.data = data;
     }
     _applyFilters() {
@@ -34,14 +30,14 @@ export default class VariationGraph extends ProtvistaVariationGraph {
             // eslint-disable-next-line no-plusplus
             if (hasDisease) totalsArray.diseaseTotal[index]++;
         }
-        super._totalsArray = totalsArray;
+        this._totalsArray = totalsArray;
         super._createTrack();
     }
-    
+
     private getCurrentData(): VariationData {
-        let data = (this as ProtvistaTrack)._data;
+        let data = this._data;
         if (Array.isArray(data)) {
-            const newData = Object.assign({}, (this as ProtvistaTrack)._originalData);
+            const newData = Object.assign({}, this._originalData);
             newData.variants = data;
             data = newData;
         }

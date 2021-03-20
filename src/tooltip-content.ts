@@ -1,22 +1,20 @@
 export default class TooltipContent {
-    //@ts-ignore
     private title: string;
-    private contentRows: Row[]=[];
+    private contentRows: Row[] = [];
     constructor(label: string) {
         this.title = label;
     }
     public addRow(label: string, content: string | undefined) {
         if (content) { this.contentRows.push(new Row(label, content)); }
     }
-    public render():string {
+    public render(): string {
         let content = "<table>";
         this.contentRows.forEach(row =>
-            content+=  '<tr> <td>' + row.label + '</td><td>' + row.content + '</td></tr>'
+            content += '<tr> <td>' + row.label + '</td><td>' + row.content + '</td></tr>'
         )
-        return content+'</table>';
+        return content + '</table>';
     }
-    public getTitle()
-    {
+    public getTitle() {
         return this.title;
     }
 }
