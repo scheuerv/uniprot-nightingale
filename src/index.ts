@@ -10,7 +10,6 @@ import LimitedTrack from "./protvista/limited-track";
 import { loadComponent } from "./utils";
 
 import TrackManager from "./manager/track-manager";
-import "./index.html";
 import './main.css';
 import VariationGraph from "./variation-graph";
 import ProtvistaVariation from "protvista-variation";
