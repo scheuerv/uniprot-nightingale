@@ -12,7 +12,6 @@ export default class FeatureParser implements TrackParser<FeatureOutput> {
     private emitDataLoaded = createEmitter<FeatureOutput[]>();
     public dataLoaded = this.emitDataLoaded.event;
     async parse(uniprotId: string, data: any): Promise<TrackRenderer | null> {
-
         const categories: Map<string, Map<string, FragmentAligner>> = new Map();
         const features = data.features;
         features.forEach((feature: { category: string; type: string; begin: string; end: string; ftId: string | undefined; description: string | undefined; evidences: [{ code: string, source: { name: string, id: string, url: string, alternativeUrl: string } | undefined }] }) => {
@@ -51,17 +50,16 @@ export default class FeatureParser implements TrackParser<FeatureOutput> {
             }
             tooltipContent.addRow('Tools', this.getBlast(uniprotId, feature));
             typeFeatureAligner.addFragment(new Fragment(parseInt(feature.begin), parseInt(feature.end), borderColor, fillColor, tooltipContent));
-
-
         });
-        const categoryRenderers: BasicTrackRenderer[] = [];
+        const categoryRenderers: BasicTrackRenderer<FeatureOutput>[] = [];
         for (const [category, categoryData] of categories.entries()) {
-            const typeTrackRows: TrackRow[] = [];
+            const typeTrackRows: TrackRow<FeatureOutput>[] = [];
             for (const [type, fragmentAligner] of categoryData) {
                 typeTrackRows.push(new TrackRow(fragmentAligner.getAccessions(), config[type]?.label ?? type));
             }
             categoryRenderers.push(new BasicTrackRenderer(typeTrackRows, categoriesConfig[category]?.label ? categoriesConfig[category]?.label : this.createLabel(category)));
         }
+        this.emitDataLoaded.emit([])
         if (categories.size > 0) {
             return new CompositeTrackRenderer(categoryRenderers);
         }

@@ -11,6 +11,7 @@ export default class ProteomicsParser implements TrackParser<ProteomicsOutput> {
     private emitDataLoaded = createEmitter<ProteomicsOutput[]>();
     public readonly dataLoaded = this.emitDataLoaded.event;
     async parse(uniprotId: string, data: any): Promise<TrackRenderer | null> {
+        this.emitDataLoaded.emit([]);
         if (data.errorMessage) {
             return null;
         }
@@ -34,7 +35,7 @@ export default class ProteomicsParser implements TrackParser<ProteomicsOutput> {
             new TrackRow(uniqueFragmentAligner.getAccessions(), config[uniqueFragmentAligner.getType()].label),
             new TrackRow(nonUniqueFragmentAligner.getAccessions(), config[nonUniqueFragmentAligner.getType()].label)
         ];
-        this.emitDataLoaded.emit([{}]);
+
         if (trackRows.length > 0) {
             return new BasicTrackRenderer(trackRows, this.categoryName);
         }

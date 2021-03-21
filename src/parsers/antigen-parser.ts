@@ -11,6 +11,7 @@ export default class AntigenParser implements TrackParser<AntigenOutput>  {
     public readonly dataLoaded = this.emitDataLoaded.event;
     private readonly categoryName = "Antigenic sequences";
     async parse(uniprotId: string, data: any): Promise<TrackRenderer | null> {
+        this.emitDataLoaded.emit([]);
         if (data.errorMessage)
             return null;
         const features = data.features;
@@ -18,8 +19,7 @@ export default class AntigenParser implements TrackParser<AntigenOutput>  {
             const fillColor = config[feature.type]?.color;
             const borderColor = getDarkerColor(fillColor)
             return new Fragment(parseInt(feature.begin), parseInt(feature.end), borderColor, fillColor)
-        });
-        this.emitDataLoaded.emit([{}]);
+        });       
         if (features.length > 0) {
             const type = features[0].type;
             const trackRow = new TrackRow([

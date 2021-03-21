@@ -10,6 +10,7 @@ export default class VariationParser implements TrackParser<VariationOutput> {
     private readonly emitDataLoaded = createEmitter<VariationOutput[]>();
     public dataLoaded = this.emitDataLoaded.event;
     async parse(uniprotId: string, data: ProteinsAPIVariation&{errorMessage:string,requestedURL:string}): Promise<TrackRenderer | null> {
+        this.emitDataLoaded.emit([]);
         if(data.errorMessage)
         {
             return null;
@@ -27,7 +28,7 @@ export default class VariationParser implements TrackParser<VariationOutput> {
             taxid: data.taxid,
             features: data.features
         });
-        this.emitDataLoaded.emit([{}]);
+
         if (data.features.length > 0 && transformedData != null) {
             return new VariationRenderer(transformedData, this.categoryName);
         } else {

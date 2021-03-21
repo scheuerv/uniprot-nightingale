@@ -5,12 +5,15 @@ import ProtvistaTrack from 'protvista-track';
 import BasicTrackContainer from '../manager/track-container';
 import BasicCategoryContainer from '../manager/basic-category-container';
 import TooltipContent from '../tooltip-content';
-export default class BasicTrackRenderer implements TrackRenderer {
+import { createEmitter } from "ts-typed-events";
+export default class BasicTrackRenderer<Output> implements TrackRenderer {
     private mainTrack: BasicTrackContainer<Accession[]>;
     private subtracks: BasicTrackContainer<Accession[]>[];
     private subtracksDiv: HTMLDivElement;
     private mainTrackRow: d3.Selection<HTMLDivElement, undefined, null, undefined>;
-    constructor(private rows: TrackRow[], private mainTrackLabel: string) {
+    private readonly emitOnClick = createEmitter<Output>();
+    public onClick = this.emitOnClick.event;
+    constructor(private rows: TrackRow<Output>[], private mainTrackLabel: string) {
 
     }
     getCategoryContainer(sequence: string): BasicCategoryContainer {
@@ -35,12 +38,16 @@ export default class BasicTrackRenderer implements TrackRenderer {
         this.subtracksDiv = d3.create("div").attr("class", "subtracks-container").style("display", "none").node()!;
         this.subtracks.forEach((subtrack, i) => {
             d3.select(subtrack.track).attr("length", sequence.length);
-            const trackRowDiv = createRow(
-                d3.create("div").text(this.rows[i].label).node()!,
+            const subTrackRowDiv = createRow(
+                d3.create("div").text(this.rows[i].label).on('click', () => {
+                    if (this.rows[i].output) {
+                        this.emitOnClick.emit(this.rows[i].output!)
+                    }
+                }).node()!,
                 subtrack.track,
                 "sub"
             );
-            this.subtracksDiv?.appendChild(trackRowDiv.node()!);
+            this.subtracksDiv?.appendChild(subTrackRowDiv.node()!);
             trackContainers.push(subtrack);
 
         });
@@ -82,8 +89,8 @@ export default class BasicTrackRenderer implements TrackRenderer {
 
 
 }
-export class TrackRow {
-    constructor(public rowData: Accession[], public label: string) {
+export class TrackRow<Output> {
+    constructor(public rowData: Accession[], public label: string, public output?: Output) {
 
     }
 }

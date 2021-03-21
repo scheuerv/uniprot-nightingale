@@ -7,23 +7,24 @@ export default class SMRParser implements TrackParser<SMROutput> {
     public readonly dataLoaded = this.emitDataLoaded.event;
     private readonly categoryName = "Predicted structures";
     private readonly color = '#2e86c1';
-    async parse(uniprotId: string, data: any): Promise<BasicTrackRenderer | null> {
+    async parse(uniprotId: string, data: any): Promise<BasicTrackRenderer<SMROutput> | null> {
 
         const result = data.result;
         const experimentalMethod = result.provider + " (" + result.method + ")";
         const coordinatesFile = result.coordinates;
-        const trackRows: TrackRow[] = [];
-        const output: SMROutput[] = []
+        const trackRows: TrackRow<SMROutput>[] = [];
+        const outputs: SMROutput[] = []
         result.structures.forEach((structure: { template: string; chains: { id: string, segments: any }[]; }) => {
             const sTemplate = structure.template.match(/(.+)\.(.+)+\.(.+)/);
-
             let pdbId: string;
             if (sTemplate !== null) {
                 pdbId = sTemplate[1] + '.' + sTemplate[2];
             }
-            structure.chains.forEach(chain => {
+            structure.chains.forEach(chain => {   
+                let output:SMROutput|undefined=undefined;         
                 if (sTemplate !== null) {
-                    output.push({ pdbId: sTemplate[1], chain: chain.id })
+                    output={ pdbId: sTemplate[1], chain: chain.id };
+                    outputs.push(output)
                 }
                 const fragments = chain.segments.map((segment: { uniprot: { from: string; to: string; }; }) => {
                     return new Fragment(parseInt(segment.uniprot.from), parseInt(segment.uniprot.to), getDarkerColor(this.color), this.color);
@@ -34,11 +35,11 @@ export default class SMRParser implements TrackParser<SMROutput> {
                 ], 'SMR')
                 accesion.experimentalMethod = experimentalMethod;
                 accesion.coordinatesFile = coordinatesFile;
-                trackRows.push(new TrackRow([accesion], pdbId + ' ' + chain.id.toLowerCase()));
-                return output;
+                trackRows.push(new TrackRow([accesion], pdbId + ' ' + chain.id.toLowerCase(),output));
+                return outputs;
             });
         })
-        this.emitDataLoaded.emit(output);
+        this.emitDataLoaded.emit(outputs);
         if (trackRows.length > 0) {
             return new BasicTrackRenderer(trackRows, this.categoryName);
         }

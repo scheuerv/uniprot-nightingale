@@ -9,8 +9,9 @@ export default class PdbParser implements TrackParser<PDBOutput> {
     private readonly categoryName = "Experimental structures";
     private readonly observedColor = '#2e86c1';
     private readonly unobservedColor = '#bdbfc1';
-    async parse(uniprotId: string, data: any): Promise<BasicTrackRenderer | null> {
-        const trackRows: TrackRow[] = [];
+    async parse(uniprotId: string, data: any): Promise<BasicTrackRenderer<PDBOutput> | null> {
+        const trackRows: TrackRow<PDBOutput>[] = [];
+        const outputs: PDBOutput[] = []
         if (data[uniprotId]) {
             const hash: Record<string, typeof data> = [];
             const dataDeduplicated: typeof data = [];
@@ -41,13 +42,13 @@ export default class PdbParser implements TrackParser<PDBOutput> {
                     })
             ).then(
                 results => {
-                    const output: PDBOutput[] = []
                     results.forEach(resultJson => {
                         const result = resultJson as any;
 
                         result.data[result.source.pdb_id].molecules.forEach((molecule: { entity_id: string, chains: [{ observed: { start: { residue_number: string; }; end: { residue_number: string; }; }[]; }]; }) => {
                             molecule.chains.forEach(chain => {
-                                output.push({ pdbId: result.source.pdb_id, chain: result.source.chain_id });
+                                const output:PDBOutput ={ pdbId: result.source.pdb_id, chain: result.source.chain_id };
+                                outputs.push(output);
                                 const uniprotStart = parseInt(result.source.unp_start);
                                 const uniprotEnd = parseInt(result.source.unp_end);
                                 const pdbStart = parseInt(result.source.start);
@@ -59,18 +60,18 @@ export default class PdbParser implements TrackParser<PDBOutput> {
                                 const unobservedFragments = this.getUnobservedFragments(observedFragments, uniprotStart, uniprotEnd);
                                 const fragments = observedFragments.concat(unobservedFragments);
                                 const accessions = [new Accession(null, [new Location(fragments)], 'PDB')];
-                                trackRows.push(new TrackRow(accessions, result.source.pdb_id + ' ' + result.source.chain_id.toLowerCase()));
+                                trackRows.push(new TrackRow(accessions, result.source.pdb_id + ' ' + result.source.chain_id.toLowerCase(),output));
                             });
 
                         });
                     });
-                    return output;
-                }).then(
-                    output => this.emitDataLoaded.emit(output)
-                )
+                    return outputs;
+                });
+            this.emitDataLoaded.emit(outputs)
             return new BasicTrackRenderer(trackRows, this.categoryName);
         }
         else {
+            this.emitDataLoaded.emit(outputs)
             return null;
         }
     }
