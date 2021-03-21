@@ -4,7 +4,11 @@ import TrackRenderer from '../renderers/track-renderer';
 import { config } from "protvista-track/src/config";
 import { getDarkerColor } from '../utils';
 
-export default class AntigenParser implements TrackParser {
+import { createEmitter } from "ts-typed-events";
+export default class AntigenParser implements TrackParser<AntigenOutput>  {
+    
+    private emitDataLoaded = createEmitter<AntigenOutput[]>();
+    public readonly dataLoaded = this.emitDataLoaded.event;
     private readonly categoryName = "Antigenic sequences";
     async parse(uniprotId: string, data: any): Promise<TrackRenderer | null> {
         if (data.errorMessage)
@@ -15,6 +19,7 @@ export default class AntigenParser implements TrackParser {
             const borderColor = getDarkerColor(fillColor)
             return new Fragment(parseInt(feature.begin), parseInt(feature.end), borderColor, fillColor)
         });
+        this.emitDataLoaded.emit([{}]);
         if (features.length > 0) {
             const type = features[0].type;
             const trackRow = new TrackRow([
@@ -26,3 +31,4 @@ export default class AntigenParser implements TrackParser {
         }
     }
 }
+type AntigenOutput = {};

@@ -3,8 +3,12 @@ import VariationRenderer from "../renderers/variation-renderer";
 import TrackParser from "./track-parser";
 import { SourceType, AminoAcid, Variant, Association, ProteinsAPIVariation, Xref } from "protvista-variation-adapter/src/variants";
 import { VariantColors } from "../variation-filter";
-export default class VariationParser implements TrackParser {
+
+import { createEmitter } from "ts-typed-events";
+export default class VariationParser implements TrackParser<VariationOutput> {
     private readonly categoryName = "Variation"
+    private readonly emitDataLoaded = createEmitter<VariationOutput[]>();
+    public dataLoaded = this.emitDataLoaded.event;
     async parse(uniprotId: string, data: ProteinsAPIVariation&{errorMessage:string,requestedURL:string}): Promise<TrackRenderer | null> {
         if(data.errorMessage)
         {
@@ -23,6 +27,7 @@ export default class VariationParser implements TrackParser {
             taxid: data.taxid,
             features: data.features
         });
+        this.emitDataLoaded.emit([{}]);
         if (data.features.length > 0 && transformedData != null) {
             return new VariationRenderer(transformedData, this.categoryName);
         } else {
@@ -148,3 +153,4 @@ export type VariationData = {
     sequence: string,
     variants: Variant[]
 }
+type VariationOutput = {};

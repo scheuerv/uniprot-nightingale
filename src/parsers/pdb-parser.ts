@@ -1,7 +1,11 @@
 import TrackParser from './track-parser';
 import BasicTrackRenderer, { Fragment, Location, Accession, TrackRow } from '../renderers/basic-track-renderer';
+import { createEmitter } from 'ts-typed-events';
 
-export default class PdbParser implements TrackParser {
+export default class PdbParser implements TrackParser<PDBOutput> {
+
+    private emitDataLoaded = createEmitter<PDBOutput[]>();
+    public readonly dataLoaded = this.emitDataLoaded.event;
     private readonly categoryName = "Experimental structures";
     private readonly observedColor = '#2e86c1';
     private readonly unobservedColor = '#bdbfc1';
@@ -37,10 +41,13 @@ export default class PdbParser implements TrackParser {
                     })
             ).then(
                 results => {
+                    const output: PDBOutput[] = []
                     results.forEach(resultJson => {
                         const result = resultJson as any;
+
                         result.data[result.source.pdb_id].molecules.forEach((molecule: { entity_id: string, chains: [{ observed: { start: { residue_number: string; }; end: { residue_number: string; }; }[]; }]; }) => {
                             molecule.chains.forEach(chain => {
+                                output.push({ pdbId: result.source.pdb_id, chain: result.source.chain_id });
                                 const uniprotStart = parseInt(result.source.unp_start);
                                 const uniprotEnd = parseInt(result.source.unp_end);
                                 const pdbStart = parseInt(result.source.start);
@@ -57,7 +64,10 @@ export default class PdbParser implements TrackParser {
 
                         });
                     });
-                })
+                    return output;
+                }).then(
+                    output => this.emitDataLoaded.emit(output)
+                )
             return new BasicTrackRenderer(trackRows, this.categoryName);
         }
         else {
@@ -88,4 +98,5 @@ export default class PdbParser implements TrackParser {
 
     }
 }
+type PDBOutput = { pdbId: string, chain: string };
 

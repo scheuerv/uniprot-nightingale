@@ -1,5 +1,5 @@
 import d3 = require('d3');
-import categoryContainer from './category-container';
+import CategoryContainer from './category-container';
 import TrackParser from '../parsers/track-parser';
 import { createRow } from '../utils';
 import { Accession, Fragment } from '../renderers/basic-track-renderer';
@@ -9,6 +9,8 @@ import FeatureParser from '../parsers/feature-parser';
 import ProteomicsParser from '../parsers/proteomics-parser';
 import SMRParser from '../parsers/SMR-parser';
 import VariationParser from '../parsers/variation-parser';
+
+type Constructor<T> = new (...args: any[]) => T;
 export default class TrackManager {
     private tracks: Track[] = [];
     private sequence: string = "";
@@ -25,10 +27,14 @@ export default class TrackManager {
         trackManager.addTrack(uniProtId => `https://www.ebi.ac.uk/proteins/api/variation/${uniProtId}`, new VariationParser());
         return trackManager;
     }
+
+    getParsersByType<T extends TrackParser<S>, S>(filterType: Constructor<T>): T[] {
+        return this.tracks.map(t => t.parser)
+            .filter(parser => parser instanceof filterType)
+            .map(parser => parser as T);
+    }
+
     async render(uniprotId: string, element: HTMLElement) {
-
-
-
         const protvistaManager = d3.create("protvista-manager")
             .attr("attributes", "length displaystart displayend highlightstart highlightend activefilters filters")
             .node();
@@ -66,7 +72,8 @@ export default class TrackManager {
             )
         ).then(renderers => {
 
-            const categoryContainers: categoryContainer[] = [];
+            const categoryContainers: CategoryContainer[] = [];
+
             renderers
                 .filter(renderer => renderer != null)
                 .map(renderer => renderer!)
@@ -82,9 +89,11 @@ export default class TrackManager {
                 const e = d3.event;
                 updateTooltip(e, e.detail);
             });
+            return categoryContainers
         });
+
     }
-    addTrack(urlGenerator: (url: string) => string, parser: TrackParser) {
+    addTrack(urlGenerator: (url: string) => string, parser: TrackParser<any>) {
         this.tracks.push({ urlGenerator, parser })
     }
 }
@@ -119,5 +128,5 @@ function removeAllTooltips() {
 }
 type Track = {
     urlGenerator: (url: string) => string;
-    parser: TrackParser;
+    parser: TrackParser<any>;
 }

@@ -15,6 +15,9 @@
     "author": "",
     "license": "ISC",
     "dependencies": {
+        "@types/color-convert": "^2.0.0",
+        "@types/d3": "^4.13.0",
+        "@types/nightingale": "git://github.com/scheuerv/nightingale-types.git",
         "d3": "^5.16.0",
         "protvista-feature-adapter": "^3.2.1",
         "protvista-filter": "^3.1.2",
@@ -26,9 +29,7 @@
         "protvista-variation": "^3.2.1",
         "protvista-variation-adapter": "^3.2.1",
         "protvista-variation-graph": "^3.2.1",
-        "@types/nightingale": "git://github.com/scheuerv/nightingale-types.git",
-        "@types/color-convert": "^2.0.0",
-        "@types/d3": "^4.13.0"
+        "ts-typed-events": "^3.0.0"
     },
     "devDependencies": {
         "@babel/polyfill": "^7.12.1",

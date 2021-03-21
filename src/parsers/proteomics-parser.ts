@@ -4,10 +4,12 @@ import TrackRenderer from '../renderers/track-renderer';
 import FragmentAligner from './fragment-aligner';
 import { getDarkerColor } from '../utils';
 const config = require("protvista-track/src/config").config;
+import { createEmitter } from "ts-typed-events";
 
-export default class ProteomicsParser implements TrackParser {
+export default class ProteomicsParser implements TrackParser<ProteomicsOutput> {
     private categoryName = "Proteomics";
-
+    private emitDataLoaded = createEmitter<ProteomicsOutput[]>();
+    public readonly dataLoaded = this.emitDataLoaded.event;
     async parse(uniprotId: string, data: any): Promise<TrackRenderer | null> {
         if (data.errorMessage) {
             return null;
@@ -32,6 +34,7 @@ export default class ProteomicsParser implements TrackParser {
             new TrackRow(uniqueFragmentAligner.getAccessions(), config[uniqueFragmentAligner.getType()].label),
             new TrackRow(nonUniqueFragmentAligner.getAccessions(), config[nonUniqueFragmentAligner.getType()].label)
         ];
+        this.emitDataLoaded.emit([{}]);
         if (trackRows.length > 0) {
             return new BasicTrackRenderer(trackRows, this.categoryName);
         }
@@ -40,3 +43,4 @@ export default class ProteomicsParser implements TrackParser {
         }
     }
 }
+type ProteomicsOutput = {};

@@ -7,7 +7,10 @@ import { config } from "protvista-track/src/config";
 import { getDarkerColor, groupBy, groupByAndMap } from "../utils";
 import TooltipContent from "../tooltip-content";
 import ecoMap from "protvista-feature-adapter/src/evidences";
-export default class FeatureParser implements TrackParser {
+import { createEmitter } from "ts-typed-events";
+export default class FeatureParser implements TrackParser<FeatureOutput> {
+    private emitDataLoaded = createEmitter<FeatureOutput[]>();
+    public dataLoaded = this.emitDataLoaded.event;
     async parse(uniprotId: string, data: any): Promise<TrackRenderer | null> {
 
         const categories: Map<string, Map<string, FragmentAligner>> = new Map();
@@ -164,4 +167,6 @@ const categoriesConfig: Record<string, { label: string }> = {
         "label": "Variants"
     }
 }
+
+type FeatureOutput = {};
 
