@@ -4,7 +4,7 @@ import { createRow } from '../utils';
 import ProtvistaTrack from 'protvista-track';
 import BasicTrackContainer from '../manager/track-container';
 import BasicCategoryContainer from '../manager/basic-category-container';
-import TooltipContent from 'src/tooltip-content';
+import TooltipContent from '../tooltip-content';
 export default class BasicTrackRenderer implements TrackRenderer {
     private mainTrack: BasicTrackContainer<Accession[]>;
     private subtracks: BasicTrackContainer<Accession[]>[];

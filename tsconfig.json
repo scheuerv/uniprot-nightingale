@@ -3,6 +3,7 @@
       "composite": false,
       "target": "es2020",
       "jsx": "react",
+      "outDir": "dist",
       "sourceMap": true,
       "strictNullChecks": true,
       "module": "commonjs",
