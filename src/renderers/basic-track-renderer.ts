@@ -37,12 +37,15 @@ export default class BasicTrackRenderer<Output> implements TrackRenderer {
         this.subtracksDiv = d3.create("div").attr("class", "subtracks-container").style("display", "none").node()!;
         this.subtracks.forEach((subtrack, i) => {
             d3.select(subtrack.track).attr("length", sequence.length);
+            const labelElement = d3.create("div").text(this.rows[i].label);
+            if (this.rows[i].output) {
+                labelElement.style("cursor", "pointer");
+                labelElement.on('click', () => {
+                    this.emitOnLabelClick?.emit(this.rows[i].output!);
+                });
+            }
             const subTrackRowDiv = createRow(
-                d3.create("div").text(this.rows[i].label).on('click', () => {
-                    if (this.rows[i].output) {
-                        this.emitOnLabelClick?.emit(this.rows[i].output!)
-                    }
-                }).node()!,
+                labelElement.node()!,
                 subtrack.track,
                 "sub"
             );
