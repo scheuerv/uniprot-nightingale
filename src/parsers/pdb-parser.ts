@@ -4,8 +4,10 @@ import { createEmitter } from 'ts-typed-events';
 
 export default class PdbParser implements TrackParser<PDBOutput> {
 
-    private emitDataLoaded = createEmitter<PDBOutput[]>();
-    public readonly dataLoaded = this.emitDataLoaded.event;
+    private emitOnDataLoaded = createEmitter<PDBOutput[]>();
+    public readonly onDataLoaded = this.emitOnDataLoaded.event;
+    private emitOnLabelClick = createEmitter<PDBOutput>();
+    public readonly onLabelClick = this.emitOnLabelClick.event;
     private readonly categoryName = "Experimental structures";
     private readonly observedColor = '#2e86c1';
     private readonly unobservedColor = '#bdbfc1';
@@ -67,11 +69,11 @@ export default class PdbParser implements TrackParser<PDBOutput> {
                     });
                     return outputs;
                 });
-            this.emitDataLoaded.emit(outputs)
-            return new BasicTrackRenderer(trackRows, this.categoryName);
+            this.emitOnDataLoaded.emit(outputs)
+            return new BasicTrackRenderer(trackRows, this.categoryName,this.emitOnLabelClick);
         }
         else {
-            this.emitDataLoaded.emit(outputs)
+            this.emitOnDataLoaded.emit(outputs)
             return null;
         }
     }

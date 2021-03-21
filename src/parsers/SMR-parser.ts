@@ -3,8 +3,10 @@ import BasicTrackRenderer, { Fragment, Location, Accession, TrackRow } from '../
 import { getDarkerColor } from '../utils';
 import { createEmitter } from 'ts-typed-events';
 export default class SMRParser implements TrackParser<SMROutput> {
-    private emitDataLoaded = createEmitter<SMROutput[]>();
-    public readonly dataLoaded = this.emitDataLoaded.event;
+    private emitOnDataLoaded = createEmitter<SMROutput[]>();
+    public readonly onDataLoaded = this.emitOnDataLoaded.event;
+    private emitOnLabelClick = createEmitter<SMROutput>();
+    public readonly onLabelClick = this.emitOnLabelClick.event;
     private readonly categoryName = "Predicted structures";
     private readonly color = '#2e86c1';
     async parse(uniprotId: string, data: any): Promise<BasicTrackRenderer<SMROutput> | null> {
@@ -39,9 +41,9 @@ export default class SMRParser implements TrackParser<SMROutput> {
                 return outputs;
             });
         })
-        this.emitDataLoaded.emit(outputs);
+        this.emitOnDataLoaded.emit(outputs);
         if (trackRows.length > 0) {
-            return new BasicTrackRenderer(trackRows, this.categoryName);
+            return new BasicTrackRenderer(trackRows, this.categoryName,this.emitOnLabelClick);
         }
         else {
             return null;

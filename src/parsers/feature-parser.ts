@@ -9,8 +9,8 @@ import TooltipContent from "../tooltip-content";
 import ecoMap from "protvista-feature-adapter/src/evidences";
 import { createEmitter } from "ts-typed-events";
 export default class FeatureParser implements TrackParser<FeatureOutput> {
-    private emitDataLoaded = createEmitter<FeatureOutput[]>();
-    public dataLoaded = this.emitDataLoaded.event;
+    private emitOnDataLoaded = createEmitter<FeatureOutput[]>();
+    public onDataLoaded = this.emitOnDataLoaded.event;
     async parse(uniprotId: string, data: any): Promise<TrackRenderer | null> {
         const categories: Map<string, Map<string, FragmentAligner>> = new Map();
         const features = data.features;
@@ -59,7 +59,7 @@ export default class FeatureParser implements TrackParser<FeatureOutput> {
             }
             categoryRenderers.push(new BasicTrackRenderer(typeTrackRows, categoriesConfig[category]?.label ? categoriesConfig[category]?.label : this.createLabel(category)));
         }
-        this.emitDataLoaded.emit([])
+        this.emitOnDataLoaded.emit([])
         if (categories.size > 0) {
             return new CompositeTrackRenderer(categoryRenderers);
         }

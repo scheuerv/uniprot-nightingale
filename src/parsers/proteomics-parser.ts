@@ -8,10 +8,10 @@ import { createEmitter } from "ts-typed-events";
 
 export default class ProteomicsParser implements TrackParser<ProteomicsOutput> {
     private categoryName = "Proteomics";
-    private emitDataLoaded = createEmitter<ProteomicsOutput[]>();
-    public readonly dataLoaded = this.emitDataLoaded.event;
+    private emitOnDataLoaded = createEmitter<ProteomicsOutput[]>();
+    public readonly onDataLoaded = this.emitOnDataLoaded.event;
     async parse(uniprotId: string, data: any): Promise<TrackRenderer | null> {
-        this.emitDataLoaded.emit([]);
+        this.emitOnDataLoaded.emit([]);
         if (data.errorMessage) {
             return null;
         }

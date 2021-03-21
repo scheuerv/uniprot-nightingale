@@ -7,10 +7,10 @@ import { VariantColors } from "../variation-filter";
 import { createEmitter } from "ts-typed-events";
 export default class VariationParser implements TrackParser<VariationOutput> {
     private readonly categoryName = "Variation"
-    private readonly emitDataLoaded = createEmitter<VariationOutput[]>();
-    public dataLoaded = this.emitDataLoaded.event;
+    private readonly emitOnDataLoaded = createEmitter<VariationOutput[]>();
+    public onDataLoaded = this.emitOnDataLoaded.event;
     async parse(uniprotId: string, data: ProteinsAPIVariation&{errorMessage:string,requestedURL:string}): Promise<TrackRenderer | null> {
-        this.emitDataLoaded.emit([]);
+        this.emitOnDataLoaded.emit([]);
         if(data.errorMessage)
         {
             return null;

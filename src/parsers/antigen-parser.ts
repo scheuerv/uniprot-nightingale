@@ -7,11 +7,11 @@ import { getDarkerColor } from '../utils';
 import { createEmitter } from "ts-typed-events";
 export default class AntigenParser implements TrackParser<AntigenOutput>  {
     
-    private emitDataLoaded = createEmitter<AntigenOutput[]>();
-    public readonly dataLoaded = this.emitDataLoaded.event;
+    private emitOnDataLoaded = createEmitter<AntigenOutput[]>();
+    public readonly onDataLoaded = this.emitOnDataLoaded.event;
     private readonly categoryName = "Antigenic sequences";
     async parse(uniprotId: string, data: any): Promise<TrackRenderer | null> {
-        this.emitDataLoaded.emit([]);
+        this.emitOnDataLoaded.emit([]);
         if (data.errorMessage)
             return null;
         const features = data.features;

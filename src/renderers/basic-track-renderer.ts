@@ -5,15 +5,14 @@ import ProtvistaTrack from 'protvista-track';
 import BasicTrackContainer from '../manager/track-container';
 import BasicCategoryContainer from '../manager/basic-category-container';
 import TooltipContent from '../tooltip-content';
-import { createEmitter } from "ts-typed-events";
+import { Emitter, SealedEvent } from 'ts-typed-events';
+
 export default class BasicTrackRenderer<Output> implements TrackRenderer {
     private mainTrack: BasicTrackContainer<Accession[]>;
     private subtracks: BasicTrackContainer<Accession[]>[];
     private subtracksDiv: HTMLDivElement;
     private mainTrackRow: d3.Selection<HTMLDivElement, undefined, null, undefined>;
-    private readonly emitOnClick = createEmitter<Output>();
-    public onClick = this.emitOnClick.event;
-    constructor(private rows: TrackRow<Output>[], private mainTrackLabel: string) {
+    constructor(private rows: TrackRow<Output>[], private mainTrackLabel: string, private emitOnLabelClick: Emitter<Output, SealedEvent<Output>> | undefined) {
 
     }
     getCategoryContainer(sequence: string): BasicCategoryContainer {
@@ -41,7 +40,7 @@ export default class BasicTrackRenderer<Output> implements TrackRenderer {
             const subTrackRowDiv = createRow(
                 d3.create("div").text(this.rows[i].label).on('click', () => {
                     if (this.rows[i].output) {
-                        this.emitOnClick.emit(this.rows[i].output!)
+                        this.emitOnLabelClick?.emit(this.rows[i].output!)
                     }
                 }).node()!,
                 subtrack.track,
