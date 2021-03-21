@@ -37,7 +37,7 @@ export default class ProteomicsParser implements TrackParser<ProteomicsOutput> {
         ];
 
         if (trackRows.length > 0) {
-            return new BasicTrackRenderer(trackRows, this.categoryName);
+            return new BasicTrackRenderer(trackRows, this.categoryName,undefined);
         }
         else {
             return null;

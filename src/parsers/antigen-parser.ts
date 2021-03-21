@@ -25,7 +25,7 @@ export default class AntigenParser implements TrackParser<AntigenOutput>  {
             const trackRow = new TrackRow([
                 new Accession(null, [new Location(fragments)], type),
             ], config[type]?.label);
-            return new BasicTrackRenderer([trackRow], this.categoryName);
+            return new BasicTrackRenderer([trackRow], this.categoryName,undefined);
         } else {
             return null;
         }
