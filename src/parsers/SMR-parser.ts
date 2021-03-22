@@ -3,47 +3,45 @@ import BasicTrackRenderer, { Fragment, Location, Accession, TrackRow } from '../
 import { getDarkerColor } from '../utils';
 import { createEmitter } from 'ts-typed-events';
 export default class SMRParser implements TrackParser<SMROutput> {
-    private emitOnDataLoaded = createEmitter<SMROutput[]>();
+    private readonly emitOnDataLoaded = createEmitter<SMROutput[]>();
     public readonly onDataLoaded = this.emitOnDataLoaded.event;
-    private emitOnLabelClick = createEmitter<SMROutput>();
+    private readonly emitOnLabelClick = createEmitter<SMROutput>();
     public readonly onLabelClick = this.emitOnLabelClick.event;
     private readonly categoryName = "Predicted structures";
     private readonly color = '#2e86c1';
-    async parse(uniprotId: string, data: any): Promise<BasicTrackRenderer<SMROutput> | null> {
+    async parse(uniprotId: string, data: SMRData): Promise<BasicTrackRenderer<SMROutput> | null> {
 
         const result = data.result;
-        const experimentalMethod = result.provider + " (" + result.method + ")";
-        const coordinatesFile = result.coordinates;
         const trackRows: TrackRow<SMROutput>[] = [];
         const outputs: SMROutput[] = []
-        result.structures.forEach((structure: { template: string; chains: { id: string, segments: any }[]; }) => {
+        result.structures.forEach((structure) => {
             const sTemplate = structure.template.match(/(.+)\.(.+)+\.(.+)/);
+            const experimentalMethod = structure.provider + " (" + structure.method + ")";
+            const coordinatesFile = structure.coordinates;
             let pdbId: string;
             if (sTemplate !== null) {
                 pdbId = sTemplate[1] + '.' + sTemplate[2];
             }
-            structure.chains.forEach(chain => {   
-                let output:SMROutput|undefined=undefined;         
+            structure.chains.forEach(chain => {
+                let output: SMROutput | undefined = undefined;
                 if (sTemplate !== null) {
-                    output={ pdbId: sTemplate[1], chain: chain.id };
+                    output = { pdbId: sTemplate[1], chain: chain.id };
                     outputs.push(output)
                 }
-                const fragments = chain.segments.map((segment: { uniprot: { from: string; to: string; }; }) => {
-                    return new Fragment(parseInt(segment.uniprot.from), parseInt(segment.uniprot.to), getDarkerColor(this.color), this.color);
+                const fragments = chain.segments.map(segment => {
+                    return new Fragment(segment.uniprot.from, segment.uniprot.to, getDarkerColor(this.color), this.color);
                 });
 
                 const accesion = new Accession(null, [
                     new Location(fragments)
-                ], 'SMR')
-                accesion.experimentalMethod = experimentalMethod;
-                accesion.coordinatesFile = coordinatesFile;
-                trackRows.push(new TrackRow([accesion], pdbId + ' ' + chain.id.toLowerCase(),output));
+                ], 'SMR', experimentalMethod, coordinatesFile)
+                trackRows.push(new TrackRow([accesion], pdbId + ' ' + chain.id.toLowerCase(), output));
                 return outputs;
             });
         })
         this.emitOnDataLoaded.emit(outputs);
         if (trackRows.length > 0) {
-            return new BasicTrackRenderer(trackRows, this.categoryName,this.emitOnLabelClick);
+            return new BasicTrackRenderer(trackRows, this.categoryName, this.emitOnLabelClick);
         }
         else {
             return null;
@@ -51,4 +49,52 @@ export default class SMRParser implements TrackParser<SMROutput> {
     }
 
 }
-type SMROutput = { pdbId: string, chain: string };
+type SMROutput = { readonly pdbId: string, readonly chain: string };
+
+type SMRResult = {
+    readonly sequence: string,
+    readonly sequence_length: number,
+    readonly structures: SMRStructure[],
+    readonly uniprot_entries?: {
+        readonly ac?: string,
+        readonly id?: string,
+        readonly isoid?: number
+    }[]
+
+}
+
+type SMRStructure = {
+    readonly chains: SMRChain[]
+    readonly coordinates: string,
+    readonly coverage: number,
+    readonly from: number,
+    readonly identity?: number,
+    readonly method: string,
+    readonly provider: string,
+    readonly similarity?: number,
+    readonly template: string,
+    readonly to: number
+}
+type SMRChain = {
+    readonly id: string,
+    readonly segments: SMRSegment[]
+};
+type SMRSegment = {
+    readonly smtl: {
+        readonly aligned_sequence: string,
+        readonly description: string,
+        readonly from: number,
+        readonly to: number
+    },
+    readonly uniprot: {
+        readonly aligned_sequence: string,
+        readonly from: number,
+        readonly to: number
+    }
+};
+
+type SMRData={
+
+   result:SMRResult,
+   
+};

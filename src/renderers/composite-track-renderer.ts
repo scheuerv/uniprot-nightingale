@@ -2,7 +2,7 @@ import CompositeCategoryContainer from "../manager/composite-category-container"
 import TrackRenderer from "./track-renderer";
 
 export default class CompositeTrackRenderer implements TrackRenderer {
-    constructor(private trackRenderers: TrackRenderer[]) {
+    constructor(private readonly trackRenderers: TrackRenderer[]) {
 
     }
     getCategoryContainer(sequence: string): CompositeCategoryContainer {

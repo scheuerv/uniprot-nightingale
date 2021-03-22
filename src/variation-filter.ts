@@ -136,18 +136,18 @@ export const VariantColors = {
         .range(['#002594', '#8FE3FF'])
 }
 export type FilterCase = {
-    name: string,
-    type: {
-        name: string,
-        text: string
+    readonly name: string,
+    readonly type: {
+        readonly name: string,
+        readonly text: string
     },
-    options: {
-        labels: string[],
-        colors: string[]
+    readonly options: {
+        readonly labels: string[],
+        readonly colors: string[]
     },
-    properties: ((variant: Variant) => boolean)[],
-    filterDataVariation: (variants: FilterVariationData[]) => FilterVariationData[]
-    filterDataVariationGraph: (variants: VariationData) => Variant[];
+    readonly properties: ((variant: Variant) => boolean)[],
+    readonly filterDataVariation: (variants: FilterVariationData[]) => FilterVariationData[]
+    readonly filterDataVariationGraph: (variants: VariationData) => Variant[];
 }
 export const filterCases: FilterCase[] = [
     {

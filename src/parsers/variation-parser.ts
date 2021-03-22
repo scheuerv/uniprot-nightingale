@@ -1,6 +1,6 @@
 import TrackRenderer from "../renderers/track-renderer";
 import VariationRenderer from "../renderers/variation-renderer";
-import TrackParser from "./track-parser";
+import TrackParser, { ErrorResponse, isErrorResponse } from "./track-parser";
 import { SourceType, AminoAcid, Variant, Association, ProteinsAPIVariation, Xref } from "protvista-variation-adapter/src/variants";
 import { VariantColors } from "../variation-filter";
 
@@ -8,27 +8,17 @@ import { createEmitter } from "ts-typed-events";
 export default class VariationParser implements TrackParser<VariationOutput> {
     private readonly categoryName = "Variation"
     private readonly emitOnDataLoaded = createEmitter<VariationOutput[]>();
-    public onDataLoaded = this.emitOnDataLoaded.event;
-    async parse(uniprotId: string, data: ProteinsAPIVariation&{errorMessage:string,requestedURL:string}): Promise<TrackRenderer | null> {
-        this.emitOnDataLoaded.emit([]);
-        if(data.errorMessage)
-        {
+    public readonly onDataLoaded = this.emitOnDataLoaded.event;
+    async parse(uniprotId: string, data: ProteinsAPIVariation | ErrorResponse): Promise<TrackRenderer | null> {
+        if (isErrorResponse(data)) {
+            this.emitOnDataLoaded.emit([]);
             return null;
         }
         const transformedData = this.transformData({
-            accession: uniprotId,
-            entryName: data.entryName,
-            proteinName: data.proteinName,
-            geneName: data.geneName,
-            organismName: data.organismName,
-            proteinExistence: data.proteinExistence,
-            sequence: data.sequence,
-            sequenceChecksum: data.sequenceChecksum,
-            sequenceVersion: data.sequenceVersion,
-            taxid: data.taxid,
-            features: data.features
+            ...data,
+            accession: uniprotId
         });
-
+        this.emitOnDataLoaded.emit([]);
         if (data.features.length > 0 && transformedData != null) {
             return new VariationRenderer(transformedData, this.categoryName);
         } else {
@@ -45,7 +35,7 @@ export default class VariationParser implements TrackParser<VariationOutput> {
 
     private transformData(
         data: ProteinsAPIVariation
-    ):VariationData|null {
+    ): VariationData | null {
         const { sequence, features } = data;
         const variants = features.map((variant) => ({
             ...variant,
@@ -151,7 +141,7 @@ export default class VariationParser implements TrackParser<VariationOutput> {
 }
 
 export type VariationData = {
-    sequence: string,
-    variants: Variant[]
+    readonly sequence: string,
+    readonly variants: Variant[]
 }
 type VariationOutput = {};

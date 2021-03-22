@@ -2,7 +2,7 @@ import { Accession, Fragment, Location } from "../renderers/basic-track-renderer
 
 export default class FragmentAligner {
     private fragments: Fragment[] = [];
-    constructor(private type: string) {
+    constructor(private readonly type: string) {
 
     }
     public getAccessions() {

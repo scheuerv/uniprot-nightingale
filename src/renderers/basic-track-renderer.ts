@@ -92,39 +92,40 @@ export default class BasicTrackRenderer<Output> implements TrackRenderer {
 
 }
 export class TrackRow<Output> {
-    constructor(public rowData: Accession[], public label: string, public output?: Output) {
+    constructor(public readonly rowData: Accession[], public readonly label: string, public readonly output?: Output) {
 
     }
 }
 export class Accession {
-    public experimentalMethod: string | null;
-    public coverage: number;
-    public pdbStart: number;
-    public pdbEnd: number;
-    public uniprotStart: number;
-    public uniprotEnd: number;
-    public coordinatesFile: string | null;
+
+    readonly coverage: number;
+    readonly pdbStart: number;
+    readonly pdbEnd: number;
+    readonly uniprotStart: number;
+    readonly uniprotEnd: number;
     constructor
         (
-            public color: string | null,
-            public locations: Location[],
-            public type: string
+            readonly color: string | null,
+            readonly locations: Location[],
+            readonly type: string,
+            readonly experimentalMethod?: string,
+            readonly coordinatesFile?: string
         ) { }
 }
 export class Location {
     constructor
         (
-            public fragments: Fragment[]
+            readonly fragments: Fragment[]
         ) { }
 
 }
 
 export class Fragment {
     constructor(
-        public start: number,
-        public end: number,
-        public color?: string,
-        public fill?: string,
-        public tooltipContent?: TooltipContent
+        readonly start: number,
+        readonly end: number,
+        readonly color?: string,
+        readonly fill?: string,
+        readonly tooltipContent?: TooltipContent
     ) { }
 }

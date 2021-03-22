@@ -1,7 +1,7 @@
 import BasicTrackRenderer, { Fragment, TrackRow } from "../renderers/basic-track-renderer";
 import CompositeTrackRenderer from "../renderers/composite-track-renderer";
 import FragmentAligner from "./fragment-aligner";
-import TrackParser from "./track-parser";
+import TrackParser, { DbReferenceObject, ErrorResponse, Feature, isErrorResponse, ProteinFeatureInfo } from "./track-parser";
 import TrackRenderer from "../renderers/track-renderer";
 import { config } from "protvista-track/src/config";
 import { getDarkerColor, groupBy, groupByAndMap } from "../utils";
@@ -9,47 +9,54 @@ import TooltipContent from "../tooltip-content";
 import ecoMap from "protvista-feature-adapter/src/evidences";
 import { createEmitter } from "ts-typed-events";
 export default class FeatureParser implements TrackParser<FeatureOutput> {
-    private emitOnDataLoaded = createEmitter<FeatureOutput[]>();
-    public onDataLoaded = this.emitOnDataLoaded.event;
-    async parse(uniprotId: string, data: any): Promise<TrackRenderer | null> {
+    private readonly emitOnDataLoaded = createEmitter<FeatureOutput[]>();
+    public readonly onDataLoaded = this.emitOnDataLoaded.event;
+    async parse(uniprotId: string, data: ProteinFeatureInfo | ErrorResponse): Promise<TrackRenderer | null> {
+        if (isErrorResponse(data)) {
+            this.emitOnDataLoaded.emit([]);
+            return null;
+        }
         const categories: Map<string, Map<string, FragmentAligner>> = new Map();
         const features = data.features;
-        features.forEach((feature: { category: string; type: string; begin: string; end: string; ftId: string | undefined; description: string | undefined; evidences: [{ code: string, source: { name: string, id: string, url: string, alternativeUrl: string } | undefined }] }) => {
-            let category = categories.get(feature.category);
-            if (!category) {
-                category = new Map();
-                categories.set(feature.category, category);
-            }
-            let typeFeatureAligner = category.get(feature.type)
-            if (!typeFeatureAligner) {
-                typeFeatureAligner = new FragmentAligner(feature.type);
-                category.set(feature.type, typeFeatureAligner);
-            }
-            const fillColor = config[feature.type]?.color;
-            const borderColor = getDarkerColor(fillColor);
+        features.forEach(feature => {
+            if (feature.category) {
+                let category = categories.get(feature.category);
+                if (!category) {
+                    category = new Map();
+                    categories.set(feature.category, category);
+                }
+                let typeFeatureFragmentAligner = category.get(feature.type)
+                if (!typeFeatureFragmentAligner) {
+                    typeFeatureFragmentAligner = new FragmentAligner(feature.type);
+                    category.set(feature.type, typeFeatureFragmentAligner);
+                }
+                const fillColor = config[feature.type]?.color;
+                const borderColor = getDarkerColor(fillColor);
 
-            const tooltipContent = new TooltipContent(feature.type + " " + feature.begin + (feature.begin === feature.end ? "" : ("-" + feature.end)));
-            tooltipContent.addRow('Feature ID', feature.ftId);
-            tooltipContent.addRow('Description', feature.description);
-            if (feature.evidences) {
-                const groupedEvidencesByCode = groupByAndMap(
-                    feature.evidences.filter(evidence => evidence.source != undefined),
-                    evidence => evidence.code,
-                    evidence => evidence.source!
-                );
-                groupedEvidencesByCode.forEach((sources, code) => {
-                    tooltipContent.addRow('Evidence', this.getEvidenceText(uniprotId, code, sources))
-                    let groupedSourcesByName: Map<string, Source[]> = groupBy(sources, source => source.name);
-                    groupedSourcesByName.forEach((sources: Source[], name: string) => {
-                        tooltipContent.addRow('', this.getEvidenceXRefLinks({ elem: sources, name: name, alternative: false }));
-                        if (name === 'PubMed') {
-                            tooltipContent.addRow('', this.getEvidenceXRefLinks({ elem: sources, name: 'EuropePMC', alternative: true }));
-                        }
+                const tooltipContent = new TooltipContent(feature.type + " " + feature.begin + (feature.begin === feature.end ? "" : ("-" + feature.end)));
+                tooltipContent.addRowIfContentDefined('Feature ID', feature.ftId);
+                tooltipContent.addRowIfContentDefined('Description', feature.description);
+                if (feature.evidences) {
+                    const groupedEvidencesByCode = groupByAndMap(
+                        feature.evidences.filter(evidence => evidence.source != undefined),
+                        evidence => evidence.code,
+                        evidence => evidence.source!
+                    );
+                    groupedEvidencesByCode.forEach((sources, code) => {
+                        const convertedSources: DbReferenceObject[] = this.convertSources(uniprotId, sources, code);
+                        tooltipContent.addRowIfContentDefined('Evidence', this.getEvidenceText(code, convertedSources))
+                        let groupedSourcesByName: Map<string, DbReferenceObject[]> = groupBy(convertedSources, source => source.name);
+                        groupedSourcesByName.forEach((sources: DbReferenceObject[], name: string) => {
+                            tooltipContent.addRowIfContentDefined('', this.getEvidenceXRefLinks({ sources: convertedSources, name: name, alternative: false }));
+                            if (name === 'PubMed') {
+                                tooltipContent.addRowIfContentDefined('', this.getEvidenceXRefLinks({ sources: convertedSources, name: 'EuropePMC', alternative: true }));
+                            }
+                        });
                     });
-                });
+                }
+                tooltipContent.addRowIfContentDefined('Tools', this.getBlast(uniprotId, feature));
+                typeFeatureFragmentAligner.addFragment(new Fragment(parseInt(feature.begin), parseInt(feature.end), borderColor, fillColor, tooltipContent));
             }
-            tooltipContent.addRow('Tools', this.getBlast(uniprotId, feature));
-            typeFeatureAligner.addFragment(new Fragment(parseInt(feature.begin), parseInt(feature.end), borderColor, fillColor, tooltipContent));
         });
         const categoryRenderers: BasicTrackRenderer<FeatureOutput>[] = [];
         for (const [category, categoryData] of categories.entries()) {
@@ -57,7 +64,7 @@ export default class FeatureParser implements TrackParser<FeatureOutput> {
             for (const [type, fragmentAligner] of categoryData) {
                 typeTrackRows.push(new TrackRow(fragmentAligner.getAccessions(), config[type]?.label ?? type));
             }
-            categoryRenderers.push(new BasicTrackRenderer(typeTrackRows, categoriesConfig[category]?.label ? categoriesConfig[category]?.label : this.createLabel(category),undefined));
+            categoryRenderers.push(new BasicTrackRenderer(typeTrackRows, categoriesConfig[category]?.label ? categoriesConfig[category]?.label : this.createLabel(category), undefined));
         }
         this.emitOnDataLoaded.emit([])
         if (categories.size > 0) {
@@ -67,12 +74,27 @@ export default class FeatureParser implements TrackParser<FeatureOutput> {
             return null;
         }
     }
+    convertSources(uniprotId: string, sources: DbReferenceObject[], code: string): DbReferenceObject[] {
+        const eco = ecoMap.filter((record) => record.name == code)[0];
+        const acronym = eco.acronym;
+        if ((acronym === 'EXP') || (acronym === 'NAS')) {
+            const convertedSources = sources.map(source => {
+                if (source.id && (source.id.indexOf('ref.') === 0)) {
+                    return { ...source, name: 'Citation', url: 'http://www.uniprot.org/uniprot/' + uniprotId + '#ref' + source.id.slice(4) };
+                } else {
+                    return source
+                }
+            });
+            return convertedSources
+        }
+        return sources;
+    }
     createLabel(category: string) {
         category = category[0].toUpperCase() + category.slice(1, category.length).replace(/_/g, ' ').toLowerCase();
         return category;
     }
 
-    private getBlast(accession: string, feature: { category: string; type: string; begin: string; end: string; ftId: string | undefined; description: string | undefined; }) {
+    private getBlast(accession: string, feature: Feature) {
         const blastURL = 'http://www.uniprot.org/blast/?about=';
         const noBlastTypes = ['helix', 'strand', 'turn', 'disulfid', 'crosslnk', 'variant'];
         const end = parseInt(feature.end);
@@ -93,16 +115,14 @@ export default class FeatureParser implements TrackParser<FeatureOutput> {
         return label;
     }
 
-    private getEvidenceText(accession: string, code: string, sources: Source[]) {
-        const eco = ecoMap.filter((record: { name: string; }) => record.name == code)[0] as { name: string, description: string, shortDescription: string, acronym: string, isManual: boolean };
+    private getEvidenceText(code: string, sources: DbReferenceObject[]) {
+        const eco = ecoMap.filter((record) => record.name == code)[0];
         const acronym = eco.acronym;
-        let publications: number = sources.filter((source: { name: string; }) => source.name == 'PubMed' || source.name == 'Citation').length;
+        let publications = sources.filter((source) => source.name == 'PubMed' || source.name == 'Citation').length;
         let evidenceText = '';
         if ((acronym === 'EXP') || (acronym === 'NAS')) {
             publications += sources.filter((source) => {
                 if (source.id && (source.id.indexOf('ref.') === 0)) {
-                    source.name = 'Citation';
-                    source.url = 'http://www.uniprot.org/uniprot/' + accession + '#ref' + source.id.slice(4);
                     return true;
                 } else {
                     return false;
@@ -129,20 +149,19 @@ export default class FeatureParser implements TrackParser<FeatureOutput> {
         }
         return evidenceText + (eco.description ? ' (' + eco.description + ')' : '');
     };
-    private getEvidenceXRefLinks(info: { elem: Source[], name: string, alternative: boolean }) {
+    private getEvidenceXRefLinks(info: { sources: DbReferenceObject[], name: string, alternative: boolean }) {
         let text = info.name + ' ';
-        info.elem.forEach((source, i) => {
+        info.sources.forEach((source, i) => {
             var url = info.alternative === true ? source.alternativeUrl : source.url;
             text += '<span><a href="' + url + '" target="_blank">' + source.id + '</a></span>';
-            if (i !== (info.elem.length - 1)) {
+            if (i !== (info.sources.length - 1)) {
                 text += '<span>|</span>';
             }
         });
         return text;
     };
 }
-type Source = { name: string, id: string, url: string, alternativeUrl: string };
-const categoriesConfig: Record<string, { label: string }> = {
+const categoriesConfig: Record<string,  { readonly label: string }> = {
     "DOMAINS_AND_SITES": {
         "label": "Domains & sites"
     },
@@ -167,4 +186,5 @@ const categoriesConfig: Record<string, { label: string }> = {
 }
 
 type FeatureOutput = {};
+
 
