@@ -97,18 +97,17 @@ export default class TrackManager {
                 const e = d3.event;
                 updateTooltip(e, e.detail);
             });
-            const protvistaNavigation = d3.selectAll("protvista-navigation .selection").node() as ProtvistaNavigation;
+            const protvistaNavigation = d3.select("protvista-navigation").node() as ProtvistaNavigation;
             let lastFocusedResidue: number;
-            d3.select("protvista-track g.fragment-group").on("mousemove", (f, i) => {
+            d3.selectAll("protvista-track g.fragment-group").on("mousemove", (f, i) => {
                 const e = d3.event;
-                const navigationRect = protvistaNavigation.getBoundingClientRect();
-                const xScale = d3.scaleLinear()
-                    .domain([0, navigationRect.width])
+                const xScale = d3.scaleLinear<number>()
+                    .domain([0, protvistaNavigation.width - 2 * protvistaNavigation._padding])
                     .rangeRound([
-                        protvistaNavigation._displaystart,
-                        protvistaNavigation._displayend + 1
+                        parseInt(protvistaNavigation._displaystart),
+                        parseInt(protvistaNavigation._displayend) + 1
                     ]);
-                const residueNumber = xScale(e.offsetX + navigationRect.left - navigationRect.left);
+                const residueNumber = xScale(e.offsetX - protvistaNavigation._padding);
                 if (lastFocusedResidue != residueNumber) {
                     lastFocusedResidue = residueNumber;
                     this.emitOnResidueMouseOver.emit(residueNumber);
