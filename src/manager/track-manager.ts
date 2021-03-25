@@ -9,11 +9,19 @@ import FeatureParser from '../parsers/feature-parser';
 import ProteomicsParser from '../parsers/proteomics-parser';
 import SMRParser from '../parsers/SMR-parser';
 import VariationParser from '../parsers/variation-parser';
+import ProtvistaManager from 'protvista-manager';
+import { createEmitter } from "ts-typed-events";
+import ProtvistaNavigation from 'protvista-navigation';
 
 type Constructor<T> = new (...args: any[]) => T;
 export default class TrackManager {
-    private tracks: Track[] = [];
+    private readonly emitOnResidueMouseOver = createEmitter<number>();
+    public readonly onResidueMouseOver = this.emitOnResidueMouseOver.event;
+    private readonly emitOnFragmentMouseOut = createEmitter();
+    public readonly onFragmentMouseOut = this.emitOnFragmentMouseOut.event;
+    private readonly tracks: Track[] = [];
     private sequence: string = "";
+    private protvistaManager: ProtvistaManager;
     constructor(private sequenceUrlGenerator: (url: string) => string) {
 
     }
@@ -35,9 +43,9 @@ export default class TrackManager {
     }
 
     async render(uniprotId: string, element: HTMLElement) {
-        const protvistaManager = d3.create("protvista-manager")
+        this.protvistaManager = d3.create("protvista-manager")
             .attr("attributes", "length displaystart displayend highlightstart highlightend activefilters filters")
-            .node();
+            .node()! as ProtvistaManager;
         fetch(this.sequenceUrlGenerator(uniprotId)).then(data => data.text())
             .then(data => {
                 const tokens = data.split(/\r?\n/);
@@ -45,13 +53,13 @@ export default class TrackManager {
                     this.sequence += tokens[i];
                 }
                 const navigationElement = d3.create('protvista-navigation').attr("length", this.sequence.length);
-                protvistaManager?.appendChild(
+                this.protvistaManager.appendChild(
                     createRow(
                         d3.create('div').node()!, navigationElement.node()!
                     ).node()!
                 );
                 const sequenceElement = d3.create('protvista-sequence').attr("length", this.sequence.length).attr("sequence", this.sequence);
-                protvistaManager?.appendChild(
+                this.protvistaManager.appendChild(
                     createRow(
                         d3.create('div').node()!, sequenceElement.node()!
                     ).node()!
@@ -80,42 +88,69 @@ export default class TrackManager {
                 .forEach(renderer => {
                     const categoryContainer = renderer.getCategoryContainer(this.sequence);
                     categoryContainers.push(categoryContainer);
-                    protvistaManager?.appendChild(categoryContainer.getContent());
+                    this.protvistaManager.appendChild(categoryContainer.getContent());
                 });
 
-            element.appendChild(protvistaManager!);
+            element.appendChild(this.protvistaManager);
             categoryContainers.forEach(categoryContainer => categoryContainer.addData());
             d3.selectAll("protvista-track").on("change", (f, i) => {
                 const e = d3.event;
                 updateTooltip(e, e.detail);
             });
+            const protvistaNavigation = d3.selectAll("protvista-navigation .selection").node() as ProtvistaNavigation;
+            let lastFocusedResidue: number;
+            d3.select("protvista-track g.fragment-group").on("mousemove", (f, i) => {
+                const e = d3.event;
+                const navigationRect = protvistaNavigation.getBoundingClientRect();
+                const xScale = d3.scaleLinear()
+                    .domain([0, navigationRect.width])
+                    .rangeRound([
+                        protvistaNavigation._displaystart,
+                        protvistaNavigation._displayend + 1
+                    ]);
+                const residueNumber = xScale(e.offsetX + navigationRect.left - navigationRect.left);
+                if (lastFocusedResidue != residueNumber) {
+                    lastFocusedResidue = residueNumber;
+                    this.emitOnResidueMouseOver.emit(residueNumber);
+                }
+            }).on("mouseout", (f, i) => {
+                this.emitOnFragmentMouseOut.emit();
+            });
             return categoryContainers
         });
 
     }
+    highlight(start: number, end: number) {
+        this.protvistaManager.dispatchEvent(new CustomEvent('change', {
+            detail: {
+                highlight: `${start}:${end}`,
+            }, bubbles: true, cancelable: true
+        }));
+    }
+
     addTrack(urlGenerator: (url: string) => string, parser: TrackParser<any>) {
         this.tracks.push({ urlGenerator, parser })
     }
 }
 
 function updateTooltip(e: { clientY: number; clientX: number; eventtype: string },
-    d: { eventtype: string, coords: number[]; feature: Accession; target: { __data__: Fragment; }; }) {
-    if (d.eventtype == 'mouseout') {
+    detail: { eventtype: string, coords: number[]; feature: Accession; target: { __data__: Fragment; }; }) {
+    if (detail.eventtype == 'mouseout') {
         removeAllTooltips();
         return;
     }
-    if (d.eventtype != 'mouseover') {
+    if (detail.eventtype != 'mouseover') {
         return;
     }
-    const fragment = d.target.__data__;
+    const fragment = detail.target.__data__;
     d3.select("protvista-tooltip")
         .data([fragment])
         .enter()
         .append("protvista-tooltip");
 
     d3.select("protvista-tooltip")
-        .attr("x", d.coords[0])
-        .attr("y", d.coords[1])
+        .attr("x", detail.coords[0])
+        .attr("y", detail.coords[1])
         .attr("title", fragment.tooltipContent?.getTitle() ?? "")
         .attr("visible", true)
         .html(fragment.tooltipContent?.render() ?? "")
