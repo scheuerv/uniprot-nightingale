@@ -8,10 +8,15 @@ const loadComponent = function (name: string, className: CustomElementConstructo
     }
 };
 
-function createRow(label: Node, content: Node, customClass: string = "") {
+function createRow(label: Node, content: Node, customClass: string = "", arrow: boolean = false) {
+    const labelWrapper = d3.create("span").node()!;
+    if (arrow) {
+        labelWrapper.appendChild(d3.create("i").attr("class", "fas fa-arrow-circle-right").node()!);
+    }
+    labelWrapper.appendChild(label);
     const row = d3.create("div")
         .attr("class", "track-row");
-    row.append("div").attr("class", "track-label " + customClass).node()?.appendChild(label);
+    row.append("div").attr("class", "track-label " + customClass).node()?.appendChild(labelWrapper);
     row.append("div").attr("class", "track-content " + customClass).node()?.appendChild(content);
     return row;
 }

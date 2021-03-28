@@ -6,8 +6,8 @@ div.track-row {
 
 div.track-row.data,
 .subtracks-container .track-row {
-    margin-bottom: .1em;
-    border-bottom: .1em solid #b2f5ff;
+    margin-bottom: 0.1em;
+    border-bottom: 0.1em solid #b2f5ff;
 }
 
 div.track-content {
@@ -32,9 +32,9 @@ div.track-label {
     overflow: hidden;
     box-sizing: border-box;
     width: 198px;
-    max-width: 198px;  
+    max-width: 198px;
     min-width: 198px;
-    padding: .5em;
+    padding: 0.5em;
     vertical-align: middle;
 }
 
@@ -48,11 +48,11 @@ div.track-label.sub {
 }
 
 div.track-label.main:hover {
-    background-color: #80EEFF;
+    background-color: #80eeff;
 }
 
 div.track-label.arrow-right:before {
-    content: ' ';
+    content: " ";
     display: inline-block;
     width: 0;
     height: 0;
@@ -62,8 +62,19 @@ div.track-label.arrow-right:before {
     margin-right: 5px;
 }
 
+div.track-label .fas.fa-arrow-circle-right {
+    cursor: pointer;
+    color: rgba(0, 0, 0, 0.5);
+    float: right;
+}
+
+div.track-label div {
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
 div.track-label.arrow-down:before {
-    content: ' ';
+    content: " ";
     display: inline-block;
     width: 0;
     height: 0;

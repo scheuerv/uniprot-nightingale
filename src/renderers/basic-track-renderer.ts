@@ -22,11 +22,11 @@ export default class BasicTrackRenderer<Output> implements TrackRenderer {
         const categoryDiv = d3.create("div").node();
 
         d3.select(this.mainTrack.track).attr("length", sequence.length);
-
         this.mainTrackRow = createRow(
             document.createTextNode(this.mainTrackLabel),
             this.mainTrack.track,
-            "main"
+            "main",
+            true
         );
         this.mainTrackRow.attr("class", this.mainTrackRow.attr("class") + " data")
         this.mainTrackRow.select(".track-label").attr("class", "track-label main arrow-right").on('click', () =>
@@ -47,7 +47,8 @@ export default class BasicTrackRenderer<Output> implements TrackRenderer {
             const subTrackRowDiv = createRow(
                 labelElement.node()!,
                 subtrack.track,
-                "sub"
+                "sub",
+                true
             );
             this.subtracksDiv?.appendChild(subTrackRowDiv.node()!);
             trackContainers.push(subtrack);

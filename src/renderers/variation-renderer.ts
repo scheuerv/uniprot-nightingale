@@ -36,11 +36,11 @@ export default class VariationRenderer implements TrackRenderer {
 
         this.variation = new BasicTrackContainer(variationTrack, this.data);
         const categoryDiv = d3.create("div").node()!;
-
         this.mainTrackRow = createRow(
             document.createTextNode(this.mainTrackLabel),
             this.variationGraph.track,
-            "main"
+            "main",
+            true
         );
         this.mainTrackRow.attr("class", this.mainTrackRow.attr("class") + " data")
         this.mainTrackRow.select(".track-label").attr("class", "track-label main arrow-right").on('click', () =>
