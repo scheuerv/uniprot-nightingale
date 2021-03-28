@@ -107,6 +107,9 @@ export default class TrackManager {
                         parseInt(protvistaNavigation._displaystart),
                         parseInt(protvistaNavigation._displayend) + 1
                     ]);
+
+                // console.log(e.offsetX - protvistaNavigation._padding);
+                // console.log(e.offsetX);
                 const residueNumber = xScale(e.offsetX - protvistaNavigation._padding);
                 if (lastFocusedResidue != residueNumber) {
                     lastFocusedResidue = residueNumber;
@@ -123,6 +126,14 @@ export default class TrackManager {
         this.protvistaManager.dispatchEvent(new CustomEvent('change', {
             detail: {
                 highlight: `${start}:${end}`,
+            }, bubbles: true, cancelable: true
+        }));
+    }
+
+    highlightOff() {
+        this.protvistaManager.dispatchEvent(new CustomEvent('change', {
+            detail: {
+                highlight: null,
             }, bubbles: true, cancelable: true
         }));
     }
