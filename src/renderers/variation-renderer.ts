@@ -9,7 +9,7 @@ import BasicCategoryContainer from "../manager/basic-category-container";
 import d3 = require('d3');
 import { VariationData } from "../parsers/variation-parser";
 import { filterCases } from "../variation-filter";
-import { TrackFragment } from "src/manager/track-manager";
+import { TrackFragment } from "../manager/track-manager";
 import { createEmitter } from "ts-typed-events";
 export default class VariationRenderer implements TrackRenderer {
     private variationGraph: BasicTrackContainer<VariationData>;

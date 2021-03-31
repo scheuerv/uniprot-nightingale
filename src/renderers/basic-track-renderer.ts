@@ -6,7 +6,7 @@ import BasicTrackContainer from '../manager/track-container';
 import BasicCategoryContainer from '../manager/basic-category-container';
 import TooltipContent from '../tooltip-content';
 import { createEmitter, Emitter, SealedEvent } from 'ts-typed-events';
-import { TrackFragment } from 'src/manager/track-manager';
+import { TrackFragment } from '../manager/track-manager';
 
 export default class BasicTrackRenderer<Output> implements TrackRenderer {
     private mainTrack: BasicTrackContainer<Accession[]>;

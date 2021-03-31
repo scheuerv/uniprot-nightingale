@@ -1,4 +1,4 @@
-import { TrackFragment } from "src/manager/track-manager";
+import { TrackFragment } from "../manager/track-manager";
 import { createEmitter } from "ts-typed-events";
 import CompositeCategoryContainer from "../manager/composite-category-container";
 import TrackRenderer from "./track-renderer";
