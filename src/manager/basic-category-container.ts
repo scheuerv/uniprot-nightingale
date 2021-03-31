@@ -10,4 +10,7 @@ export default class BasicCategoryContainer implements CategoryContainer {
     addData() {
         this.tracks.forEach(track => track.addData());
     }
+    getTrackContainers() {
+        return this.tracks;
+    }
 }

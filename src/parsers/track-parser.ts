@@ -7,7 +7,7 @@ export default interface TrackParser<Output> {
 
 }
 
-export function isErrorResponse(response: ErrorResponse | /*ProteinFeatureInfo*/ any): response is ErrorResponse {
+export function isErrorResponse(response: ErrorResponse | any): response is ErrorResponse {
     return (response as ErrorResponse).requestedURL !== undefined;
 }
 

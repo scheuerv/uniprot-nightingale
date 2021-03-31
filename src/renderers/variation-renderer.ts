@@ -9,15 +9,19 @@ import BasicCategoryContainer from "../manager/basic-category-container";
 import d3 = require('d3');
 import { VariationData } from "../parsers/variation-parser";
 import { filterCases } from "../variation-filter";
-
+import { TrackFragment } from "src/manager/track-manager";
+import { createEmitter } from "ts-typed-events";
 export default class VariationRenderer implements TrackRenderer {
     private variationGraph: BasicTrackContainer<VariationData>;
     private variation: BasicTrackContainer<VariationData>;
     private subtracksDiv: HTMLDivElement;
     private mainTrackRow: d3.Selection<HTMLDivElement, undefined, null, undefined>;
+    private emitOnArrowClick = createEmitter<TrackFragment[]>();
+    public onArrowClick = this.emitOnArrowClick.event;
     constructor(private readonly data: VariationData, private mainTrackLabel: string) {
 
     }
+
     getCategoryContainer(sequence: string): CategoryContainer {
         const variationGraph = d3.create("protvista-variation-graph")
             .attr("highlight-event", "onmouseover")
