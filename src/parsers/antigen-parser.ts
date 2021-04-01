@@ -19,7 +19,7 @@ export default class AntigenParser implements TrackParser<AntigenOutput>  {
         const fragments = features.map(feature => {
             const fillColor = config[feature.type]?.color;
             const borderColor = getDarkerColor(fillColor)
-            return new Fragment(parseInt(feature.begin), parseInt(feature.end), borderColor, fillColor)
+            return new Fragment(parseInt(feature.begin), parseInt(feature.end), borderColor, fillColor,config[feature.type]?.shape)
         });
         this.emitOnDataLoaded.emit([]);
         if (features.length > 0) {

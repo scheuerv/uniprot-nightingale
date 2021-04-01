@@ -7,6 +7,7 @@ import BasicCategoryContainer from '../manager/basic-category-container';
 import TooltipContent from '../tooltip-content';
 import { createEmitter, Emitter, SealedEvent } from 'ts-typed-events';
 import { TrackFragment } from '../manager/track-manager';
+import FragmentAligner from '../parsers/fragment-aligner';
 
 export default class BasicTrackRenderer<Output> implements TrackRenderer {
     private mainTrack: BasicTrackContainer<Accession[]>;
@@ -44,7 +45,10 @@ export default class BasicTrackRenderer<Output> implements TrackRenderer {
         }
     }
     private getMainTrack(sequence: string): [BasicTrackContainer<Accession[]>, d3.Selection<HTMLDivElement, undefined, null, undefined>] {
-        const mainTrackData = this.rows.flatMap(row => row.rowData);
+        const mainTrackData = this.rows.flatMap(row => row.rowData);                
+        const fragmentAligner = new FragmentAligner();
+        mainTrackData.forEach(accession=>accession.locations[0].fragments.forEach(fragment=>fragmentAligner.addFragment(fragment)))
+        const mainTrackDataAligned=fragmentAligner.getAccessions();
         const d3Track = d3.create("protvista-track")
             .attr("highlight-event", "onmouseover")
             .attr("height", 40)
@@ -58,7 +62,7 @@ export default class BasicTrackRenderer<Output> implements TrackRenderer {
             true
         );
         const trackFragments: TrackFragment[] = [];
-        mainTrackData.forEach(accession => {
+        mainTrackDataAligned.forEach(accession => {
             accession.locations[0].fragments.forEach(fragment => {
                 trackFragments.push({ start: fragment.start, end: fragment.end, color: fragment.color ?? '#000000' })
             })
@@ -70,7 +74,7 @@ export default class BasicTrackRenderer<Output> implements TrackRenderer {
         mainTrackRow.select(".track-label").attr("class", "track-label main arrow-right").on('click', () =>
             this.toggle()
         );
-        return [new BasicTrackContainer<Accession[]>(track, mainTrackData), mainTrackRow];
+        return [new BasicTrackContainer<Accession[]>(track, mainTrackDataAligned), mainTrackRow];
     }
     private getSubtracks(sequence: string): [BasicTrackContainer<Accession[]>[], HTMLDivElement] {
 
@@ -130,7 +134,7 @@ export class Accession {
         (
             readonly color: string | null,
             readonly locations: Location[],
-            readonly type: string,
+            readonly type?: string,
             readonly experimentalMethod?: string,
             readonly coordinatesFile?: string
         ) { }
@@ -146,9 +150,10 @@ export class Location {
 export class Fragment {
     constructor(
         readonly start: number,
-        readonly end: number,
+        readonly end: number,    
         readonly color?: string,
-        readonly fill?: string,
+        readonly fill?: string,       
+        readonly shape?:string,
         readonly tooltipContent?: TooltipContent
     ) { }
 }

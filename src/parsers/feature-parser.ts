@@ -27,7 +27,7 @@ export default class FeatureParser implements TrackParser<FeatureOutput> {
                 }
                 let typeFeatureFragmentAligner = category.get(feature.type)
                 if (!typeFeatureFragmentAligner) {
-                    typeFeatureFragmentAligner = new FragmentAligner(feature.type);
+                    typeFeatureFragmentAligner = new FragmentAligner();
                     category.set(feature.type, typeFeatureFragmentAligner);
                 }
                 const fillColor = config[feature.type]?.color;
@@ -55,7 +55,7 @@ export default class FeatureParser implements TrackParser<FeatureOutput> {
                     });
                 }
                 tooltipContent.addRowIfContentDefined('Tools', this.getBlast(uniprotId, feature));
-                typeFeatureFragmentAligner.addFragment(new Fragment(parseInt(feature.begin), parseInt(feature.end), borderColor, fillColor, tooltipContent));
+                typeFeatureFragmentAligner.addFragment(new Fragment(parseInt(feature.begin), parseInt(feature.end), borderColor, fillColor,config[feature.type]?.shape, tooltipContent));
             }
         });
         const categoryRenderers: BasicTrackRenderer<FeatureOutput>[] = [];
