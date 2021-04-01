@@ -41,7 +41,7 @@ export default class TrackManager {
         return trackManager;
     }
 
-    getParsersByType<T extends TrackParser<S>, S>(filterType: Constructor<T>): T[] {
+    getParsersByType<T extends TrackParser<any>>(filterType: Constructor<T>): T[] {
         return this.tracks.map(t => t.parser)
             .filter(parser => parser instanceof filterType)
             .map(parser => parser as T);
