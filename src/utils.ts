@@ -21,6 +21,22 @@ function createRow(label: Node, content: Node, customClass: string = "", arrow: 
     return row;
 }
 
+function unmarkArrows() {
+    d3.selectAll(".fa-arrow-circle-right.clicked").nodes().forEach(node => {
+        (node as Element).classList.remove("clicked");
+    });
+}
+function markArrow() {
+    const classList = d3.select(d3.event.target).node().classList;
+    if (classList.contains("clicked")) {
+        unmarkArrows();
+        return false;
+    } else {
+        unmarkArrows()
+        classList.add("clicked");
+        return true;
+    }
+}
 function getDarkerColor(color: string | undefined) {
     if (!color) {
         return "#000000";
@@ -50,4 +66,4 @@ function groupByAndMap<T, O, Id>(data: IterableIterator<T> | T[], by: (item: T) 
     }
     return grouped;
 }
-export { loadComponent, createRow, getDarkerColor, groupBy, groupByAndMap };
+export { loadComponent, createRow, getDarkerColor, groupBy, groupByAndMap, markArrow };

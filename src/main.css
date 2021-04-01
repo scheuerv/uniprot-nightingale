@@ -67,6 +67,9 @@ div.track-label .fas.fa-arrow-circle-right {
     color: rgba(0, 0, 0, 0.5);
     float: right;
 }
+div.track-label .fas.fa-arrow-circle-right.clicked{
+    color: rgb(0, 0, 0);
+}
 
 div.track-label div {
     overflow: hidden;
