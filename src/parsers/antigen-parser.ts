@@ -31,7 +31,7 @@ export default class AntigenParser implements TrackParser<AntigenOutput>  {
                 trackRows.push(new TrackRow(fragmentAligner.getAccessions(), config[type]?.label));
 
             });
-            return new BasicTrackRenderer(trackRows, this.categoryName, undefined);
+            return new BasicTrackRenderer(trackRows, this.categoryName, undefined,true);
         } else {
             return null;
         }

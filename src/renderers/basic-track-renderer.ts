@@ -16,7 +16,7 @@ export default class BasicTrackRenderer<Output> implements TrackRenderer {
     private mainTrackRow: d3.Selection<HTMLDivElement, undefined, null, undefined>;
     private emitOnArrowClick = createEmitter<TrackFragment[]>();
     public onArrowClick = this.emitOnArrowClick.event;
-    constructor(private rows: TrackRow<Output>[], private mainTrackLabel: string, private emitOnLabelClick: Emitter<Output, SealedEvent<Output>> | undefined) {
+    constructor(private rows: TrackRow<Output>[], private mainTrackLabel: string, private emitOnLabelClick: Emitter<Output, SealedEvent<Output>> | undefined,private displayArrow:boolean) {
 
     }
     getCategoryContainer(sequence: string): BasicCategoryContainer {
@@ -59,7 +59,7 @@ export default class BasicTrackRenderer<Output> implements TrackRenderer {
             document.createTextNode(this.mainTrackLabel),
             track,
             "main",
-            true
+            this.displayArrow
         );
         const trackFragments: TrackFragment[] = [];
         mainTrackDataAligned.forEach(accession => {
@@ -98,7 +98,7 @@ export default class BasicTrackRenderer<Output> implements TrackRenderer {
                 labelElement.node()!,
                 subtrack,
                 "sub",
-                true
+                this.displayArrow
             );
             const trackFragments: TrackFragment[] = [];
             subtrackData.rowData.forEach(accession => {

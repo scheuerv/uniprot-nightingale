@@ -73,7 +73,7 @@ export default class PdbParser implements TrackParser<PDBOutput> {
                     return outputs;
                 });
             this.emitOnDataLoaded.emit(outputs)
-            return new BasicTrackRenderer(trackRows, this.categoryName, this.emitOnLabelClick);
+            return new BasicTrackRenderer(trackRows, this.categoryName, this.emitOnLabelClick,false);
         }
         else {
             this.emitOnDataLoaded.emit(outputs)

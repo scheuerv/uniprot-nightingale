@@ -41,7 +41,7 @@ export default class SMRParser implements TrackParser<SMROutput> {
         })
         this.emitOnDataLoaded.emit(outputs);
         if (trackRows.length > 0) {
-            return new BasicTrackRenderer(trackRows, this.categoryName, this.emitOnLabelClick);
+            return new BasicTrackRenderer(trackRows, this.categoryName, this.emitOnLabelClick,false);
         }
         else {
             return null;
