@@ -2,7 +2,7 @@
 import ProtvistaManager from "protvista-manager";
 import ProtvistaSequence from "protvista-sequence";
 
-import VariationFilter from "./variation-filter";
+import VariationFilter from "./protvista/variation-filter";
 import ProtvistaNavigation from "protvista-navigation";
 import ProtvistaTooltip from "protvista-tooltip";
 import LimitedTrack from "./protvista/limited-track";
@@ -11,7 +11,7 @@ import { loadComponent } from "./utils";
 
 import TrackManager from "./manager/track-manager";
 import './main.css';
-import VariationGraph from "./variation-graph";
+import VariationGraph from "./protvista/variation-graph";
 import ProtvistaVariation from "protvista-variation";
 import '@fortawesome/fontawesome-free/css/all.css';
 
