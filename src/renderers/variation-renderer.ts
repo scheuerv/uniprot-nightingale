@@ -11,6 +11,7 @@ import { VariationData } from "../parsers/variation-parser";
 import { filterCases } from "../variation-filter";
 import { TrackFragment } from "../manager/track-manager";
 import { createEmitter } from "ts-typed-events";
+import ColorConvert from "color-convert";
 export default class VariationRenderer implements TrackRenderer {
     private variationGraph: BasicTrackContainer<VariationData>;
     private variation: BasicTrackContainer<VariationData>;
@@ -18,6 +19,10 @@ export default class VariationRenderer implements TrackRenderer {
     private mainTrackRow: d3.Selection<HTMLDivElement, undefined, null, undefined>;
     private emitOnArrowClick = createEmitter<TrackFragment[]>();
     public onArrowClick = this.emitOnArrowClick.event;
+    private readonly variationColors = {
+        min: 200,
+        max: 50
+    };
     constructor(private readonly data: VariationData, private mainTrackLabel: string) {
 
     }
@@ -27,8 +32,8 @@ export default class VariationRenderer implements TrackRenderer {
             .attr("highlight-event", "onmouseover")
             .attr("id", "protvista-variation-graph")
             .attr("length", sequence.length)
-            .attr("height", 40);
-        this.variationGraph = new BasicTrackContainer(variationGraph.node() as ProtvistaVariationGraph, this.data);
+            .attr("height", 40).node() as ProtvistaVariationGraph;
+        this.variationGraph = new BasicTrackContainer(variationGraph, this.data);
         const variation = d3.create("protvista-variation")
             .attr("id", "protvista-variation")
             .attr("length", sequence.length)
@@ -53,8 +58,26 @@ export default class VariationRenderer implements TrackRenderer {
         this.mainTrackRow.select(".fa-arrow-circle-right").on("click", () => {
             {
                 d3.event.stopPropagation();
-                markArrow();
-                this.emitOnArrowClick.emit([]);
+                if (markArrow()) {
+                    const histogram = Array.from(variationGraph._totalsArray.total);
+                    const max = Math.max.apply(Math, histogram);
+                    const relativeHist = histogram.map(function (x) {
+                        return x / max;
+                    });
+                    const fragments = Array.from(relativeHist)
+                        .map((relative, index) => {
+                            const color = this.variationColors.min + (this.variationColors.max - this.variationColors.min) * relative;
+                            return {
+                                start: index,
+                                end: index,
+                                color: '#' + ColorConvert.rgb.hex([color, color, color])
+                            }
+                        });
+                    this.emitOnArrowClick.emit(fragments);
+                }
+                else {
+                    this.emitOnArrowClick.emit([]);
+                }
             }
         });
         categoryDiv.appendChild(this.mainTrackRow.node()!);
@@ -76,6 +99,7 @@ export default class VariationRenderer implements TrackRenderer {
 
 
     }
+
     private toggle() {
         if (this.subtracksDiv!.style.display === 'none') {
             this.subtracksDiv!.style.display = 'block';
