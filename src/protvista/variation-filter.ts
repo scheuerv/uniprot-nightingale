@@ -3,7 +3,7 @@ import { PredAlgorithmNameType, SourceType, Variant } from "protvista-variation-
 import ProtvistaFilter from "protvista-filter";
 import d3 = require("d3");
 import { html, css } from "lit-element";
-import { VariationData } from "./parsers/variation-parser";
+import { VariationData } from "../parsers/variation-parser";
 export default class VariationFilter extends ProtvistaFilter {
     public multiFor: Map<string, (
         ((filterCase: FilterCase) => (variants: FilterVariationData[]) => FilterVariationData[])

@@ -2,13 +2,13 @@ import CategoryContainer from "../manager/category-container";
 import TrackRenderer from "./track-renderer";
 import ProtvistaVariationGraph from "protvista-variation-graph";
 import ProtvistaVariation from "protvista-variation";
-import VariationFilter, { FilterCase } from "../variation-filter";
+import VariationFilter, { FilterCase } from "../protvista/variation-filter";
 import BasicTrackContainer from "../manager/track-container";
 import { createRow, markArrow } from "../utils";
 import BasicCategoryContainer from "../manager/basic-category-container";
 import d3 = require('d3');
 import { VariationData } from "../parsers/variation-parser";
-import { filterCases } from "../variation-filter";
+import { filterCases } from "../protvista/variation-filter";
 import { TrackFragment } from "../manager/track-manager";
 import { createEmitter } from "ts-typed-events";
 import ColorConvert from "color-convert";
@@ -59,21 +59,7 @@ export default class VariationRenderer implements TrackRenderer {
             {
                 d3.event.stopPropagation();
                 if (markArrow()) {
-                    const histogram = Array.from(variationGraph._totalsArray.total);
-                    const max = Math.max.apply(Math, histogram);
-                    const relativeHist = histogram.map(function (x) {
-                        return x / max;
-                    });
-                    const fragments = Array.from(relativeHist)
-                        .map((relative, index) => {
-                            const color = this.variationColors.min + (this.variationColors.max - this.variationColors.min) * relative;
-                            return {
-                                start: index,
-                                end: index,
-                                color: '#' + ColorConvert.rgb.hex([color, color, color])
-                            }
-                        });
-                    this.emitOnArrowClick.emit(fragments);
+                    this.emitOnArrowClick.emit(this.getFragments(variationGraph));
                 }
                 else {
                     this.emitOnArrowClick.emit([]);
@@ -95,9 +81,34 @@ export default class VariationRenderer implements TrackRenderer {
         protvistaFilter.multiFor = new Map();
         protvistaFilter.multiFor.set('protvista-variation-graph', (filterCase: FilterCase) => filterCase.filterDataVariationGraph);
         protvistaFilter.multiFor.set('protvista-variation', (filterCase: FilterCase) => filterCase.filterDataVariation);
+        protvistaFilter.addEventListener("change", (e) => {
+            if (e instanceof CustomEvent && (e as CustomEvent).detail.type === 'filters') {
+                const arrowClicked = this.mainTrackRow.select(".fa-arrow-circle-right.clicked").node();
+                if (arrowClicked) {
+                    this.emitOnArrowClick.emit(this.getFragments(variationGraph));
+                }
+            }
+        });
         return new BasicCategoryContainer([this.variationGraph, this.variation], categoryDiv!);
 
 
+    }
+    private getFragments(variationGraph: ProtvistaVariationGraph): TrackFragment[] {
+        const histogram = Array.from(variationGraph._totalsArray.total);
+        const max = Math.max.apply(Math, histogram);
+        const relativeHist = histogram.map(function (x) {
+            return x / max;
+        });
+        const fragments = Array.from(relativeHist)
+            .map((relative, index) => {
+                const color = this.variationColors.min + (this.variationColors.max - this.variationColors.min) * relative;
+                return {
+                    start: index,
+                    end: index,
+                    color: '#' + ColorConvert.rgb.hex([color, color, color])
+                }
+            });
+        return fragments;
     }
 
     private toggle() {

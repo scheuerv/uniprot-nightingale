@@ -1,5 +1,5 @@
 import ProtvistaVariationGraph from "protvista-variation-graph";
-import { VariationData } from "./parsers/variation-parser";
+import { VariationData } from "../parsers/variation-parser";
 export default class VariationGraph extends ProtvistaVariationGraph {
     set data(data: VariationData) {
         this._originalData = data;
@@ -15,19 +15,12 @@ export default class VariationGraph extends ProtvistaVariationGraph {
 
         for (const { begin, association } of data.variants) {
             const index = +begin;
-            // skip if the variant is outside of bounds
-            // eslint-disable-next-line no-continue
             if (index < 1 || index > data.sequence.length) continue;
-
-            // eslint-disable-next-line no-plusplus
             totalsArray.total[index]++;
-
-            // eslint-disable-next-line no-continue
             if (!association) continue;
             const hasDisease = association.find(
                 association => association.disease === true
             );
-            // eslint-disable-next-line no-plusplus
             if (hasDisease) totalsArray.diseaseTotal[index]++;
         }
         this._totalsArray = totalsArray;

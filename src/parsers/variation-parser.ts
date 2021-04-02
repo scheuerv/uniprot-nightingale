@@ -2,7 +2,7 @@ import TrackRenderer from "../renderers/track-renderer";
 import VariationRenderer from "../renderers/variation-renderer";
 import TrackParser, { ErrorResponse, isErrorResponse } from "./track-parser";
 import { SourceType, AminoAcid, Variant, Association, ProteinsAPIVariation, Xref } from "protvista-variation-adapter/src/variants";
-import { VariantColors } from "../variation-filter";
+import { VariantColors } from "../protvista/variation-filter";
 
 import { createEmitter } from "ts-typed-events";
 export default class VariationParser implements TrackParser<VariationOutput> {
