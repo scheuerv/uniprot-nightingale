@@ -9,7 +9,7 @@ const loadComponent = function (name: string, className: CustomElementConstructo
 };
 
 function createRow(label: Node, content: Node, customClass: string = "", arrow: boolean = false) {
-    const labelWrapper = d3.create("span").node()!;
+    const labelWrapper = d3.create("span").attr("title",label.textContent?? "").node()!;
     if (arrow) {
         labelWrapper.appendChild(d3.create("i").attr("class", "fas fa-arrow-circle-right").node()!);
     }
