@@ -5,7 +5,7 @@ import TrackParser, { ErrorResponse, isErrorResponse, ProteinFeatureInfo } from 
 import TrackRenderer from "../renderers/track-renderer";
 import { config } from "protvista-track/src/config";
 import { getDarkerColor, } from "../utils";
-import { createTooltip } from "../tooltip-content";
+import { createFeatureTooltip } from "../tooltip-content";
 import { createEmitter } from "ts-typed-events";
 export default class FeatureParser implements TrackParser<FeatureOutput> {
     private readonly emitOnDataLoaded = createEmitter<FeatureOutput[]>();
@@ -31,7 +31,7 @@ export default class FeatureParser implements TrackParser<FeatureOutput> {
                 }
                 const fillColor = config[feature.type]?.color;
                 const borderColor = getDarkerColor(fillColor);
-                typeFeatureFragmentAligner.addFragment(new Fragment(parseInt(feature.begin), parseInt(feature.end), borderColor, fillColor, config[feature.type]?.shape, createTooltip(feature, uniprotId, data.sequence)));
+                typeFeatureFragmentAligner.addFragment(new Fragment(parseInt(feature.begin), parseInt(feature.end), borderColor, fillColor, config[feature.type]?.shape, createFeatureTooltip(feature, uniprotId, data.sequence)));
             }
         });
         const categoryRenderers: BasicTrackRenderer<FeatureOutput>[] = [];

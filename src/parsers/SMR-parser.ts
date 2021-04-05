@@ -2,6 +2,7 @@ import TrackParser from './track-parser';
 import BasicTrackRenderer, { Fragment, Location, Accession, TrackRow } from '../renderers/basic-track-renderer';
 import { getDarkerColor } from '../utils';
 import { createEmitter } from 'ts-typed-events';
+import TooltipContent, { createBlast } from '../tooltip-content';
 export default class SMRParser implements TrackParser<SMROutput> {
     private readonly emitOnDataLoaded = createEmitter<SMROutput[]>();
     public readonly onDataLoaded = this.emitOnDataLoaded.event;
@@ -29,7 +30,10 @@ export default class SMRParser implements TrackParser<SMROutput> {
                     outputs.push(output)
                 }
                 const fragments = chain.segments.map(segment => {
-                    return new Fragment(segment.uniprot.from, segment.uniprot.to, getDarkerColor(this.color), this.color);
+                    const tooltipContent = new TooltipContent(`${pdbId.toUpperCase()}_${chain.id} ${segment.uniprot.from}${(segment.uniprot.from === segment.uniprot.to) ? "" : ("-" + segment.uniprot.to)}`);
+                    tooltipContent.addRowIfContentDefined('Description', structure.method ? 'Experimental method: ' + structure.method : undefined);
+                    tooltipContent.addRowIfContentDefined('BLAST', createBlast(uniprotId, segment.uniprot.from, segment.uniprot.to, `${pdbId}" "${chain.id.toLowerCase()}`));
+                    return new Fragment(segment.uniprot.from, segment.uniprot.to, getDarkerColor(this.color), this.color, undefined, tooltipContent);
                 });
 
                 const accesion = new Accession(null, [
@@ -41,7 +45,7 @@ export default class SMRParser implements TrackParser<SMROutput> {
         })
         this.emitOnDataLoaded.emit(outputs);
         if (trackRows.length > 0) {
-            return new BasicTrackRenderer(trackRows, this.categoryName, this.emitOnLabelClick,false);
+            return new BasicTrackRenderer(trackRows, this.categoryName, this.emitOnLabelClick, false);
         }
         else {
             return null;
@@ -93,8 +97,8 @@ type SMRSegment = {
     }
 };
 
-type SMRData={
+type SMRData = {
 
-   result:SMRResult,
-   
+    result: SMRResult,
+
 };

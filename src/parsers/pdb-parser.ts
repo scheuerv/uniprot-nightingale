@@ -1,6 +1,7 @@
 import TrackParser from './track-parser';
 import BasicTrackRenderer, { Fragment, Location, Accession, TrackRow } from '../renderers/basic-track-renderer';
 import { createEmitter } from 'ts-typed-events';
+import TooltipContent, { createBlast } from '../tooltip-content';
 
 export default class PdbParser implements TrackParser<PDBOutput> {
 
@@ -49,10 +50,11 @@ export default class PdbParser implements TrackParser<PDBOutput> {
                 results => {
                     results.forEach((resultJson: { source: PDBParserItemAgg, data: ChainData }) => {
                         const result = resultJson;
-
-                        result.data[result.source.pdb_id].molecules.forEach((molecule) => {
+                        const pdbId = result.source.pdb_id;
+                        result.data[pdbId].molecules.forEach((molecule) => {
                             molecule.chains.forEach(chain => {
-                                const output: PDBOutput = { pdbId: result.source.pdb_id, chain: result.source.chain_id };
+                                const chainId = result.source.chain_id;
+                                const output: PDBOutput = { pdbId: pdbId, chain: chainId };
                                 outputs.push(output);
                                 const uniprotStart = result.source.unp_start;
                                 const uniprotEnd = result.source.unp_end;
@@ -60,12 +62,19 @@ export default class PdbParser implements TrackParser<PDBOutput> {
                                 const observedFragments = chain.observed.map(fragment => {
                                     const start: number = Math.max(fragment.start.residue_number + uniprotStart - pdbStart, uniprotStart);
                                     const end: number = Math.min(fragment.end.residue_number + uniprotStart - pdbStart, uniprotEnd);
-                                    return new Fragment(start, end, this.observedColor, this.observedColor);
+                                    return new Fragment(
+                                        start,
+                                        end,
+                                        this.observedColor,
+                                        this.observedColor,
+                                        undefined,
+                                        this.createTooltip(uniprotId,pdbId, chainId, start, end, result.source.experimental_method)
+                                    );
                                 }).filter(fragment => fragment.end >= uniprotStart && fragment.start <= uniprotEnd);
-                                const unobservedFragments = this.getUnobservedFragments(observedFragments, uniprotStart, uniprotEnd);
+                                const unobservedFragments = this.getUnobservedFragments(observedFragments, uniprotStart, uniprotEnd, pdbId, chainId, uniprotId, result.source.experimental_method);
                                 const fragments = observedFragments.concat(unobservedFragments);
                                 const accessions = [new Accession(null, [new Location(fragments)], 'PDB')];
-                                trackRows.push(new TrackRow(accessions, result.source.pdb_id + ' ' + result.source.chain_id.toLowerCase(), output));
+                                trackRows.push(new TrackRow(accessions, pdbId + ' ' + chainId.toLowerCase(), output));
                             });
 
                         });
@@ -73,7 +82,7 @@ export default class PdbParser implements TrackParser<PDBOutput> {
                     return outputs;
                 });
             this.emitOnDataLoaded.emit(outputs)
-            return new BasicTrackRenderer(trackRows, this.categoryName, this.emitOnLabelClick,false);
+            return new BasicTrackRenderer(trackRows, this.categoryName, this.emitOnLabelClick, false);
         }
         else {
             this.emitOnDataLoaded.emit(outputs)
@@ -83,25 +92,42 @@ export default class PdbParser implements TrackParser<PDBOutput> {
     private urlGenerator(pdbId: string, chainId: string): string {
         return `https://www.ebi.ac.uk/pdbe/api/pdb/entry/polymer_coverage/${pdbId}/chain/${chainId}`;
     }
-    private getUnobservedFragments(observedFragments: Fragment[], start: number, end: number): Fragment[] {
+    private getUnobservedFragments(observedFragments: Fragment[], start: number, end: number, pdbId: string, chainId: string, uniprotId: string, experimentalMethod?: string): Fragment[] {
         const observedFragmentSorted = observedFragments.sort((a, b) => a.start - b.start);
         const unobservedFragments: Fragment[] = [];
+
         if (observedFragmentSorted.length == 0) {
             return [];
         }
         if (start < observedFragmentSorted[0].start) {
-            unobservedFragments.push(new Fragment(start, observedFragmentSorted[0].start - 1, this.unobservedColor, this.unobservedColor));
+            const fragmentEnd = observedFragmentSorted[0].start - 1;
+            unobservedFragments.push(new Fragment(
+                start, fragmentEnd, this.unobservedColor, this.unobservedColor, undefined,
+                this.createTooltip(uniprotId,pdbId, chainId, start, fragmentEnd, experimentalMethod))
+            );
         }
 
         for (let i = 1; i < observedFragmentSorted.length; i++) {
-            unobservedFragments.push(new Fragment(observedFragmentSorted[i - 1].end + 1, observedFragmentSorted[i].start - 1, this.unobservedColor, this.unobservedColor))
+            const fragmnetStart = observedFragmentSorted[i - 1].end + 1;
+            const fragmentEnd = observedFragmentSorted[i].start - 1;
+            unobservedFragments.push(new Fragment(
+                fragmnetStart, fragmentEnd, this.unobservedColor, this.unobservedColor, undefined,
+                this.createTooltip(uniprotId,pdbId, chainId, fragmnetStart, fragmentEnd, experimentalMethod)))
         }
 
         if (end - 1 >= observedFragmentSorted[observedFragmentSorted.length - 1].end) {
-            unobservedFragments.push(new Fragment(observedFragmentSorted[observedFragmentSorted.length - 1].end + 1, end, this.unobservedColor, this.unobservedColor));
+            const fragmentStart = observedFragmentSorted[observedFragmentSorted.length - 1].end + 1;
+            unobservedFragments.push(new Fragment(
+                fragmentStart, end, this.unobservedColor, this.unobservedColor, undefined,
+                this.createTooltip(uniprotId,pdbId, chainId, fragmentStart, end, experimentalMethod)));
         }
         return unobservedFragments;
-
+    }
+    private createTooltip(uniprotId:string,pdbId: string, chainId: string, start: string|number, end: string|number, experimentalMethod?: string) {
+        const tooltipContent = new TooltipContent(`${pdbId.toUpperCase()}_${chainId} ${start}${(start === end) ? "" : ("-" + end)}`);
+        tooltipContent.addRowIfContentDefined('Description', experimentalMethod ? 'Experimental method: ' + experimentalMethod : undefined);
+        tooltipContent.addRowIfContentDefined('BLAST', createBlast(uniprotId,start,end,`${pdbId}" "${chainId.toLowerCase()}`));
+        return tooltipContent;
     }
 }
 type PDBOutput = { readonly pdbId: string, readonly chain: string };

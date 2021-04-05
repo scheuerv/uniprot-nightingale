@@ -6,7 +6,7 @@ import { getDarkerColor, groupBy } from '../utils';
 
 import { createEmitter } from "ts-typed-events";
 import FragmentAligner from './fragment-aligner';
-import { createTooltip } from '../tooltip-content';
+import { createFeatureTooltip } from '../tooltip-content';
 export default class AntigenParser implements TrackParser<AntigenOutput>  {
 
     private readonly emitOnDataLoaded = createEmitter<AntigenOutput[]>();
@@ -27,7 +27,7 @@ export default class AntigenParser implements TrackParser<AntigenOutput>  {
                 const borderColor = getDarkerColor(fillColor)
                 let fragmentAligner = new FragmentAligner();
                 typeFeatures.forEach(feature => {
-                    fragmentAligner.addFragment(new Fragment(parseInt(feature.begin), parseInt(feature.end), borderColor, fillColor, config[feature.type]?.shape, createTooltip(feature, uniprotId, data.sequence)));
+                    fragmentAligner.addFragment(new Fragment(parseInt(feature.begin), parseInt(feature.end), borderColor, fillColor, config[feature.type]?.shape, createFeatureTooltip(feature, uniprotId, data.sequence)));
                 })
                 trackRows.push(new TrackRow(fragmentAligner.getAccessions(), config[type]?.label));
 

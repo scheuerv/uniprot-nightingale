@@ -84,29 +84,24 @@ function convertSources(uniprotId: string, sources: DbReferenceObject[], code: s
     }
     return sources;
 }
-function getBlast(accession: string, feature: Feature, key?: string) {
-    const blastURL = 'http://www.uniprot.org/blast/?about=';
+function getFeatureBlast(accession: string, feature: Feature, key?: string) {
     const noBlastTypes = ['helix', 'strand', 'turn', 'disulfid', 'crosslnk', 'variant'];
-    const end = parseInt(feature.end);
     const type = feature.type.toLowerCase();
-    if ((end - parseInt(feature.begin)) >= 3 && !noBlastTypes.includes(type)) {
+    if ((parseInt(feature.end) - parseInt(feature.begin)) >= 3 && !noBlastTypes.includes(type)) {
         const featureConfig = key ? config[key] : config[feature.type];
-        var url = blastURL + accession + '[' + feature.begin + '-' + end + ']&key=' + (featureConfig?.name ? featureConfig.label : convertTypeToLabel(feature.type));
-        if (feature.ftId) {
-            url += '&id=' + feature.ftId;
-        }
-        const blast = '<span><a href="' + url + '" target="_blank">BLAST</a>';
-        return blast;
+        return createBlast(accession, feature.begin, feature.end, featureConfig?.name ? featureConfig.label : convertTypeToLabel(feature.type));
     }
 }
-export function createTooltip(feature: Feature, uniprotId: string, sequence: string, type?: string) {
+export function createBlast(about: string, start: string | number, end: string | number, key: string) {
+    return `<span><a href="http://www.uniprot.org/blast/?about=${about}[${start}-${end}]&key=${key}" target="_blank">BLAST</a>`;
+}
+export function createFeatureTooltip(feature: Feature, uniprotId: string, sequence: string, type?: string) {
     const tooltipContent = new TooltipContent(type ?? feature.type + " " + feature.begin + (feature.begin === feature.end ? "" : ("-" + feature.end)));
-    //tooltipContent.addRowIfContentDefined('Feature ID', feature.ftId);
     tooltipContent.addRowIfContentDefined('Description', feature.description);
     tooltipContent.addRowIfContentDefined(feature.type == 'CONFLICT' ? 'Conflict' : 'Mutation', feature.alternativeSequence ? sequence.substring(parseInt(feature.begin) - 1, parseInt(feature.end)) + '>' + feature.alternativeSequence : undefined);
     tooltipContent.addEvidenceIfDefined(feature, uniprotId);
     tooltipContent.addXRefsIfDefined(feature);
-    tooltipContent.addRowIfContentDefined('Tools', getBlast(uniprotId, feature, type));
+    tooltipContent.addRowIfContentDefined('Tools', getFeatureBlast(uniprotId, feature, type));
     return tooltipContent;
 }
 

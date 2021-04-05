@@ -5,7 +5,7 @@ import FragmentAligner from './fragment-aligner';
 import { getDarkerColor } from '../utils';
 const config = require("protvista-track/src/config").config;
 import { createEmitter } from "ts-typed-events";
-import { createTooltip } from '../tooltip-content';
+import { createFeatureTooltip } from '../tooltip-content';
 
 export default class ProteomicsParser implements TrackParser<ProteomicsOutput> {
     private readonly categoryName = "Proteomics";
@@ -27,10 +27,10 @@ export default class ProteomicsParser implements TrackParser<ProteomicsOutput> {
         const borderColorNonUnique = getDarkerColor(colorNonUnique);
         features.forEach(feature => {
             if (feature.unique) {
-                uniqueFragmentAligner.addFragment(new Fragment(parseInt(feature.begin), parseInt(feature.end), borderColorUnique, colorUnique, config[this.unique]?.shape, createTooltip(feature, uniprotId, this.unique)));
+                uniqueFragmentAligner.addFragment(new Fragment(parseInt(feature.begin), parseInt(feature.end), borderColorUnique, colorUnique, config[this.unique]?.shape, createFeatureTooltip(feature, uniprotId, this.unique)));
             }
             else {
-                nonUniqueFragmentAligner.addFragment(new Fragment(parseInt(feature.begin), parseInt(feature.end), borderColorNonUnique, colorNonUnique, config[this.nonUnique]?.shape, createTooltip(feature, uniprotId, this.nonUnique)));
+                nonUniqueFragmentAligner.addFragment(new Fragment(parseInt(feature.begin), parseInt(feature.end), borderColorNonUnique, colorNonUnique, config[this.nonUnique]?.shape, createFeatureTooltip(feature, uniprotId, this.nonUnique)));
             }
         });
         const trackRows = [
