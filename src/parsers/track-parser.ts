@@ -46,6 +46,7 @@ export type Feature = {
     readonly xrefs?: DbReferenceObject[],
     readonly evidences?: Evidence[]
     readonly unique?:boolean;
+    readonly matchScore?:number;
 };
 export type DbReferenceObject = {
     readonly name: string,

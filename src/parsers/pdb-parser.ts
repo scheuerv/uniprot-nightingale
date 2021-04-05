@@ -57,9 +57,9 @@ export default class PdbParser implements TrackParser<PDBOutput> {
                                 const uniprotStart = result.source.unp_start;
                                 const uniprotEnd = result.source.unp_end;
                                 const pdbStart = result.source.start;
-                                const observedFragments = chain.observed.map(element => {
-                                    const start: number = Math.max(element.start.residue_number + uniprotStart - pdbStart, uniprotStart);
-                                    const end: number = Math.min(element.end.residue_number + uniprotStart - pdbStart, uniprotEnd);
+                                const observedFragments = chain.observed.map(fragment => {
+                                    const start: number = Math.max(fragment.start.residue_number + uniprotStart - pdbStart, uniprotStart);
+                                    const end: number = Math.min(fragment.end.residue_number + uniprotStart - pdbStart, uniprotEnd);
                                     return new Fragment(start, end, this.observedColor, this.observedColor);
                                 }).filter(fragment => fragment.end >= uniprotStart && fragment.start <= uniprotEnd);
                                 const unobservedFragments = this.getUnobservedFragments(observedFragments, uniprotStart, uniprotEnd);

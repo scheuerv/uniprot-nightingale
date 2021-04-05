@@ -5,14 +5,15 @@ import FragmentAligner from './fragment-aligner';
 import { getDarkerColor } from '../utils';
 const config = require("protvista-track/src/config").config;
 import { createEmitter } from "ts-typed-events";
+import { createTooltip } from '../tooltip-content';
 
 export default class ProteomicsParser implements TrackParser<ProteomicsOutput> {
     private readonly categoryName = "Proteomics";
-    private readonly unique="UNIQUE";
-    private readonly nonUnique="NON_UNIQUE";
+    private readonly unique = "UNIQUE";
+    private readonly nonUnique = "NON_UNIQUE";
     private readonly emitOnDataLoaded = createEmitter<ProteomicsOutput[]>();
     public readonly onDataLoaded = this.emitOnDataLoaded.event;
-    async parse(uniprotId: string, data: ProteinFeatureInfo | ErrorResponse): Promise<TrackRenderer | null> {      
+    async parse(uniprotId: string, data: ProteinFeatureInfo | ErrorResponse): Promise<TrackRenderer | null> {
         if (isErrorResponse(data)) {
             this.emitOnDataLoaded.emit([]);
             return null;
@@ -26,10 +27,10 @@ export default class ProteomicsParser implements TrackParser<ProteomicsOutput> {
         const borderColorNonUnique = getDarkerColor(colorNonUnique);
         features.forEach(feature => {
             if (feature.unique) {
-                uniqueFragmentAligner.addFragment(new Fragment(parseInt(feature.begin), parseInt(feature.end), borderColorUnique, colorUnique,config[this.unique]?.shape));
+                uniqueFragmentAligner.addFragment(new Fragment(parseInt(feature.begin), parseInt(feature.end), borderColorUnique, colorUnique, config[this.unique]?.shape, createTooltip(feature, uniprotId, this.unique)));
             }
             else {
-                nonUniqueFragmentAligner.addFragment(new Fragment(parseInt(feature.begin), parseInt(feature.end), borderColorNonUnique, colorNonUnique,config[this.nonUnique]?.shape));
+                nonUniqueFragmentAligner.addFragment(new Fragment(parseInt(feature.begin), parseInt(feature.end), borderColorNonUnique, colorNonUnique, config[this.nonUnique]?.shape, createTooltip(feature, uniprotId, this.nonUnique)));
             }
         });
         const trackRows = [
@@ -38,7 +39,7 @@ export default class ProteomicsParser implements TrackParser<ProteomicsOutput> {
         ];
         this.emitOnDataLoaded.emit([]);
         if (trackRows.length > 0) {
-            return new BasicTrackRenderer(trackRows, this.categoryName,undefined,true);
+            return new BasicTrackRenderer(trackRows, this.categoryName, undefined, true);
         }
         else {
             return null;
