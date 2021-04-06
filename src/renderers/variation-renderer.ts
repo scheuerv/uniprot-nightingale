@@ -29,16 +29,15 @@ export default class VariationRenderer implements TrackRenderer {
 
     getCategoryContainer(sequence: string): CategoryContainer {
         const variationGraph = d3.create("protvista-variation-graph")
-            .attr("highlight-event", "onmouseover")
+            .attr("highlight-event", "onclick")
             .attr("id", "protvista-variation-graph")
             .attr("length", sequence.length)
             .attr("height", 40).node() as ProtvistaVariationGraph;
         this.variationGraph = new BasicTrackContainer(variationGraph, this.data);
-        const variation = d3.create("protvista-variation")
+        const variationTrack = d3.create("protvista-variation")
             .attr("id", "protvista-variation")
             .attr("length", sequence.length)
-            .attr("highlight-event", "onmouseover");
-        const variationTrack = variation.node() as ProtvistaVariation;
+            .attr("highlight-event", "onclick").node() as ProtvistaVariation;
         variationTrack.colorConfig = function (e: any) {
             return "black";
         }

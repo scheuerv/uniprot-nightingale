@@ -50,7 +50,7 @@ export default class BasicTrackRenderer<Output> implements TrackRenderer {
         mainTrackData.forEach(accession => accession.locations[0].fragments.forEach(fragment => fragmentAligner.addFragment(fragment)))
         const mainTrackDataAligned = fragmentAligner.getAccessions();
         const d3Track = d3.create("protvista-track")
-            .attr("highlight-event", "onmouseover")
+            .attr("highlight-event", "onclick")
             .attr("height", 40)
             .attr("layout", "non-overlapping");
         const track = d3Track.node() as ProtvistaTrack;
@@ -81,7 +81,7 @@ export default class BasicTrackRenderer<Output> implements TrackRenderer {
         const subtracksDiv = d3.create("div").attr("class", "subtracks-container").style("display", "none").node()!;
         this.rows.forEach(subtrackData => {
             const d3Track = d3.create("protvista-track")
-                .attr("highlight-event", "onmouseover")
+                .attr("highlight-event", "ononclick")
                 .attr("height", 40)
                 .attr("layout", "non-overlapping");
             const subtrack = d3Track.node() as ProtvistaTrack;
