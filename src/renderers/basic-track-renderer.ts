@@ -2,7 +2,7 @@ import TrackRenderer from './track-renderer';
 import d3 = require('d3');
 import { createRow, markArrow } from '../utils';
 import ProtvistaTrack from 'protvista-track';
-import BasicTrackContainer from '../manager/track-container';
+import BasicTrackContainer, { MainTrackContainer, TrackContainer } from '../manager/track-container';
 import BasicCategoryContainer from '../manager/basic-category-container';
 import TooltipContent from '../tooltip-content';
 import { createEmitter, Emitter, SealedEvent } from 'ts-typed-events';
@@ -10,20 +10,20 @@ import { TrackFragment } from '../manager/track-manager';
 import FragmentAligner from '../parsers/fragment-aligner';
 
 export default class BasicTrackRenderer<Output> implements TrackRenderer {
-    private mainTrack: BasicTrackContainer<Accession[]>;
+    private mainTrack: MainTrackContainer<Accession[]>;
     private subtracks: BasicTrackContainer<Accession[]>[];
     private subtracksDiv: HTMLDivElement;
     private mainTrackRow: d3.Selection<HTMLDivElement, undefined, null, undefined>;
     private emitOnArrowClick = createEmitter<TrackFragment[]>();
     public onArrowClick = this.emitOnArrowClick.event;
-    constructor(private rows: TrackRow<Output>[], private mainTrackLabel: string, private emitOnLabelClick: Emitter<Output, SealedEvent<Output>> | undefined,private displayArrow:boolean) {
+    constructor(private rows: TrackRow<Output>[], private mainTrackLabel: string, private emitOnLabelClick: Emitter<Output, SealedEvent<Output>> | undefined, private displayArrow: boolean) {
 
     }
     getCategoryContainer(sequence: string): BasicCategoryContainer {
 
         [this.mainTrack, this.mainTrackRow] = this.getMainTrack(sequence);
         [this.subtracks, this.subtracksDiv] = this.getSubtracks(sequence);
-        const trackContainers: BasicTrackContainer<Accession[]>[] = [];
+        const trackContainers: TrackContainer[] = [];
         const categoryDiv = d3.create("div").node();
         categoryDiv!.appendChild(this.mainTrackRow.node()!);
         trackContainers.push(this.mainTrack);
@@ -33,34 +33,44 @@ export default class BasicTrackRenderer<Output> implements TrackRenderer {
         categoryDiv!.append(this.subtracksDiv!);
         return new BasicCategoryContainer(trackContainers, categoryDiv!);
     }
-    private toggle() {
+    private toggle(sequence: string) {
+        const classList = d3.select(this.mainTrack.track).node()?.parentElement!.classList;
         if (this.subtracksDiv.style.display === 'none') {
             this.subtracksDiv.style.display = 'block';
-            d3.select(this.mainTrack.track).style('display', 'none');
+            classList?.remove("main");
+            classList?.add("empty");
             this.mainTrackRow.select('.track-label.main').attr("class", "track-label main arrow-down");
         } else {
             this.subtracksDiv.style.display = 'none';
-            d3.select(this.mainTrack.track).style('display', 'block');
+            classList?.remove("empty");
+            classList?.add("main");
             this.mainTrackRow.select('.track-label.main').attr('class', 'track-label main arrow-right');
         }
     }
-    private getMainTrack(sequence: string): [BasicTrackContainer<Accession[]>, d3.Selection<HTMLDivElement, undefined, null, undefined>] {
+    private getMainTrack(sequence: string): [MainTrackContainer<Accession[]>, d3.Selection<HTMLDivElement, undefined, null, undefined>] {
         const mainTrackData = this.rows.flatMap(row => row.rowData);
         const fragmentAligner = new FragmentAligner();
         mainTrackData.forEach(accession => accession.locations[0].fragments.forEach(fragment => fragmentAligner.addFragment(fragment)))
         const mainTrackDataAligned = fragmentAligner.getAccessions();
-        const d3Track = d3.create("protvista-track")
+        const track = d3.create("protvista-track")
             .attr("highlight-event", "onclick")
             .attr("height", 40)
-            .attr("layout", "non-overlapping");
-        const track = d3Track.node() as ProtvistaTrack;
-        d3.select(track).attr("length", sequence.length);
+            .attr("class", "main")
+            .attr("layout", "non-overlapping")
+            .attr("length", sequence.length).node() as ProtvistaTrack;
+
         const mainTrackRow = createRow(
             document.createTextNode(this.mainTrackLabel),
             track,
             "main",
             this.displayArrow
         );
+        const emptyTrack = d3.create("protvista-track")
+            .attr("height", 40)
+            .attr("length", sequence.length)
+            .attr("class", "empty")
+            .node() as ProtvistaTrack;
+        track.parentElement!.appendChild(emptyTrack);
         const trackFragments: TrackFragment[] = [];
         mainTrackDataAligned.forEach(accession => {
             accession.locations[0].fragments.forEach(fragment => {
@@ -70,9 +80,9 @@ export default class BasicTrackRenderer<Output> implements TrackRenderer {
         mainTrackRow.select(".fa-arrow-circle-right").on("click", this.arrowClick(trackFragments));
         mainTrackRow.attr("class", mainTrackRow.attr("class") + " data")
         mainTrackRow.select(".track-label").attr("class", "track-label main arrow-right").on('click', () =>
-            this.toggle()
+            this.toggle(sequence)
         );
-        return [new BasicTrackContainer<Accession[]>(track, mainTrackDataAligned), mainTrackRow];
+        return [new MainTrackContainer<Accession[]>(track, emptyTrack, mainTrackDataAligned), mainTrackRow];
     }
 
     private getSubtracks(sequence: string): [BasicTrackContainer<Accession[]>[], HTMLDivElement] {
@@ -81,7 +91,7 @@ export default class BasicTrackRenderer<Output> implements TrackRenderer {
         const subtracksDiv = d3.create("div").attr("class", "subtracks-container").style("display", "none").node()!;
         this.rows.forEach(subtrackData => {
             const d3Track = d3.create("protvista-track")
-                .attr("highlight-event", "ononclick")
+                .attr("highlight-event", "onclick")
                 .attr("height", 40)
                 .attr("layout", "non-overlapping");
             const subtrack = d3Track.node() as ProtvistaTrack;
