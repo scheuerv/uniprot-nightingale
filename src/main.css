@@ -21,7 +21,9 @@ div.track-content {
 
 protvista-track svg,
 protvista-navigation svg,
-protvista-sequence svg {
+protvista-sequence svg,
+protvista-variation-graph svg,
+protvista-variation svg {
     width: 100%;
 }
 
