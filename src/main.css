@@ -26,9 +26,11 @@ div.track-content.empty .main {
 div.track-content.main .empty {
     display: none !important;
 }
-
 .rectangle.feature {
     fill-opacity: 0.6 !important;
+}
+.fragment-group:hover {
+    stroke-width: 2px;
 }
 
 protvista-track svg,
