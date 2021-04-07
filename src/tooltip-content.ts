@@ -71,7 +71,7 @@ class Row {
 
 function convertSources(uniprotId: string, sources: DbReferenceObject[], code: string): DbReferenceObject[] {
     const eco = ecoMap.filter((record) => record.name == code)[0];
-    const acronym = eco.acronym;
+    const acronym = eco?.acronym;
     if ((acronym === 'EXP') || (acronym === 'NAS')) {
         const convertedSources = sources.map(source => {
             if (source.id && (source.id.indexOf('ref.') === 0)) {
@@ -84,6 +84,7 @@ function convertSources(uniprotId: string, sources: DbReferenceObject[], code: s
     }
     return sources;
 }
+
 function getFeatureBlast(accession: string, feature: Feature, key?: string) {
     const noBlastTypes = ['helix', 'strand', 'turn', 'disulfid', 'crosslnk', 'variant'];
     const type = feature.type.toLowerCase();
@@ -112,7 +113,7 @@ function convertTypeToLabel(name: string) {
 }
 function getEvidenceText(code: string, sources: DbReferenceObject[]) {
     const eco = ecoMap.filter((record) => record.name == code)[0];
-    const acronym = eco.acronym;
+    const acronym = eco?.acronym;
     let publications = sources.filter((source) => source.name == 'PubMed' || source.name == 'Citation').length;
     let evidenceText = '';
     if ((acronym === 'EXP') || (acronym === 'NAS')) {
@@ -127,7 +128,7 @@ function getEvidenceText(code: string, sources: DbReferenceObject[]) {
         if (publications > 0) {
             evidenceText = publications + " ";
         }
-        evidenceText += eco.shortDescription;
+        evidenceText += eco.shortDescription ?? code;
     } else if (acronym === 'ISM') {
         evidenceText = sources.length === 0 ? 'Sequence Analysis' : sources[0].name + ' annotation';
     }
@@ -140,9 +141,9 @@ function getEvidenceText(code: string, sources: DbReferenceObject[]) {
                 interpro ? 'InterPro annotation' :
                     sources ? sources[0].name + ' annotation' : 'Automatic annotation';
     } else {
-        evidenceText = eco.shortDescription ? eco.shortDescription : code;
+        evidenceText = eco?.shortDescription ?? code;
     }
-    return evidenceText + (eco.description ? ' (' + eco.description + ')' : '');
+    return evidenceText + (eco?.description ? ' (' + eco.description + ')' : '');
 };
 function getEvidenceXRefLinks(info: { sources: DbReferenceObject[], name: string, text: (source: DbReferenceObject) => string, alternative: boolean }) {
     let text = info.name + ' ';

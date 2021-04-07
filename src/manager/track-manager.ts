@@ -71,7 +71,7 @@ export default class TrackManager {
                 );
             });
 
-        Promise.all(
+        Promise.allSettled(
             this.tracks.map(
                 track => fetch(track.urlGenerator(uniprotId))
                     .then(
@@ -84,10 +84,14 @@ export default class TrackManager {
                     )
             )
         ).then(renderers => {
-
             const categoryContainers: CategoryContainer[] = [];
-
             renderers
+                .map(promiseSettled => {
+                    if (promiseSettled.status == "fulfilled") {
+                        return promiseSettled.value;
+                    }
+                    return null;
+                })
                 .filter(renderer => renderer != null)
                 .map(renderer => renderer!)
                 .forEach(renderer => {

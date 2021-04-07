@@ -30,7 +30,7 @@ export default class PdbParser implements TrackParser<PDBOutput> {
                     hash[record.pdb_id + "_" + record.chain_id].tax_ids.push(record.tax_id)
                 }
             }
-            await Promise.all(
+            await Promise.allSettled(
                 dataDeduplicated.map(
                     (record) => {
                         const chain_id = record.chain_id;
@@ -48,37 +48,45 @@ export default class PdbParser implements TrackParser<PDBOutput> {
                     })
             ).then(
                 results => {
-                    results.forEach((resultJson: { source: PDBParserItemAgg, data: ChainData }) => {
-                        const result = resultJson;
-                        const pdbId = result.source.pdb_id;
-                        result.data[pdbId].molecules.forEach((molecule) => {
-                            molecule.chains.forEach(chain => {
-                                const chainId = result.source.chain_id;
-                                const output: PDBOutput = { pdbId: pdbId, chain: chainId };
-                                outputs.push(output);
-                                const uniprotStart = result.source.unp_start;
-                                const uniprotEnd = result.source.unp_end;
-                                const pdbStart = result.source.start;
-                                const observedFragments = chain.observed.map(fragment => {
-                                    const start: number = Math.max(fragment.start.residue_number + uniprotStart - pdbStart, uniprotStart);
-                                    const end: number = Math.min(fragment.end.residue_number + uniprotStart - pdbStart, uniprotEnd);
-                                    return new Fragment(
-                                        start,
-                                        end,
-                                        this.observedColor,
-                                        this.observedColor,
-                                        undefined,
-                                        this.createTooltip(uniprotId,pdbId, chainId, start, end, result.source.experimental_method)
-                                    );
-                                }).filter(fragment => fragment.end >= uniprotStart && fragment.start <= uniprotEnd);
-                                const unobservedFragments = this.getUnobservedFragments(observedFragments, uniprotStart, uniprotEnd, pdbId, chainId, uniprotId, result.source.experimental_method);
-                                const fragments = observedFragments.concat(unobservedFragments);
-                                const accessions = [new Accession(null, [new Location(fragments)], 'PDB')];
-                                trackRows.push(new TrackRow(accessions, pdbId + ' ' + chainId.toLowerCase(), output));
-                            });
+                    results.map(promiseSettled => {
+                        if (promiseSettled.status == "fulfilled") {
+                            return promiseSettled.value;
+                        }
+                        return null;
+                    })
+                        .filter(result => result != null)
+                        .map(result => result!)
+                        .forEach((resultJson: { source: PDBParserItemAgg, data: ChainData }) => {
+                            const result = resultJson;
+                            const pdbId = result.source.pdb_id;
+                            result.data[pdbId].molecules.forEach((molecule) => {
+                                molecule.chains.forEach(chain => {
+                                    const chainId = result.source.chain_id;
+                                    const output: PDBOutput = { pdbId: pdbId, chain: chainId };
+                                    outputs.push(output);
+                                    const uniprotStart = result.source.unp_start;
+                                    const uniprotEnd = result.source.unp_end;
+                                    const pdbStart = result.source.start;
+                                    const observedFragments = chain.observed.map(fragment => {
+                                        const start: number = Math.max(fragment.start.residue_number + uniprotStart - pdbStart, uniprotStart);
+                                        const end: number = Math.min(fragment.end.residue_number + uniprotStart - pdbStart, uniprotEnd);
+                                        return new Fragment(
+                                            start,
+                                            end,
+                                            this.observedColor,
+                                            this.observedColor,
+                                            undefined,
+                                            this.createTooltip(uniprotId, pdbId, chainId, start, end, result.source.experimental_method)
+                                        );
+                                    }).filter(fragment => fragment.end >= uniprotStart && fragment.start <= uniprotEnd);
+                                    const unobservedFragments = this.getUnobservedFragments(observedFragments, uniprotStart, uniprotEnd, pdbId, chainId, uniprotId, result.source.experimental_method);
+                                    const fragments = observedFragments.concat(unobservedFragments);
+                                    const accessions = [new Accession(null, [new Location(fragments)], 'PDB')];
+                                    trackRows.push(new TrackRow(accessions, pdbId + ' ' + chainId.toLowerCase(), output));
+                                });
 
+                            });
                         });
-                    });
                     return outputs;
                 });
             this.emitOnDataLoaded.emit(outputs)
@@ -103,7 +111,7 @@ export default class PdbParser implements TrackParser<PDBOutput> {
             const fragmentEnd = observedFragmentSorted[0].start - 1;
             unobservedFragments.push(new Fragment(
                 start, fragmentEnd, this.unobservedColor, this.unobservedColor, undefined,
-                this.createTooltip(uniprotId,pdbId, chainId, start, fragmentEnd, experimentalMethod))
+                this.createTooltip(uniprotId, pdbId, chainId, start, fragmentEnd, experimentalMethod))
             );
         }
 
@@ -112,21 +120,21 @@ export default class PdbParser implements TrackParser<PDBOutput> {
             const fragmentEnd = observedFragmentSorted[i].start - 1;
             unobservedFragments.push(new Fragment(
                 fragmnetStart, fragmentEnd, this.unobservedColor, this.unobservedColor, undefined,
-                this.createTooltip(uniprotId,pdbId, chainId, fragmnetStart, fragmentEnd, experimentalMethod)))
+                this.createTooltip(uniprotId, pdbId, chainId, fragmnetStart, fragmentEnd, experimentalMethod)))
         }
 
         if (end - 1 >= observedFragmentSorted[observedFragmentSorted.length - 1].end) {
             const fragmentStart = observedFragmentSorted[observedFragmentSorted.length - 1].end + 1;
             unobservedFragments.push(new Fragment(
                 fragmentStart, end, this.unobservedColor, this.unobservedColor, undefined,
-                this.createTooltip(uniprotId,pdbId, chainId, fragmentStart, end, experimentalMethod)));
+                this.createTooltip(uniprotId, pdbId, chainId, fragmentStart, end, experimentalMethod)));
         }
         return unobservedFragments;
     }
-    private createTooltip(uniprotId:string,pdbId: string, chainId: string, start: string|number, end: string|number, experimentalMethod?: string) {
+    private createTooltip(uniprotId: string, pdbId: string, chainId: string, start: string | number, end: string | number, experimentalMethod?: string) {
         const tooltipContent = new TooltipContent(`${pdbId.toUpperCase()}_${chainId} ${start}${(start === end) ? "" : ("-" + end)}`);
         tooltipContent.addRowIfContentDefined('Description', experimentalMethod ? 'Experimental method: ' + experimentalMethod : undefined);
-        tooltipContent.addRowIfContentDefined('BLAST', createBlast(uniprotId,start,end,`${pdbId}" "${chainId.toLowerCase()}`));
+        tooltipContent.addRowIfContentDefined('BLAST', createBlast(uniprotId, start, end, `${pdbId}" "${chainId.toLowerCase()}`));
         return tooltipContent;
     }
 }
