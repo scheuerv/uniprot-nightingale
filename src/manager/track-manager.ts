@@ -1,7 +1,7 @@
 import d3 = require('d3');
 import CategoryContainer from './category-container';
 import TrackParser from '../parsers/track-parser';
-import { createRow } from '../utils';
+import { createRow, fetchWithTimeout } from '../utils';
 import { Accession, Fragment } from '../renderers/basic-track-renderer';
 import PdbParser from '../parsers/pdb-parser';
 import AntigenParser from '../parsers/antigen-parser';
@@ -51,7 +51,7 @@ export default class TrackManager {
         this.protvistaManager = d3.create("protvista-manager")
             .attr("attributes", "length displaystart displayend highlightstart highlightend activefilters filters")
             .node()! as ProtvistaManager;
-        fetch(this.sequenceUrlGenerator(uniprotId)).then(data => data.text())
+            fetchWithTimeout(this.sequenceUrlGenerator(uniprotId),{timeout:5000}).then(data => data.text())
             .then(data => {
                 const tokens = data.split(/\r?\n/);
                 for (let i = 1; i < tokens.length; i++) {
@@ -73,7 +73,7 @@ export default class TrackManager {
 
         Promise.allSettled(
             this.tracks.map(
-                track => fetch(track.urlGenerator(uniprotId))
+                track => fetchWithTimeout(track.urlGenerator(uniprotId),{timeout:5000})
                     .then(
                         data => data.json().then(data => {
                             return track.parser.parse(uniprotId, data);

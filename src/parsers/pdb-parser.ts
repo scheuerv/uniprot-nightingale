@@ -2,6 +2,7 @@ import TrackParser from './track-parser';
 import BasicTrackRenderer, { Fragment, Location, Accession, TrackRow } from '../renderers/basic-track-renderer';
 import { createEmitter } from 'ts-typed-events';
 import TooltipContent, { createBlast } from '../tooltip-content';
+import { fetchWithTimeout } from '../utils';
 
 export default class PdbParser implements TrackParser<PDBOutput> {
 
@@ -36,7 +37,7 @@ export default class PdbParser implements TrackParser<PDBOutput> {
                         const chain_id = record.chain_id;
                         const pdb_id = record.pdb_id;
 
-                        return fetch(this.urlGenerator(pdb_id, chain_id))
+                        return fetchWithTimeout(this.urlGenerator(pdb_id, chain_id),{timeout:5000})
                             .then(
                                 data => data.json().then(data => {
                                     return { source: record, data: data };

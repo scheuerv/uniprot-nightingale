@@ -66,4 +66,23 @@ function groupByAndMap<T, O, Id>(data: IterableIterator<T> | T[], by: (item: T) 
     }
     return grouped;
 }
-export { loadComponent, createRow, getDarkerColor, groupBy, groupByAndMap, markArrow };
+async function fetchWithTimeout(resource:string, options:RequestInitWithTimeOut) {
+    const { timeout = 8000 } = options;
+    
+    const controller = new AbortController();
+    const id = setTimeout(() => controller.abort(), timeout);
+  
+    const response = await fetch(resource, {
+      ...options,
+      signal: controller.signal  
+    });
+    clearTimeout(id);
+  
+    return response;
+  }
+
+interface  RequestInitWithTimeOut extends RequestInit
+{
+    timeout:number;
+}
+export { loadComponent, createRow, getDarkerColor, groupBy, groupByAndMap, markArrow,fetchWithTimeout };
