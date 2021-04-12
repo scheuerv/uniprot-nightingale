@@ -1,7 +1,7 @@
 import d3 = require('d3');
 import CategoryContainer from './category-container';
 import TrackParser from '../parsers/track-parser';
-import { createRow, fetchWithTimeout } from '../utils';
+import { createRow, fetchWithTimeout, getClickedTrackFragments } from '../utils';
 import { Accession, Fragment } from '../renderers/basic-track-renderer';
 import PdbParser from '../parsers/pdb-parser';
 import AntigenParser from '../parsers/antigen-parser';
@@ -20,10 +20,8 @@ export default class TrackManager {
     private readonly emitOnFragmentMouseOut = createEmitter();
     public readonly onFragmentMouseOut = this.emitOnFragmentMouseOut.event;
 
-    private readonly emitOnArrowClick = createEmitter<TrackFragment[]>();
-    public readonly onArrowClick = this.emitOnArrowClick.event;
-    private readonly emitOnFragmentClick = createEmitter<TrackFragment>();
-    public readonly onFragmentClick = this.emitOnFragmentClick.event;
+    private readonly emitOnHighlightChange = createEmitter<TrackFragment[]>();
+    public readonly onHighlightChange = this.emitOnHighlightChange.event;
     private readonly tracks: Track[] = [];
     private sequence: string = "";
     private protvistaManager: ProtvistaManager;
@@ -51,7 +49,7 @@ export default class TrackManager {
         this.protvistaManager = d3.create("protvista-manager")
             .attr("attributes", "length displaystart displayend highlightstart highlightend activefilters filters")
             .node()! as ProtvistaManager;
-            fetchWithTimeout(this.sequenceUrlGenerator(uniprotId),{timeout:5000}).then(data => data.text())
+        fetchWithTimeout(this.sequenceUrlGenerator(uniprotId), { timeout: 5000 }).then(data => data.text())
             .then(data => {
                 const tokens = data.split(/\r?\n/);
                 for (let i = 1; i < tokens.length; i++) {
@@ -73,7 +71,7 @@ export default class TrackManager {
 
         Promise.allSettled(
             this.tracks.map(
-                track => fetchWithTimeout(track.urlGenerator(uniprotId),{timeout:5000})
+                track => fetchWithTimeout(track.urlGenerator(uniprotId), { timeout: 5000 })
                     .then(
                         data => data.json().then(data => {
                             return track.parser.parse(uniprotId, data);
@@ -96,7 +94,7 @@ export default class TrackManager {
                 .map(renderer => renderer!)
                 .forEach(renderer => {
                     renderer.onArrowClick.on(features => {
-                        this.emitOnArrowClick.emit(features);
+                        this.emitOnHighlightChange.emit(features);
                     });
                     const categoryContainer = renderer.getCategoryContainer(this.sequence);
                     categoryContainers.push(categoryContainer);
@@ -134,13 +132,34 @@ export default class TrackManager {
                 lastFocusedResidue = undefined;
                 this.emitOnFragmentMouseOut.emit();
             }).on("click", (f, i) => {
-                const feature = f as TrackFragment;
-                this.emitOnFragmentClick.emit(feature);
+                const classsList = d3.select(d3.event.currentTarget).node().classList;
+                if (classsList.contains('clicked')) {
+                    const arrow = d3.select(d3.event.currentTarget.closest('.track-row')).select('.fa-arrow-circle-right.clicked').node();
+                    (arrow as Element)?.classList.remove('clicked');
+                    classsList.remove('clicked')
+                }
+                else {
+                    classsList.add('clicked');
+                    if (this.allFragmentsInRowClicked()) {
+                        (d3.select(d3.event.currentTarget.closest('.track-row')).select('.fa-arrow-circle-right').node() as Element)?.classList.add('clicked');
+                    }
+                }
+                this.emitOnHighlightChange.emit(getClickedTrackFragments());
             });
 
             return categoryContainers
         });
 
+    }
+    allFragmentsInRowClicked() {
+        const fragmentNodes = d3.select(d3.event.currentTarget.closest('.track-row')).selectAll('.fragment-group').nodes();
+        for (let i = 0; i < fragmentNodes.length; i++) {
+            const fragment = fragmentNodes[i];
+            if (!(fragment as Element)?.classList?.contains('clicked')) {
+                return false;
+            }           
+        }
+        return true;
     }
     highlight(start: number, end: number) {
         this.protvistaManager.dispatchEvent(new CustomEvent('change', {

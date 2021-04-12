@@ -1,6 +1,6 @@
 import TrackRenderer from './track-renderer';
 import d3 = require('d3');
-import { createRow, markArrow } from '../utils';
+import { createRow, getClickedTrackFragments, markArrow } from '../utils';
 import ProtvistaTrack from 'protvista-track';
 import BasicTrackContainer, { MainTrackContainer, TrackContainer } from '../manager/track-container';
 import BasicCategoryContainer from '../manager/basic-category-container';
@@ -71,13 +71,7 @@ export default class BasicTrackRenderer<Output> implements TrackRenderer {
             .attr("class", "empty")
             .node() as ProtvistaTrack;
         track.parentElement!.appendChild(emptyTrack);
-        const trackFragments: TrackFragment[] = [];
-        mainTrackDataAligned.forEach(accession => {
-            accession.locations[0].fragments.forEach(fragment => {
-                trackFragments.push({ start: fragment.start, end: fragment.end, color: fragment.color ?? '#000000' })
-            })
-        });
-        mainTrackRow.select(".fa-arrow-circle-right").on("click", this.arrowClick(trackFragments));
+        mainTrackRow.select(".fa-arrow-circle-right").on("click", this.arrowClick(mainTrackRow));
         mainTrackRow.attr("class", mainTrackRow.attr("class") + " data")
         mainTrackRow.select(".track-label").attr("class", "track-label main arrow-right").on('click', () =>
             this.toggle(sequence)
@@ -110,25 +104,31 @@ export default class BasicTrackRenderer<Output> implements TrackRenderer {
                 "sub",
                 this.displayArrow
             );
-            const trackFragments: TrackFragment[] = [];
-            subtrackData.rowData.forEach(accession => {
-                accession.locations[0].fragments.forEach(fragment => {
-                    trackFragments.push({ start: fragment.start, end: fragment.end, color: fragment.color ?? '#000000' })
-                })
-            });
-            subTrackRowDiv.select(".fa-arrow-circle-right").on("click", this.arrowClick(trackFragments));
+            subTrackRowDiv.select(".fa-arrow-circle-right").on("click", this.arrowClick(subTrackRowDiv));
             subtracksDiv.appendChild(subTrackRowDiv.node()!);
             subtrackContainers.push(new BasicTrackContainer<Accession[]>(subtrack, subtrackData.rowData));
         });
         return [subtrackContainers, subtracksDiv];
     }
-    private arrowClick(trackFragments: TrackFragment[]) {
+    private arrowClick(row: d3.Selection<HTMLDivElement, undefined, null, undefined>) {
         return () => {
             d3.event.stopPropagation();
             if (markArrow()) {
-                this.emitOnArrowClick.emit(trackFragments);
+                row.selectAll('.fragment-group').nodes().forEach(fragment => {
+                    const classsList = (fragment as Element)?.classList;
+                    if (!classsList?.contains('clicked')) {
+                        classsList.add('clicked');
+                    }
+                })
+                this.emitOnArrowClick.emit(getClickedTrackFragments());
             } else {
-                this.emitOnArrowClick.emit([]);
+                row.selectAll('.fragment-group').nodes().forEach(fragment => {
+                    const classsList = (fragment as Element)?.classList;
+                    if (classsList?.contains('clicked')) {
+                        classsList.remove('clicked');
+                    }
+                })
+                this.emitOnArrowClick.emit(getClickedTrackFragments());
             }
         }
     }
@@ -168,7 +168,7 @@ export class Fragment {
     constructor(
         readonly start: number,
         readonly end: number,
-        readonly color?: string,
+        readonly color: string,
         readonly fill?: string,
         readonly shape?: string,
         readonly tooltipContent?: TooltipContent

@@ -30,6 +30,9 @@ div.track-content.main .empty {
     fill-opacity: 0.6 !important;
 }
 .fragment-group:hover {
+    stroke-width: 1.5px;
+}
+.fragment-group.clicked {
     stroke-width: 2px;
 }
 

@@ -37,7 +37,7 @@ export default class PdbParser implements TrackParser<PDBOutput> {
                         const chain_id = record.chain_id;
                         const pdb_id = record.pdb_id;
 
-                        return fetchWithTimeout(this.urlGenerator(pdb_id, chain_id),{timeout:5000})
+                        return fetchWithTimeout(this.urlGenerator(pdb_id, chain_id), { timeout: 5000 })
                             .then(
                                 data => data.json().then(data => {
                                     return { source: record, data: data };

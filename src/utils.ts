@@ -1,6 +1,7 @@
 import d3 = require("d3");
 
 import ColorConvert from "color-convert";
+import { Fragment } from "./renderers/basic-track-renderer";
 
 const loadComponent = function (name: string, className: CustomElementConstructor) {
     if (!customElements.get(name)) {
@@ -9,7 +10,7 @@ const loadComponent = function (name: string, className: CustomElementConstructo
 };
 
 function createRow(label: Node, content: Node, customClass: string = "", arrow: boolean = false) {
-    const labelWrapper = d3.create("span").attr("title",label.textContent?? "").node()!;
+    const labelWrapper = d3.create("span").attr("title", label.textContent ?? "").node()!;
     if (arrow) {
         labelWrapper.appendChild(d3.create("i").attr("class", "fas fa-arrow-circle-right").node()!);
     }
@@ -26,13 +27,17 @@ function unmarkArrows() {
         (node as Element).classList.remove("clicked");
     });
 }
+function unmarkFragments() {
+    d3.selectAll(".fragment-group.clicked").nodes().forEach(node => {
+        (node as Element).classList.remove("clicked");
+    });
+}
 function markArrow() {
     const classList = d3.select(d3.event.target).node().classList;
     if (classList.contains("clicked")) {
-        unmarkArrows();
+        classList.remove('clicked');
         return false;
     } else {
-        unmarkArrows()
         classList.add("clicked");
         return true;
     }
@@ -66,23 +71,30 @@ function groupByAndMap<T, O, Id>(data: IterableIterator<T> | T[], by: (item: T) 
     }
     return grouped;
 }
-async function fetchWithTimeout(resource:string, options:RequestInitWithTimeOut) {
+async function fetchWithTimeout(resource: string, options: RequestInitWithTimeOut) {
     const { timeout = 8000 } = options;
-    
+
     const controller = new AbortController();
     const id = setTimeout(() => controller.abort(), timeout);
-  
+
     const response = await fetch(resource, {
-      ...options,
-      signal: controller.signal  
+        ...options,
+        signal: controller.signal
     });
     clearTimeout(id);
-  
-    return response;
-  }
 
-interface  RequestInitWithTimeOut extends RequestInit
-{
-    timeout:number;
+    return response;
 }
-export { loadComponent, createRow, getDarkerColor, groupBy, groupByAndMap, markArrow,fetchWithTimeout };
+function getClickedTrackFragments() {
+    return d3.selectAll('.fragment-group.clicked').nodes().map(fragment => {
+        const fragmentData = (fragment as any).__data__ as Fragment;
+        return { start: fragmentData.start, end: fragmentData.end, color: fragmentData.color }
+    });
+}
+interface RequestInitWithTimeOut extends RequestInit {
+    timeout: number;
+}
+export {
+    loadComponent, createRow, getDarkerColor, groupBy, groupByAndMap, markArrow, fetchWithTimeout, getClickedTrackFragments,
+    unmarkArrows, unmarkFragments
+};

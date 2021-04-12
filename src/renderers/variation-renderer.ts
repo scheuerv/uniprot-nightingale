@@ -4,7 +4,7 @@ import ProtvistaVariationGraph from "protvista-variation-graph";
 import ProtvistaVariation from "protvista-variation";
 import VariationFilter, { FilterCase } from "../protvista/variation-filter";
 import BasicTrackContainer from "../manager/track-container";
-import { createRow, markArrow } from "../utils";
+import { createRow, markArrow, unmarkArrows, unmarkFragments } from "../utils";
 import BasicCategoryContainer from "../manager/basic-category-container";
 import d3 = require('d3');
 import { VariationData } from "../parsers/variation-parser";
@@ -57,6 +57,8 @@ export default class VariationRenderer implements TrackRenderer {
         this.mainTrackRow.select(".fa-arrow-circle-right").on("click", () => {
             {
                 d3.event.stopPropagation();
+                unmarkArrows();
+                unmarkFragments();
                 if (markArrow()) {
                     this.emitOnArrowClick.emit(this.getFragments(variationGraph));
                 }
