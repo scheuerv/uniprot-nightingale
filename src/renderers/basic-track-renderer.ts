@@ -1,6 +1,6 @@
 import TrackRenderer from './track-renderer';
 import d3 = require('d3');
-import { createRow, getClickedTrackFragments, markArrow } from '../utils';
+import { createRow } from '../utils';
 import ProtvistaTrack from 'protvista-track';
 import BasicTrackContainer, { MainTrackContainer, TrackContainer } from '../manager/track-container';
 import BasicCategoryContainer from '../manager/basic-category-container';
@@ -71,8 +71,7 @@ export default class BasicTrackRenderer<Output> implements TrackRenderer {
             .attr("class", "empty")
             .node() as ProtvistaTrack;
         track.parentElement!.appendChild(emptyTrack);
-        mainTrackRow.select(".fa-arrow-circle-right").on("click", this.arrowClick(mainTrackRow));
-        mainTrackRow.attr("class", mainTrackRow.attr("class") + " data")
+        mainTrackRow.attr("class", mainTrackRow.attr("class") + " main")
         mainTrackRow.select(".track-label").attr("class", "track-label main arrow-right").on('click', () =>
             this.toggle(sequence)
         );
@@ -104,35 +103,11 @@ export default class BasicTrackRenderer<Output> implements TrackRenderer {
                 "sub",
                 this.displayArrow
             );
-            subTrackRowDiv.select(".fa-arrow-circle-right").on("click", this.arrowClick(subTrackRowDiv));
             subtracksDiv.appendChild(subTrackRowDiv.node()!);
             subtrackContainers.push(new BasicTrackContainer<Accession[]>(subtrack, subtrackData.rowData));
         });
         return [subtrackContainers, subtracksDiv];
     }
-    private arrowClick(row: d3.Selection<HTMLDivElement, undefined, null, undefined>) {
-        return () => {
-            d3.event.stopPropagation();
-            if (markArrow()) {
-                row.selectAll('.fragment-group').nodes().forEach(fragment => {
-                    const classsList = (fragment as Element)?.classList;
-                    if (!classsList?.contains('clicked')) {
-                        classsList.add('clicked');
-                    }
-                })
-                this.emitOnArrowClick.emit(getClickedTrackFragments());
-            } else {
-                row.selectAll('.fragment-group').nodes().forEach(fragment => {
-                    const classsList = (fragment as Element)?.classList;
-                    if (classsList?.contains('clicked')) {
-                        classsList.remove('clicked');
-                    }
-                })
-                this.emitOnArrowClick.emit(getClickedTrackFragments());
-            }
-        }
-    }
-
 
 }
 export class TrackRow<Output> {
@@ -166,6 +141,7 @@ export class Location {
 
 export class Fragment {
     constructor(
+        readonly id: number,
         readonly start: number,
         readonly end: number,
         readonly color: string,
@@ -173,4 +149,61 @@ export class Fragment {
         readonly shape?: string,
         readonly tooltipContent?: TooltipContent
     ) { }
+}
+
+export class FragmentWrapper {
+    constructor(
+        readonly fragmentRowTuples: [ElementWithData, RowWrapper][] = [],
+        readonly fragmentData: Fragment,
+    ) {
+        fragmentRowTuples.forEach((fragmentRowTuple, i) => {
+            d3.select(fragmentRowTuple[0]).on("click", (e) => {
+                const classsList = d3.select(d3.event.currentTarget)?.node()?.classList;
+                if (classsList.contains('clicked')) {
+                    fragmentRowTuple[1].arrowElement.classList.remove('clicked');
+                    classsList.remove('clicked');
+                    fragmentRowTuples[fragmentRowTuples.length - 1 - i][0].classList.remove('clicked');
+                    fragmentRowTuples[fragmentRowTuples.length - 1 - i][1].arrowElement.classList.remove('clicked');
+                }
+                else {
+                    classsList.add('clicked');
+                    fragmentRowTuples[fragmentRowTuples.length - 1 - i][0].classList.add('clicked');
+                    if (this.allFragmentsInRowClicked(fragmentRowTuples[fragmentRowTuples.length - 1 - i][1], fragmentRowTuples.length - 1 - i)) {
+                        fragmentRowTuples[fragmentRowTuples.length - 1 - i][1].arrowElement.classList.add('clicked');
+                    }
+                    if (this.allFragmentsInRowClicked(fragmentRowTuples[i][1], i)) {
+                        fragmentRowTuples[i][1].arrowElement.classList.add('clicked');
+                    }
+                }
+                //this.emitOnHighlightChange.emit(getClickedTrackFragments());
+            });
+        })
+    }
+    allFragmentsInRowClicked(row: RowWrapper, fragmentNumber: number) {
+        for (let i = 0; i < row.getFragmentWrappers().length; i++) {
+            if (!row.getFragmentWrappers()[i].fragmentRowTuples[fragmentNumber][0].classList.contains('clicked')) {
+                return false;
+            }
+        }
+        return true;
+    }
+}
+
+export class RowWrapper {
+    private fragmentWrappers: FragmentWrapper[] = [];
+    constructor(
+        readonly arrowElement: Element
+    ) { }
+
+    public addFragmentWrapper(fragmentWrapper: FragmentWrapper) {
+        this.fragmentWrappers.push(fragmentWrapper);
+    }
+
+    public getFragmentWrappers() {
+        return this.fragmentWrappers;
+    }
+}
+
+export class ElementWithData extends Element {
+    public __data__: Fragment;
 }

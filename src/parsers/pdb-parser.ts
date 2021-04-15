@@ -13,6 +13,7 @@ export default class PdbParser implements TrackParser<PDBOutput> {
     private readonly categoryName = "Experimental structures";
     private readonly observedColor = '#2e86c1';
     private readonly unobservedColor = '#bdbfc1';
+    private id = 1;
     async parse(uniprotId: string, data: PDBParserData): Promise<BasicTrackRenderer<PDBOutput> | null> {
         const trackRows: TrackRow<PDBOutput>[] = [];
         const outputs: PDBOutput[] = []
@@ -37,7 +38,7 @@ export default class PdbParser implements TrackParser<PDBOutput> {
                         const chain_id = record.chain_id;
                         const pdb_id = record.pdb_id;
 
-                        return fetchWithTimeout(this.urlGenerator(pdb_id, chain_id), { timeout: 5000 })
+                        return fetchWithTimeout(this.urlGenerator(pdb_id, chain_id), { timeout: 8000 })
                             .then(
                                 data => data.json().then(data => {
                                     return { source: record, data: data };
@@ -72,6 +73,7 @@ export default class PdbParser implements TrackParser<PDBOutput> {
                                         const start: number = Math.max(fragment.start.residue_number + uniprotStart - pdbStart, uniprotStart);
                                         const end: number = Math.min(fragment.end.residue_number + uniprotStart - pdbStart, uniprotEnd);
                                         return new Fragment(
+                                            this.id++,
                                             start,
                                             end,
                                             this.observedColor,
@@ -111,7 +113,12 @@ export default class PdbParser implements TrackParser<PDBOutput> {
         if (start < observedFragmentSorted[0].start) {
             const fragmentEnd = observedFragmentSorted[0].start - 1;
             unobservedFragments.push(new Fragment(
-                start, fragmentEnd, this.unobservedColor, this.unobservedColor, undefined,
+                this.id++,
+                start,
+                fragmentEnd,
+                this.unobservedColor,
+                this.unobservedColor,
+                undefined,
                 this.createTooltip(uniprotId, pdbId, chainId, start, fragmentEnd, experimentalMethod))
             );
         }
@@ -120,14 +127,24 @@ export default class PdbParser implements TrackParser<PDBOutput> {
             const fragmnetStart = observedFragmentSorted[i - 1].end + 1;
             const fragmentEnd = observedFragmentSorted[i].start - 1;
             unobservedFragments.push(new Fragment(
-                fragmnetStart, fragmentEnd, this.unobservedColor, this.unobservedColor, undefined,
+                this.id,
+                fragmnetStart,
+                fragmentEnd,
+                this.unobservedColor,
+                this.unobservedColor,
+                undefined,
                 this.createTooltip(uniprotId, pdbId, chainId, fragmnetStart, fragmentEnd, experimentalMethod)))
         }
 
         if (end - 1 >= observedFragmentSorted[observedFragmentSorted.length - 1].end) {
             const fragmentStart = observedFragmentSorted[observedFragmentSorted.length - 1].end + 1;
             unobservedFragments.push(new Fragment(
-                fragmentStart, end, this.unobservedColor, this.unobservedColor, undefined,
+                this.id,
+                fragmentStart,
+                end,
+                this.unobservedColor,
+                this.unobservedColor,
+                undefined,
                 this.createTooltip(uniprotId, pdbId, chainId, fragmentStart, end, experimentalMethod)));
         }
         return unobservedFragments;

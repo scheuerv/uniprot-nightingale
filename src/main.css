@@ -4,7 +4,7 @@ div.track-row {
     height: 40px;
 }
 
-div.track-row.data,
+div.track-row.main,
 .subtracks-container .track-row {
     margin-bottom: 0.1em;
     border-bottom: 0.1em solid #b2f5ff;

@@ -23,6 +23,7 @@ export default class SMRParser implements TrackParser<SMROutput> {
             if (sTemplate !== null) {
                 pdbId = sTemplate[1] + '.' + sTemplate[2];
             }
+            let id = 1;
             structure.chains.forEach(chain => {
                 let output: SMROutput | undefined = undefined;
                 if (sTemplate !== null) {
@@ -33,7 +34,7 @@ export default class SMRParser implements TrackParser<SMROutput> {
                     const tooltipContent = new TooltipContent(`${pdbId.toUpperCase()}_${chain.id} ${segment.uniprot.from}${(segment.uniprot.from === segment.uniprot.to) ? "" : ("-" + segment.uniprot.to)}`);
                     tooltipContent.addRowIfContentDefined('Description', structure.method ? 'Experimental method: ' + structure.method : undefined);
                     tooltipContent.addRowIfContentDefined('BLAST', createBlast(uniprotId, segment.uniprot.from, segment.uniprot.to, `${pdbId}" "${chain.id.toLowerCase()}`));
-                    return new Fragment(segment.uniprot.from, segment.uniprot.to, getDarkerColor(this.color), this.color, undefined, tooltipContent);
+                    return new Fragment(id++, segment.uniprot.from, segment.uniprot.to, getDarkerColor(this.color), this.color, undefined, tooltipContent);
                 });
 
                 const accesion = new Accession(null, [

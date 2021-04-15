@@ -25,12 +25,13 @@ export default class ProteomicsParser implements TrackParser<ProteomicsOutput> {
         const colorNonUnique = config[this.nonUnique].color;
         const borderColorUnique = getDarkerColor(colorUnique);
         const borderColorNonUnique = getDarkerColor(colorNonUnique);
+        let id = 1;
         features.forEach(feature => {
             if (feature.unique) {
-                uniqueFragmentAligner.addFragment(new Fragment(parseInt(feature.begin), parseInt(feature.end), borderColorUnique, colorUnique, config[this.unique]?.shape, createFeatureTooltip(feature, uniprotId, this.unique)));
+                uniqueFragmentAligner.addFragment(new Fragment(id++, parseInt(feature.begin), parseInt(feature.end), borderColorUnique, colorUnique, config[this.unique]?.shape, createFeatureTooltip(feature, uniprotId, this.unique)));
             }
             else {
-                nonUniqueFragmentAligner.addFragment(new Fragment(parseInt(feature.begin), parseInt(feature.end), borderColorNonUnique, colorNonUnique, config[this.nonUnique]?.shape, createFeatureTooltip(feature, uniprotId, this.nonUnique)));
+                nonUniqueFragmentAligner.addFragment(new Fragment(id++, parseInt(feature.begin), parseInt(feature.end), borderColorNonUnique, colorNonUnique, config[this.nonUnique]?.shape, createFeatureTooltip(feature, uniprotId, this.nonUnique)));
             }
         });
         const trackRows = [

@@ -22,12 +22,13 @@ export default class AntigenParser implements TrackParser<AntigenOutput>  {
 
         if (features.size > 0) {
             const trackRows: TrackRow<AntigenOutput>[] = [];
+            let id = 1;
             features.forEach((typeFeatures, type) => {
                 const fillColor = config[type]?.color;
                 const borderColor = getDarkerColor(fillColor)
                 let fragmentAligner = new FragmentAligner();
                 typeFeatures.forEach(feature => {
-                    fragmentAligner.addFragment(new Fragment(parseInt(feature.begin), parseInt(feature.end), borderColor, fillColor, config[feature.type]?.shape, createFeatureTooltip(feature, uniprotId, data.sequence)));
+                    fragmentAligner.addFragment(new Fragment(id++, parseInt(feature.begin), parseInt(feature.end), borderColor, fillColor, config[feature.type]?.shape, createFeatureTooltip(feature, uniprotId, data.sequence)));
                 })
                 trackRows.push(new TrackRow(fragmentAligner.getAccessions(), config[type]?.label));
 

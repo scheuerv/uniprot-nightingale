@@ -50,7 +50,7 @@ export default class VariationRenderer implements TrackRenderer {
             "main",
             true
         );
-        this.mainTrackRow.attr("class", this.mainTrackRow.attr("class") + " data")
+        this.mainTrackRow.attr("class", this.mainTrackRow.attr("class") + " main")
         this.mainTrackRow.select(".track-label").attr("class", "track-label main arrow-right").on('click', () =>
             this.toggle()
         );

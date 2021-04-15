@@ -1,7 +1,7 @@
 import d3 = require("d3");
 
 import ColorConvert from "color-convert";
-import { Fragment } from "./renderers/basic-track-renderer";
+import { ElementWithData } from "./renderers/basic-track-renderer";
 
 const loadComponent = function (name: string, className: CustomElementConstructor) {
     if (!customElements.get(name)) {
@@ -87,7 +87,7 @@ async function fetchWithTimeout(resource: string, options: RequestInitWithTimeOu
 }
 function getClickedTrackFragments() {
     return d3.selectAll('.fragment-group.clicked').nodes().map(fragment => {
-        const fragmentData = (fragment as any).__data__ as Fragment;
+        const fragmentData = (fragment as ElementWithData).__data__;
         return { start: fragmentData.start, end: fragmentData.end, color: fragmentData.color }
     });
 }

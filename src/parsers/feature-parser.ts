@@ -17,6 +17,7 @@ export default class FeatureParser implements TrackParser<FeatureOutput> {
         }
         const categories: Map<string, Map<string, FragmentAligner>> = new Map();
         const features = data.features;
+        let id = 1;
         features.forEach(feature => {
             if (feature.category) {
                 let category = categories.get(feature.category);
@@ -31,7 +32,7 @@ export default class FeatureParser implements TrackParser<FeatureOutput> {
                 }
                 const fillColor = config[feature.type]?.color;
                 const borderColor = getDarkerColor(fillColor);
-                typeFeatureFragmentAligner.addFragment(new Fragment(parseInt(feature.begin), parseInt(feature.end), borderColor, fillColor, config[feature.type]?.shape, createFeatureTooltip(feature, uniprotId, data.sequence)));
+                typeFeatureFragmentAligner.addFragment(new Fragment(id++, parseInt(feature.begin), parseInt(feature.end), borderColor, fillColor, config[feature.type]?.shape, createFeatureTooltip(feature, uniprotId, data.sequence)));
             }
         });
         const categoryRenderers: BasicTrackRenderer<FeatureOutput>[] = [];
