@@ -1,7 +1,7 @@
 import { TrackContainer } from "./track-container";
 
 export default interface CategoryContainer {
-    getContent(): HTMLElement;
+    content: HTMLElement;
+    trackContainers: TrackContainer[];
     addData(): void;
-    getTrackContainers(): TrackContainer[];
 }

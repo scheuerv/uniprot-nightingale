@@ -4,10 +4,10 @@ import ecoMap from "protvista-feature-adapter/src/evidences";
 import { groupBy } from "./utils";
 
 export default class TooltipContent {
-    private readonly title: string;
+    private readonly _title: string;
     private readonly contentRows: Row[] = [];
     constructor(label: string) {
-        this.title = label;
+        this._title = label;
     }
     public addRowIfContentDefined(label: string, content: string | undefined) {
         if (content) { this.contentRows.push(new Row(label, content)); }
@@ -19,8 +19,8 @@ export default class TooltipContent {
         )
         return content + '</table>';
     }
-    public getTitle() {
-        return this.title;
+    public get title() {
+        return this._title;
     }
     addEvidenceIfDefined(feature: Feature, uniprotId: string) {
         if (feature.evidences) {

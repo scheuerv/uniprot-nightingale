@@ -98,7 +98,7 @@ export default class TrackManager {
                     });
                     const categoryContainer = renderer.getCategoryContainer(this.sequence);
                     categoryContainers.push(categoryContainer);
-                    this.protvistaManager.appendChild(categoryContainer.getContent());
+                    this.protvistaManager.appendChild(categoryContainer.content);
                 });
 
             element.appendChild(this.protvistaManager);
@@ -186,7 +186,7 @@ function updateTooltip(e: { clientY: number; clientX: number; eventtype: string 
     d3.select("protvista-tooltip")
         .attr("x", detail.coords[0])
         .attr("y", detail.coords[1])
-        .attr("title", fragment.tooltipContent?.getTitle() ?? "")
+        .attr("title", fragment.tooltipContent?.title ?? "")
         .attr("visible", true)
         .html(fragment.tooltipContent?.render() ?? "")
         .exit()

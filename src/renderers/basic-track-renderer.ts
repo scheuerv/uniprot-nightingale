@@ -213,19 +213,16 @@ export class RowWrapper {
             });
         });
     }
-    public getFragmentWrappers() {
-        return this.fragmentWrappers;
-    }
     private arrowClick() {
         return () => {
             d3.event.stopPropagation();
             if (this.arrowElement.classList.contains("clicked")) {
-                this.getFragmentWrappers().forEach(fragment => {
+                this.fragmentWrappers.forEach(fragment => {
                     fragment.unmark();
                 });
                 //this.emitOnArrowClick.emit(getClickedTrackFragments());
             } else {
-                this.getFragmentWrappers().forEach(fragment => {
+                this.fragmentWrappers.forEach(fragment => {
                     fragment.mark();
                     // this.emitOnArrowClick.emit(getClickedTrackFragments());
                 });

@@ -4,24 +4,24 @@ import CategoryContainer from "./category-container";
 import { TrackContainer } from "./track-container";
 
 export default class BasicCategoryContainer implements CategoryContainer {
-    private rowWrappers: RowWrapper[];
-    constructor(private tracks: TrackContainer[], private categoryDiv: HTMLDivElement) {
+    private _rowWrappers: RowWrapper[];
+    constructor(private _tracks: TrackContainer[], private _categoryDiv: HTMLDivElement) {
 
     }
-    getContent(): HTMLElement {
-        return this.categoryDiv;
+    get content(): HTMLElement {
+        return this._categoryDiv;
     }
     addData() {
-        this.tracks.forEach(track => track.addData());
+        this._tracks.forEach(track => track.addData());
         const map: Map<number, ElementAndBuilder[]> = new Map();
-        const mainRowElement = d3.select(this.categoryDiv).select('.track-row.main');
+        const mainRowElement = d3.select(this._categoryDiv).select('.track-row.main');
         const mainRowWrapperBuilder = new RowWrapperBuilder(mainRowElement.select('.fa-arrow-circle-right').node() as Element);
         const rowWrapperBuilders = [mainRowWrapperBuilder];
         mainRowElement.selectAll('.fragment-group').nodes().forEach(fragment => {
             const fragmentWithData = fragment as ElementWithData;
             map.set(fragmentWithData.__data__.id, [{ element: fragmentWithData, builder: mainRowWrapperBuilder }]);
         });
-        d3.select(this.categoryDiv).selectAll('.subtracks-container .track-row').nodes().forEach(row => {
+        d3.select(this._categoryDiv).selectAll('.subtracks-container .track-row').nodes().forEach(row => {
             const rowSelection = d3.select(row);
             const rowWrapperBuilder = new RowWrapperBuilder(rowSelection.select('.fa-arrow-circle-right').node() as Element);
             rowWrapperBuilders.push(rowWrapperBuilder);
@@ -36,15 +36,15 @@ export default class BasicCategoryContainer implements CategoryContainer {
                 fragmentRowTuple.builder.addFragmentWrapper(fragmentWrapper);
             });
         });
-        this.rowWrappers = rowWrapperBuilders.map(builder => {
+        this._rowWrappers = rowWrapperBuilders.map(builder => {
             return builder.build();
         });
     }
-    getRowWrappers() {
-        return this.rowWrappers;
+    get rowWrappers() {
+        return this._rowWrappers;
     }
-    getTrackContainers() {
-        return this.tracks;
+    get trackContainers() {
+        return this._tracks;
     }
 }
 

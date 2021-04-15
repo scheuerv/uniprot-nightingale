@@ -1,16 +1,15 @@
 import CategoryContainer from "./category-container";
-import { TrackContainer } from "./track-container";
 
 export default class CompositeCategoryContainer implements CategoryContainer {
     constructor(private categoryContainers: CategoryContainer[]) {
 
     }
-    getTrackContainers(): TrackContainer[] {
-        return this.categoryContainers.flatMap(categoryContainer => categoryContainer.getTrackContainers())
+    get trackContainers() {
+        return this.categoryContainers.flatMap(categoryContainer => categoryContainer.trackContainers);
     }
-    getContent(): HTMLElement {
+    get content() {
         const div = document.createElement("div");
-        this.categoryContainers.forEach(categoryContainer => div.appendChild(categoryContainer.getContent()));
+        this.categoryContainers.forEach(categoryContainer => div.appendChild(categoryContainer.content));
         return div;
 
     }
