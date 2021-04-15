@@ -1,9 +1,10 @@
-import { ElementWithData, FragmentWrapper, RowWrapper } from "../renderers/basic-track-renderer";
+import { ElementWithData, FragmentWrapper, RowWrapper, RowWrapperBuilder } from "../renderers/basic-track-renderer";
 import d3 = require('d3');
 import CategoryContainer from "./category-container";
 import { TrackContainer } from "./track-container";
 
 export default class BasicCategoryContainer implements CategoryContainer {
+    private rowWrappers: RowWrapper[];
     constructor(private tracks: TrackContainer[], private categoryDiv: HTMLDivElement) {
 
     }
@@ -12,71 +13,42 @@ export default class BasicCategoryContainer implements CategoryContainer {
     }
     addData() {
         this.tracks.forEach(track => track.addData());
-        const map: Map<number, [ElementWithData, RowWrapper][]> = new Map();
+        const map: Map<number, ElementAndBuilder[]> = new Map();
         const mainRowElement = d3.select(this.categoryDiv).select('.track-row.main');
-        const mainRowWrapper = new RowWrapper(mainRowElement.select('.fa-arrow-circle-right').node() as Element)
+        const mainRowWrapperBuilder = new RowWrapperBuilder(mainRowElement.select('.fa-arrow-circle-right').node() as Element);
+        const rowWrapperBuilders = [mainRowWrapperBuilder];
         mainRowElement.selectAll('.fragment-group').nodes().forEach(fragment => {
             const fragmentWithData = fragment as ElementWithData;
-            map.set(fragmentWithData.__data__.id, [[fragmentWithData, mainRowWrapper]]);
+            map.set(fragmentWithData.__data__.id, [{ element: fragmentWithData, builder: mainRowWrapperBuilder }]);
         });
         d3.select(this.categoryDiv).selectAll('.subtracks-container .track-row').nodes().forEach(row => {
             const rowSelection = d3.select(row);
-            const rowWrapper = new RowWrapper(rowSelection.select('.fa-arrow-circle-right').node() as Element);
+            const rowWrapperBuilder = new RowWrapperBuilder(rowSelection.select('.fa-arrow-circle-right').node() as Element);
+            rowWrapperBuilders.push(rowWrapperBuilder);
             rowSelection.selectAll('.fragment-group').nodes().forEach(fragment => {
                 const fragmentWithData = fragment as ElementWithData;
-                map.get(fragmentWithData.__data__.id)?.push([fragmentWithData, rowWrapper]);
+                map.get(fragmentWithData.__data__.id)?.push({ element: fragmentWithData, builder: rowWrapperBuilder });
             });
         });
         map.forEach((fragmentRowTuples, id) => {
-            const fragmentWrapper = new FragmentWrapper(fragmentRowTuples, fragmentRowTuples[0][0].__data__);
-
+            const fragmentWrapper = new FragmentWrapper(fragmentRowTuples.map(it => it.element), fragmentRowTuples[0].element.__data__);
             fragmentRowTuples.forEach(fragmentRowTuple => {
-                fragmentRowTuple[1].addFragmentWrapper(fragmentWrapper);
-                d3.select(fragmentRowTuple[1].arrowElement).on("click", this.arrowClick(fragmentRowTuple[1]));
-            })
+                fragmentRowTuple.builder.addFragmentWrapper(fragmentWrapper);
+            });
         });
-
+        this.rowWrappers = rowWrapperBuilders.map(builder => {
+            return builder.build();
+        });
     }
-    arrowClick(row: RowWrapper) {
-        return () => {
-            d3.event.stopPropagation();
-            const clickedArrowClassList = row.arrowElement.classList;
-            if (clickedArrowClassList.contains("clicked")) {
-                clickedArrowClassList.remove('clicked');
-                row.getFragmentWrappers().forEach(fragment => {
-                    fragment.fragmentRowTuples.forEach(fragmentRowTuples => {
-                        const fragmentClasssList = fragmentRowTuples[0].classList;
-                        if (fragmentClasssList.contains('clicked')) {
-                            fragmentClasssList.remove('clicked');
-                        }
-                        const arrowClasssList = fragmentRowTuples[1].arrowElement.classList;
-                        if (arrowClasssList.contains('clicked')) {
-                            arrowClasssList.remove('clicked');
-                        }
-                    })
-                });
-                //this.emitOnArrowClick.emit(getClickedTrackFragments());
-            } else {
-                clickedArrowClassList.add("clicked");
-                row.getFragmentWrappers().forEach(fragment => {
-                    fragment.fragmentRowTuples.forEach(fragmentRowTuples => {
-                        const fragmentClasssList = fragmentRowTuples[0].classList;
-                        if (!fragmentClasssList.contains('clicked')) {
-                            fragmentClasssList.add('clicked');
-                        }
-                    });
-                    if (fragment.allFragmentsInRowClicked(fragment.fragmentRowTuples[0][1], 0)) {
-                        fragment.fragmentRowTuples[0][1].arrowElement.classList.add('clicked');
-                    }
-                    if (fragment.allFragmentsInRowClicked(fragment.fragmentRowTuples[1][1], 0)) {
-                        fragment.fragmentRowTuples[1][1].arrowElement.classList.add('clicked');
-                    }
-                    // this.emitOnArrowClick.emit(getClickedTrackFragments());
-                });
-            }
-        }
+    getRowWrappers() {
+        return this.rowWrappers;
     }
     getTrackContainers() {
         return this.tracks;
     }
+}
+
+type ElementAndBuilder = {
+    readonly element: ElementWithData,
+    readonly builder: RowWrapperBuilder
 }

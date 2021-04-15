@@ -152,44 +152,89 @@ export class Fragment {
 }
 
 export class FragmentWrapper {
+    private emitOnMarkedChange = createEmitter<boolean>();
+    public onMarkedChange = this.emitOnMarkedChange.event;
+    private isMarked = false;
     constructor(
-        readonly fragmentRowTuples: [ElementWithData, RowWrapper][] = [],
+        readonly fragmentElements: ElementWithData[] = [],
         readonly fragmentData: Fragment,
     ) {
-        fragmentRowTuples.forEach((fragmentRowTuple, i) => {
-            d3.select(fragmentRowTuple[0]).on("click", (e) => {
-                const classsList = d3.select(d3.event.currentTarget)?.node()?.classList;
-                if (classsList.contains('clicked')) {
-                    fragmentRowTuple[1].arrowElement.classList.remove('clicked');
-                    classsList.remove('clicked');
-                    fragmentRowTuples[fragmentRowTuples.length - 1 - i][0].classList.remove('clicked');
-                    fragmentRowTuples[fragmentRowTuples.length - 1 - i][1].arrowElement.classList.remove('clicked');
+        fragmentElements.forEach((fragmentElement, i) => {
+            d3.select(fragmentElement).on("click", () => {
+                if (this.isMarked) {
+                    this.unmark();
                 }
                 else {
-                    classsList.add('clicked');
-                    fragmentRowTuples[fragmentRowTuples.length - 1 - i][0].classList.add('clicked');
-                    if (this.allFragmentsInRowClicked(fragmentRowTuples[fragmentRowTuples.length - 1 - i][1], fragmentRowTuples.length - 1 - i)) {
-                        fragmentRowTuples[fragmentRowTuples.length - 1 - i][1].arrowElement.classList.add('clicked');
-                    }
-                    if (this.allFragmentsInRowClicked(fragmentRowTuples[i][1], i)) {
-                        fragmentRowTuples[i][1].arrowElement.classList.add('clicked');
-                    }
+                    this.mark();
                 }
                 //this.emitOnHighlightChange.emit(getClickedTrackFragments());
             });
         })
     }
-    allFragmentsInRowClicked(row: RowWrapper, fragmentNumber: number) {
-        for (let i = 0; i < row.getFragmentWrappers().length; i++) {
-            if (!row.getFragmentWrappers()[i].fragmentRowTuples[fragmentNumber][0].classList.contains('clicked')) {
-                return false;
-            }
+    public mark() {
+        if (!this.isMarked) {
+            this.fragmentElements.forEach(fragmentElement => {
+                fragmentElement.classList.add('clicked');
+            })
+            this.isMarked = true;
+            this.emitOnMarkedChange(this.isMarked);
         }
-        return true;
+    }
+    public unmark() {
+        if (this.isMarked) {
+            this.fragmentElements.forEach(fragmentElement => {
+                fragmentElement.classList.remove('clicked');
+            })
+            this.isMarked = false;
+            this.emitOnMarkedChange(this.isMarked);
+        }
     }
 }
 
 export class RowWrapper {
+    private fragmentsClicked = 0;
+    constructor(
+        readonly arrowElement: Element,
+        readonly fragmentWrappers: FragmentWrapper[]
+    ) {
+        d3.select(arrowElement).on("click", this.arrowClick());
+        fragmentWrappers.forEach(fragmentWrapper => {
+            fragmentWrapper.onMarkedChange.on(isMarked => {
+                if (isMarked) {
+                    this.fragmentsClicked++;
+                    if (this.fragmentsClicked == this.fragmentWrappers.length) {
+                        this.arrowElement.classList.add('clicked');
+                    }
+                }
+                else {
+                    this.fragmentsClicked--;
+                    this.arrowElement.classList.remove('clicked');
+                }
+            });
+        });
+    }
+    public getFragmentWrappers() {
+        return this.fragmentWrappers;
+    }
+    private arrowClick() {
+        return () => {
+            d3.event.stopPropagation();
+            if (this.arrowElement.classList.contains("clicked")) {
+                this.getFragmentWrappers().forEach(fragment => {
+                    fragment.unmark();
+                });
+                //this.emitOnArrowClick.emit(getClickedTrackFragments());
+            } else {
+                this.getFragmentWrappers().forEach(fragment => {
+                    fragment.mark();
+                    // this.emitOnArrowClick.emit(getClickedTrackFragments());
+                });
+            }
+        }
+    }
+}
+
+export class RowWrapperBuilder {
     private fragmentWrappers: FragmentWrapper[] = [];
     constructor(
         readonly arrowElement: Element
@@ -199,8 +244,8 @@ export class RowWrapper {
         this.fragmentWrappers.push(fragmentWrapper);
     }
 
-    public getFragmentWrappers() {
-        return this.fragmentWrappers;
+    public build() {
+        return new RowWrapper(this.arrowElement, this.fragmentWrappers)
     }
 }
 
