@@ -19,13 +19,12 @@ export default class TrackManager {
     public readonly onResidueMouseOver = this.emitOnResidueMouseOver.event;
     private readonly emitOnFragmentMouseOut = createEmitter();
     public readonly onFragmentMouseOut = this.emitOnFragmentMouseOut.event;
-
     private readonly emitOnHighlightChange = createEmitter<TrackFragment[]>();
     public readonly onHighlightChange = this.emitOnHighlightChange.event;
     private readonly tracks: Track[] = [];
     private sequence: string = "";
     private protvistaManager: ProtvistaManager;
-    constructor(private sequenceUrlGenerator: (url: string) => string) {
+    constructor(private readonly sequenceUrlGenerator: (url: string) => string) {
 
     }
     static createDefault() {
@@ -93,9 +92,6 @@ export default class TrackManager {
                 .filter(renderer => renderer != null)
                 .map(renderer => renderer!)
                 .forEach(renderer => {
-                    renderer.onArrowClick.on(features => {
-                        this.emitOnHighlightChange.emit(features);
-                    });
                     const categoryContainer = renderer.getCategoryContainer(this.sequence);
                     categoryContainers.push(categoryContainer);
                     this.protvistaManager.appendChild(categoryContainer.content);
@@ -103,6 +99,9 @@ export default class TrackManager {
 
             element.appendChild(this.protvistaManager);
             categoryContainers.forEach(categoryContainer => {
+                categoryContainer.onHighlightChange.on(trackFragments => {
+                    this.emitOnHighlightChange.emit(categoryContainers.flatMap(categoryContainer => categoryContainer.getMarkedTrackFragments()));
+                });
                 categoryContainer.addData();
             });
             d3.selectAll("protvista-track").on("change", (f, i) => {
@@ -143,7 +142,7 @@ export default class TrackManager {
             const fragment = fragmentNodes[i];
             if (!(fragment as ElementWithData).classList.contains('clicked')) {
                 return false;
-            }           
+            }
         }
         return true;
     }

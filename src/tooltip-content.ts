@@ -63,7 +63,7 @@ export default class TooltipContent {
 
 }
 class Row {
-    constructor(public label: string, public content: string) {
+    constructor(public readonly label: string, public readonly content: string) {
 
     }
 

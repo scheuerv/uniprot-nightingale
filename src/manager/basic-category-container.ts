@@ -2,14 +2,22 @@ import { ElementWithData, FragmentWrapper, RowWrapper, RowWrapperBuilder } from 
 import d3 = require('d3');
 import CategoryContainer from "./category-container";
 import { TrackContainer } from "./track-container";
+import { TrackFragment } from "./track-manager";
+import { createEmitter } from "ts-typed-events";
 
 export default class BasicCategoryContainer implements CategoryContainer {
     private _rowWrappers: RowWrapper[];
-    constructor(private _tracks: TrackContainer[], private _categoryDiv: HTMLDivElement) {
+    private readonly emitOnHighlightChange = createEmitter<TrackFragment[]>();
+    public readonly onHighlightChange = this.emitOnHighlightChange.event;
+    constructor(private readonly _tracks: TrackContainer[], private readonly _categoryDiv: HTMLDivElement) {
 
     }
+
     get content(): HTMLElement {
         return this._categoryDiv;
+    }
+    getMarkedTrackFragments(): TrackFragment[] {
+        return this._rowWrappers[0].getMarkedFragments();
     }
     addData() {
         this._tracks.forEach(track => track.addData());
@@ -38,6 +46,9 @@ export default class BasicCategoryContainer implements CategoryContainer {
         });
         this._rowWrappers = rowWrapperBuilders.map(builder => {
             return builder.build();
+        });
+        this._rowWrappers[0].onHighlightChange.on(trackFragments => {
+            this.emitOnHighlightChange.emit(trackFragments);
         });
     }
     get rowWrappers() {

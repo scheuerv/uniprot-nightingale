@@ -4,7 +4,7 @@ export interface TrackContainer {
 }
 
 export default class BasicTrackContainer<T> implements TrackContainer {
-    constructor(public track: ProtvistaTrack, private data: T) {
+    constructor(public readonly track: ProtvistaTrack, private readonly data: T) {
 
     }
     addData() {
@@ -12,7 +12,7 @@ export default class BasicTrackContainer<T> implements TrackContainer {
     }
 }
 export class MainTrackContainer<T> implements TrackContainer {
-    constructor(public track: ProtvistaTrack, public emptyTrack: ProtvistaTrack, private data: T) {
+    constructor(public readonly track: ProtvistaTrack, public readonly emptyTrack: ProtvistaTrack, private readonly data: T) {
 
     }
     addData() {

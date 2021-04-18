@@ -100,6 +100,6 @@ type SMRSegment = {
 
 type SMRData = {
 
-    result: SMRResult,
+    readonly result: SMRResult,
 
 };

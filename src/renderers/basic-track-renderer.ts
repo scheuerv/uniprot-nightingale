@@ -14,9 +14,7 @@ export default class BasicTrackRenderer<Output> implements TrackRenderer {
     private subtracks: BasicTrackContainer<Accession[]>[];
     private subtracksDiv: HTMLDivElement;
     private mainTrackRow: d3.Selection<HTMLDivElement, undefined, null, undefined>;
-    private emitOnArrowClick = createEmitter<TrackFragment[]>();
-    public onArrowClick = this.emitOnArrowClick.event;
-    constructor(private rows: TrackRow<Output>[], private mainTrackLabel: string, private emitOnLabelClick: Emitter<Output, SealedEvent<Output>> | undefined, private displayArrow: boolean) {
+    constructor(private readonly rows: TrackRow<Output>[], private readonly mainTrackLabel: string, private readonly emitOnLabelClick: Emitter<Output, SealedEvent<Output>> | undefined, private readonly displayArrow: boolean) {
 
     }
     getCategoryContainer(sequence: string): BasicCategoryContainer {
@@ -79,7 +77,6 @@ export default class BasicTrackRenderer<Output> implements TrackRenderer {
     }
 
     private getSubtracks(sequence: string): [BasicTrackContainer<Accession[]>[], HTMLDivElement] {
-
         const subtrackContainers: BasicTrackContainer<Accession[]>[] = [];
         const subtracksDiv = d3.create("div").attr("class", "subtracks-container").style("display", "none").node()!;
         this.rows.forEach(subtrackData => {
@@ -152,8 +149,10 @@ export class Fragment {
 }
 
 export class FragmentWrapper {
-    private emitOnMarkedChange = createEmitter<boolean>();
-    public onMarkedChange = this.emitOnMarkedChange.event;
+    private readonly emitOnClick = createEmitter<boolean>();
+    public readonly onClick = this.emitOnClick.event;
+    private readonly emitOnMarkedChange = createEmitter<boolean>();
+    public readonly onMarkedChange = this.emitOnMarkedChange.event;
     private isMarked = false;
     constructor(
         readonly fragmentElements: ElementWithData[] = [],
@@ -167,7 +166,7 @@ export class FragmentWrapper {
                 else {
                     this.mark();
                 }
-                //this.emitOnHighlightChange.emit(getClickedTrackFragments());
+                this.emitOnClick(this.isMarked);
             });
         })
     }
@@ -192,25 +191,30 @@ export class FragmentWrapper {
 }
 
 export class RowWrapper {
-    private fragmentsClicked = 0;
+    private readonly markedFragments = new Set<FragmentWrapper>();
+    private readonly emitOnHighlightChange = createEmitter<TrackFragment[]>();
+    public readonly onHighlightChange = this.emitOnHighlightChange.event;
     constructor(
         readonly arrowElement: Element,
         readonly fragmentWrappers: FragmentWrapper[]
     ) {
         d3.select(arrowElement).on("click", this.arrowClick());
         fragmentWrappers.forEach(fragmentWrapper => {
+            fragmentWrapper.onClick.on(isMarked => {
+                this.emitOnHighlightChange.emit(this.getMarkedFragments());
+            });
             fragmentWrapper.onMarkedChange.on(isMarked => {
                 if (isMarked) {
-                    this.fragmentsClicked++;
-                    if (this.fragmentsClicked == this.fragmentWrappers.length) {
+                    this.markedFragments.add(fragmentWrapper);
+                    if (this.markedFragments.size == this.fragmentWrappers.length) {
                         this.arrowElement.classList.add('clicked');
                     }
                 }
                 else {
-                    this.fragmentsClicked--;
+                    this.markedFragments.delete(fragmentWrapper);
                     this.arrowElement.classList.remove('clicked');
                 }
-            });
+            })
         });
     }
     private arrowClick() {
@@ -220,19 +224,23 @@ export class RowWrapper {
                 this.fragmentWrappers.forEach(fragment => {
                     fragment.unmark();
                 });
-                //this.emitOnArrowClick.emit(getClickedTrackFragments());
             } else {
                 this.fragmentWrappers.forEach(fragment => {
                     fragment.mark();
-                    // this.emitOnArrowClick.emit(getClickedTrackFragments());
                 });
             }
+            this.emitOnHighlightChange.emit(this.getMarkedFragments());
         }
+    }
+    public getMarkedFragments() {
+        return Array.from(this.markedFragments).map(fragmentWrapper => {
+            return { start: fragmentWrapper.fragmentData.start, end: fragmentWrapper.fragmentData.end, color: fragmentWrapper.fragmentData.color };
+        });
     }
 }
 
 export class RowWrapperBuilder {
-    private fragmentWrappers: FragmentWrapper[] = [];
+    private readonly fragmentWrappers: FragmentWrapper[] = [];
     constructor(
         readonly arrowElement: Element
     ) { }
@@ -247,5 +255,5 @@ export class RowWrapperBuilder {
 }
 
 export class ElementWithData extends Element {
-    public __data__: Fragment;
+    public readonly __data__: Fragment;
 }

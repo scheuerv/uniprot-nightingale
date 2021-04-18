@@ -357,9 +357,9 @@ export const filterCases: FilterCase[] = [
 ];
 
 type FilterVariationData = {
-    type: string,
-    normal: string,
-    pos: number,
+    readonly type: string,
+    readonly normal: string,
+    readonly pos: number,
     variants: Variant[]
 }
 
