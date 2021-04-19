@@ -5,7 +5,7 @@ import BasicTrackContainer from "./track-container";
 import { TrackFragment } from "./track-manager";
 import ProtvistaVariationGraph from "protvista-variation-graph";
 import ColorConvert from "color-convert";
-import VariationFilter from "src/protvista/variation-filter";
+import VariationFilter from "../protvista/variation-filter";
 import d3 = require('d3');
 
 export default class VariationCategoryContainer implements CategoryContainer {
