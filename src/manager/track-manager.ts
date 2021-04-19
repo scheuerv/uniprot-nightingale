@@ -19,6 +19,8 @@ export default class TrackManager {
     public readonly onResidueMouseOver = this.emitOnResidueMouseOver.event;
     private readonly emitOnFragmentMouseOut = createEmitter();
     public readonly onFragmentMouseOut = this.emitOnFragmentMouseOut.event;
+    private readonly emitOnRendered = createEmitter();
+    public readonly onRendered = this.emitOnRendered.event;
     private readonly emitOnHighlightChange = createEmitter<TrackFragment[]>();
     public readonly onHighlightChange = this.emitOnHighlightChange.event;
     private readonly tracks: Track[] = [];
@@ -132,8 +134,7 @@ export default class TrackManager {
                 lastFocusedResidue = undefined;
                 this.emitOnFragmentMouseOut.emit();
             });
-
-            return categoryContainers;
+            this.emitOnRendered.emit();
         });
 
     }
