@@ -48,7 +48,7 @@ export default class TrackManager {
         this.protvistaManager = d3.create("protvista-manager")
             .attr("attributes", "length displaystart displayend highlightstart highlightend activefilters filters")
             .node()! as ProtvistaManager;
-        fetchWithTimeout(this.sequenceUrlGenerator(uniprotId), { timeout: 8000 }).then(data => data.text())
+        await fetchWithTimeout(this.sequenceUrlGenerator(uniprotId), { timeout: 8000 }).then(data => data.text())
             .then(data => {
                 const tokens = data.split(/\r?\n/);
                 for (let i = 1; i < tokens.length; i++) {
@@ -76,6 +76,7 @@ export default class TrackManager {
                             return track.parser.parse(uniprotId, data);
                         }), err => {
                             console.log(`API unavailable!`, err);
+                            track.parser.failDataLoaded();
                             return Promise.reject();
                         }
                     )

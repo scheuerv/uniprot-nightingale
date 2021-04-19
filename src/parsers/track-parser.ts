@@ -4,7 +4,7 @@ import { SealedEvent } from 'ts-typed-events';
 export default interface TrackParser<Output> {
     readonly onDataLoaded: SealedEvent<Output[]>;
     parse(uniprotId: string, data: any): Promise<TrackRenderer | null>;
-
+    failDataLoaded(): void;
 }
 
 export function isErrorResponse(response: ErrorResponse | any): response is ErrorResponse {
@@ -45,8 +45,8 @@ export type Feature = {
     readonly molecule?: string,
     readonly xrefs?: DbReferenceObject[],
     readonly evidences?: Evidence[]
-    readonly unique?:boolean;
-    readonly matchScore?:number;
+    readonly unique?: boolean;
+    readonly matchScore?: number;
 };
 export type DbReferenceObject = {
     readonly name: string,

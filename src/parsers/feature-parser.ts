@@ -10,6 +10,9 @@ import { createEmitter } from "ts-typed-events";
 export default class FeatureParser implements TrackParser<FeatureOutput> {
     private readonly emitOnDataLoaded = createEmitter<FeatureOutput[]>();
     public readonly onDataLoaded = this.emitOnDataLoaded.event;
+    failDataLoaded(): void {
+        this.emitOnDataLoaded.emit([]);
+    }
     async parse(uniprotId: string, data: ProteinFeatureInfo | ErrorResponse): Promise<TrackRenderer | null> {
         if (isErrorResponse(data)) {
             this.emitOnDataLoaded.emit([]);

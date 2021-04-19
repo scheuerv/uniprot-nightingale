@@ -12,6 +12,9 @@ export default class AntigenParser implements TrackParser<AntigenOutput>  {
     private readonly emitOnDataLoaded = createEmitter<AntigenOutput[]>();
     public readonly onDataLoaded = this.emitOnDataLoaded.event;
     private readonly categoryName = "Antigenic sequences";
+    failDataLoaded(): void {
+        this.emitOnDataLoaded.emit([]);
+    }
     async parse(uniprotId: string, data: ProteinFeatureInfo | ErrorResponse): Promise<TrackRenderer | null> {
         if (isErrorResponse(data)) {
             this.emitOnDataLoaded.emit([]);

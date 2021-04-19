@@ -10,6 +10,9 @@ export default class SMRParser implements TrackParser<SMROutput> {
     public readonly onLabelClick = this.emitOnLabelClick.event;
     private readonly categoryName = "Predicted structures";
     private readonly color = '#2e86c1';
+    failDataLoaded(): void {
+        this.emitOnDataLoaded.emit([]);
+    }
     async parse(uniprotId: string, data: SMRData): Promise<BasicTrackRenderer<SMROutput> | null> {
 
         const result = data.result;

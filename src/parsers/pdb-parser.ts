@@ -5,7 +5,6 @@ import TooltipContent, { createBlast } from '../tooltip-content';
 import { fetchWithTimeout } from '../utils';
 
 export default class PdbParser implements TrackParser<PDBOutput> {
-
     private readonly emitOnDataLoaded = createEmitter<PDBOutput[]>();
     public readonly onDataLoaded = this.emitOnDataLoaded.event;
     private readonly emitOnLabelClick = createEmitter<PDBOutput>();
@@ -14,6 +13,9 @@ export default class PdbParser implements TrackParser<PDBOutput> {
     private readonly observedColor = '#2e86c1';
     private readonly unobservedColor = '#bdbfc1';
     private id = 1;
+    failDataLoaded(): void {
+        this.emitOnDataLoaded.emit([]);
+    }
     async parse(uniprotId: string, data: PDBParserData): Promise<BasicTrackRenderer<PDBOutput> | null> {
         const trackRows: TrackRow<PDBOutput>[] = [];
         const outputs: PDBOutput[] = []

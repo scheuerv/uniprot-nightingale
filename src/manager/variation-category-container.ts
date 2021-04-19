@@ -15,7 +15,7 @@ export default class VariationCategoryContainer implements CategoryContainer {
         min: 200,
         max: 50
     };
-    private arrowClicked = false;
+    private arrowMarked = false;
     constructor(
         private readonly variationGraph: BasicTrackContainer<VariationData>,
         private readonly variation: BasicTrackContainer<VariationData>,
@@ -27,20 +27,20 @@ export default class VariationCategoryContainer implements CategoryContainer {
             {
                 d3.event.stopPropagation();
                 const classList = d3.select(d3.event.target).node().classList;
-                if (this.arrowClicked) {
+                if (this.arrowMarked) {
                     classList.remove('clicked');
-                    this.arrowClicked = false;
+                    this.arrowMarked = false;
                     this.emitOnHighlightChange.emit([]);
                 } else {
                     classList.add("clicked");
-                    this.arrowClicked = true;
+                    this.arrowMarked = true;
                     this.emitOnHighlightChange.emit(this.getFragments(this.variationGraph.track as ProtvistaVariationGraph));
                 }
             }
         });
         protvistaFilter.addEventListener("change", (e) => {
             if (e instanceof CustomEvent && (e as CustomEvent).detail.type === 'filters' && e.detail.for === 'protvista-variation') {
-                if (this.arrowClicked) {
+                if (this.arrowMarked) {
                     this.emitOnHighlightChange.emit(this.getFragments(this.variationGraph.track as ProtvistaVariationGraph));
                 }
             }
@@ -56,7 +56,7 @@ export default class VariationCategoryContainer implements CategoryContainer {
         [this.variationGraph, this.variation].forEach(track => track.addData());
     }
     getMarkedTrackFragments(): TrackFragment[] {
-        if (this.arrowClicked) {
+        if (this.arrowMarked) {
             return this.getFragments(this.variationGraph.track as ProtvistaVariationGraph);
         }
         else {
