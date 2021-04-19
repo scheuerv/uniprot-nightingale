@@ -4,25 +4,17 @@ import ProtvistaVariationGraph from "protvista-variation-graph";
 import ProtvistaVariation from "protvista-variation";
 import VariationFilter, { FilterCase } from "../protvista/variation-filter";
 import BasicTrackContainer from "../manager/track-container";
-import { createRow, markArrow, unmarkArrows, unmarkFragments } from "../utils";
-import BasicCategoryContainer from "../manager/basic-category-container";
+import { createRow } from "../utils";
 import d3 = require('d3');
 import { VariationData } from "../parsers/variation-parser";
 import { filterCases } from "../protvista/variation-filter";
-import { TrackFragment } from "../manager/track-manager";
-import { createEmitter } from "ts-typed-events";
-import ColorConvert from "color-convert";
+import VariationCategoryContainer from "../manager/variation-category-container";
 export default class VariationRenderer implements TrackRenderer {
     private variationGraph: BasicTrackContainer<VariationData>;
     private variation: BasicTrackContainer<VariationData>;
     private subtracksDiv: HTMLDivElement;
     private mainTrackRow: d3.Selection<HTMLDivElement, undefined, null, undefined>;
-    private readonly emitOnArrowClick = createEmitter<TrackFragment[]>();
-    public readonly onArrowClick = this.emitOnArrowClick.event;
-    private readonly variationColors = {
-        min: 200,
-        max: 50
-    };
+
     constructor(private readonly data: VariationData, private readonly mainTrackLabel: string) {
 
     }
@@ -54,19 +46,7 @@ export default class VariationRenderer implements TrackRenderer {
         this.mainTrackRow.select(".track-label").attr("class", "track-label main arrow-right").on('click', () =>
             this.toggle()
         );
-        this.mainTrackRow.select(".fa-arrow-circle-right").on("click", () => {
-            {
-                d3.event.stopPropagation();
-                unmarkArrows();
-                unmarkFragments();
-                if (markArrow()) {
-                    this.emitOnArrowClick.emit(this.getFragments(variationGraph));
-                }
-                else {
-                    this.emitOnArrowClick.emit([]);
-                }
-            }
-        });
+
         categoryDiv.appendChild(this.mainTrackRow.node()!);
         this.subtracksDiv = d3.create("div").attr("class", "subtracks-container").style("display", "none").node()!;
 
@@ -82,34 +62,7 @@ export default class VariationRenderer implements TrackRenderer {
         protvistaFilter.multiFor = new Map();
         protvistaFilter.multiFor.set('protvista-variation-graph', (filterCase: FilterCase) => filterCase.filterDataVariationGraph);
         protvistaFilter.multiFor.set('protvista-variation', (filterCase: FilterCase) => filterCase.filterDataVariation);
-        protvistaFilter.addEventListener("change", (e) => {
-            if (e instanceof CustomEvent && (e as CustomEvent).detail.type === 'filters') {
-                const arrowClicked = this.mainTrackRow.select(".fa-arrow-circle-right.clicked").node();
-                if (arrowClicked) {
-                    this.emitOnArrowClick.emit(this.getFragments(variationGraph));
-                }
-            }
-        });
-        return new BasicCategoryContainer([this.variationGraph, this.variation], categoryDiv!);
-
-
-    }
-    private getFragments(variationGraph: ProtvistaVariationGraph): TrackFragment[] {
-        const histogram = Array.from(variationGraph._totalsArray.total);
-        const max = Math.max.apply(Math, histogram);
-        const relativeHist = histogram.map(function (x) {
-            return x / max;
-        });
-        const fragments = Array.from(relativeHist)
-            .map((relative, index) => {
-                const color = this.variationColors.min + (this.variationColors.max - this.variationColors.min) * relative;
-                return {
-                    start: index,
-                    end: index,
-                    color: '#' + ColorConvert.rgb.hex([color, color, color])
-                }
-            });
-        return fragments;
+        return new VariationCategoryContainer(this.variationGraph, this.variation, protvistaFilter, this.mainTrackRow, categoryDiv!);
     }
 
     private toggle() {

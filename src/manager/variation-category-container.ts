@@ -1,0 +1,83 @@
+import { VariationData } from "../parsers/variation-parser";
+import { createEmitter } from "ts-typed-events";
+import CategoryContainer from "./category-container";
+import BasicTrackContainer from "./track-container";
+import { TrackFragment } from "./track-manager";
+import ProtvistaVariationGraph from "protvista-variation-graph";
+import ColorConvert from "color-convert";
+import VariationFilter from "src/protvista/variation-filter";
+import d3 = require('d3');
+
+export default class VariationCategoryContainer implements CategoryContainer {
+    private readonly emitOnHighlightChange = createEmitter<TrackFragment[]>();
+    public readonly onHighlightChange = this.emitOnHighlightChange.event;
+    private readonly variationColors = {
+        min: 200,
+        max: 50
+    };
+    private arrowClicked = false;
+    constructor(
+        private readonly variationGraph: BasicTrackContainer<VariationData>,
+        private readonly variation: BasicTrackContainer<VariationData>,
+        protvistaFilter: VariationFilter,
+        mainTrackRow: d3.Selection<HTMLDivElement, undefined, null, undefined>,
+        private readonly _categoryDiv: HTMLDivElement
+    ) {
+        mainTrackRow.select(".fa-arrow-circle-right").on("click", () => {
+            {
+                d3.event.stopPropagation();
+                const classList = d3.select(d3.event.target).node().classList;
+                if (this.arrowClicked) {
+                    classList.remove('clicked');
+                    this.arrowClicked = false;
+                    this.emitOnHighlightChange.emit([]);
+                } else {
+                    classList.add("clicked");
+                    this.arrowClicked = true;
+                    this.emitOnHighlightChange.emit(this.getFragments(this.variationGraph.track as ProtvistaVariationGraph));
+                }
+            }
+        });
+        protvistaFilter.addEventListener("change", (e) => {
+            if (e instanceof CustomEvent && (e as CustomEvent).detail.type === 'filters' && e.detail.for === 'protvista-variation') {
+                if (this.arrowClicked) {
+                    this.emitOnHighlightChange.emit(this.getFragments(this.variationGraph.track as ProtvistaVariationGraph));
+                }
+            }
+        });
+    }
+    get trackContainers() {
+        return [this.variationGraph, this.variation];
+    }
+    get content(): HTMLElement {
+        return this._categoryDiv;
+    }
+    addData(): void {
+        [this.variationGraph, this.variation].forEach(track => track.addData());
+    }
+    getMarkedTrackFragments(): TrackFragment[] {
+        if (this.arrowClicked) {
+            return this.getFragments(this.variationGraph.track as ProtvistaVariationGraph);
+        }
+        else {
+            return [];
+        }
+    }
+    private getFragments(variationGraph: ProtvistaVariationGraph): TrackFragment[] {
+        const histogram = Array.from(variationGraph._totalsArray.total);
+        const max = Math.max.apply(Math, histogram);
+        const relativeHist = histogram.map(function (x) {
+            return x / max;
+        });
+        const fragments = Array.from(relativeHist)
+            .map((relative, index) => {
+                const color = this.variationColors.min + (this.variationColors.max - this.variationColors.min) * relative;
+                return {
+                    start: index,
+                    end: index,
+                    color: '#' + ColorConvert.rgb.hex([color, color, color])
+                }
+            });
+        return fragments;
+    }
+}

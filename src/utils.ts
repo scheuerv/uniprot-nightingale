@@ -22,26 +22,6 @@ function createRow(label: Node, content: Node, customClass: string = "", arrow: 
     return row;
 }
 
-function unmarkArrows() {
-    d3.selectAll(".fa-arrow-circle-right.clicked").nodes().forEach(node => {
-        (node as Element).classList.remove("clicked");
-    });
-}
-function unmarkFragments() {
-    d3.selectAll(".fragment-group.clicked").nodes().forEach(node => {
-        (node as Element).classList.remove("clicked");
-    });
-}
-function markArrow() {
-    const classList = d3.select(d3.event.target).node().classList;
-    if (classList.contains("clicked")) {
-        classList.remove('clicked');
-        return false;
-    } else {
-        classList.add("clicked");
-        return true;
-    }
-}
 function getDarkerColor(color: string | undefined) {
     if (!color) {
         return "#000000";
@@ -95,6 +75,5 @@ interface RequestInitWithTimeOut extends RequestInit {
     timeout: number;
 }
 export {
-    loadComponent, createRow, getDarkerColor, groupBy, groupByAndMap, markArrow, fetchWithTimeout, getClickedTrackFragments,
-    unmarkArrows, unmarkFragments
+    loadComponent, createRow, getDarkerColor, groupBy, groupByAndMap, fetchWithTimeout, getClickedTrackFragments
 };

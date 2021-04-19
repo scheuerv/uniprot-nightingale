@@ -3,9 +3,9 @@ import { TrackContainer } from "./track-container";
 import { TrackFragment } from "./track-manager";
 
 export default interface CategoryContainer {
-    content: HTMLElement;
-    trackContainers: TrackContainer[];
-    onHighlightChange: SealedEvent<TrackFragment[]>;
+    readonly content: HTMLElement;
+    readonly trackContainers: TrackContainer[];
+    readonly onHighlightChange: SealedEvent<TrackFragment[]>;
     addData(): void;
     getMarkedTrackFragments(): TrackFragment[];
 }
