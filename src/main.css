@@ -34,6 +34,7 @@ div.track-content.main .empty {
 }
 .fragment-group.clicked {
     stroke-width: 2px;
+    filter: brightness(70%);
 }
 
 protvista-track svg,
