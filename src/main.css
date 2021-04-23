@@ -57,7 +57,9 @@ div.track-label {
     padding: 0.5em;
     vertical-align: middle;
 }
-
+div.track-label div.bold {
+    font-weight: bold;
+}
 div.track-label.main {
     background-color: #b2f5ff;
     cursor: pointer;

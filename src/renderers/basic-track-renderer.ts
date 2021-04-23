@@ -90,6 +90,12 @@ export default class BasicTrackRenderer<Output> implements TrackRenderer {
             const labelElement = d3.create("div").text(subtrackData.label);
             if (subtrackData.output) {
                 labelElement.style("cursor", "pointer");
+                labelElement.on('mouseover',()=>{
+                    labelElement.classed('bold',true);
+                })
+                labelElement.on('mouseout',()=>{
+                    labelElement.classed('bold',false);
+                })
                 labelElement.on('click', () => {
                     this.emitOnLabelClick?.emit(subtrackData.output!);
                 });
