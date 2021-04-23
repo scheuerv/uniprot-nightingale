@@ -17,26 +17,33 @@ export default class BasicCategoryContainer implements CategoryContainer {
         return this._categoryDiv;
     }
     getMarkedTrackFragments(): TrackFragment[] {
-        return this._rowWrappers[0].getMarkedFragments();
+        return this._rowWrappers[0]?.getMarkedFragments() ?? [];
     }
     addData() {
         this._tracks.forEach(track => track.addData());
         const map: Map<number, ElementAndBuilder[]> = new Map();
         const mainRowElement = d3.select(this._categoryDiv).select('.track-row.main');
-        const mainRowWrapperBuilder = new RowWrapperBuilder(mainRowElement.select('.fa-arrow-circle-right').node() as Element);
-        const rowWrapperBuilders = [mainRowWrapperBuilder];
-        mainRowElement.selectAll('.fragment-group').nodes().forEach(fragment => {
-            const fragmentWithData = fragment as ElementWithData;
-            map.set(fragmentWithData.__data__.id, [{ element: fragmentWithData, builder: mainRowWrapperBuilder }]);
-        });
+        const rowWrapperBuilders: RowWrapperBuilder[] = [];
+        const arrowElement = mainRowElement.select('.fa-arrow-circle-right').node() as Element;
+        if (arrowElement) {
+            const mainRowWrapperBuilder = new RowWrapperBuilder(arrowElement);
+            rowWrapperBuilders.push(mainRowWrapperBuilder);
+            mainRowElement.selectAll('.fragment-group').nodes().forEach(fragment => {
+                const fragmentWithData = fragment as ElementWithData;
+                map.set(fragmentWithData.__data__.id, [{ element: fragmentWithData, builder: mainRowWrapperBuilder }]);
+            });
+        }
         d3.select(this._categoryDiv).selectAll('.subtracks-container .track-row').nodes().forEach(row => {
             const rowSelection = d3.select(row);
-            const rowWrapperBuilder = new RowWrapperBuilder(rowSelection.select('.fa-arrow-circle-right').node() as Element);
-            rowWrapperBuilders.push(rowWrapperBuilder);
-            rowSelection.selectAll('.fragment-group').nodes().forEach(fragment => {
-                const fragmentWithData = fragment as ElementWithData;
-                map.get(fragmentWithData.__data__.id)?.push({ element: fragmentWithData, builder: rowWrapperBuilder });
-            });
+            const arrowElement = rowSelection.select('.fa-arrow-circle-right').node() as Element;
+            if (arrowElement) {
+                const rowWrapperBuilder = new RowWrapperBuilder(arrowElement);
+                rowWrapperBuilders.push(rowWrapperBuilder);
+                rowSelection.selectAll('.fragment-group').nodes().forEach(fragment => {
+                    const fragmentWithData = fragment as ElementWithData;
+                    map.get(fragmentWithData.__data__.id)?.push({ element: fragmentWithData, builder: rowWrapperBuilder });
+                });
+            }
         });
         map.forEach((fragmentRowTuples, id) => {
             const fragmentWrapper = new FragmentWrapper(fragmentRowTuples.map(it => it.element), fragmentRowTuples[0].element.__data__);
@@ -47,7 +54,7 @@ export default class BasicCategoryContainer implements CategoryContainer {
         this._rowWrappers = rowWrapperBuilders.map(builder => {
             return builder.build();
         });
-        this._rowWrappers[0].onHighlightChange.on(trackFragments => {
+        this._rowWrappers[0]?.onHighlightChange.on(trackFragments => {
             this.emitOnHighlightChange.emit(trackFragments);
         });
     }
