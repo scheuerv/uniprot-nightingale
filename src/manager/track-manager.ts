@@ -107,6 +107,7 @@ export default class TrackManager {
                 });
                 categoryContainer.addData();
             });
+            // window.addEventListener('resize', this.windowResize.bind(this));
             d3.selectAll("protvista-track").on("change", (f, i) => {
                 const e = d3.event;
                 updateTooltip(e, e.detail);
@@ -171,27 +172,46 @@ export default class TrackManager {
 
 function updateTooltip(e: { clientY: number; clientX: number; eventtype: string },
     detail: { eventtype: string, coords: number[]; feature: Accession; target: { __data__: Fragment; }; }) {
+    const previousTooltip = d3.select("protvista-tooltip");
     if (detail.eventtype == 'mouseout') {
-        removeAllTooltips();
+        if (!previousTooltip.empty() && previousTooltip.classed('click-open')) {
+        } else {
+            removeAllTooltips();
+        }
         return;
     }
-    if (detail.eventtype != 'mouseover') {
+    if (detail.eventtype == 'click') {
+        createTooltip(detail, true);
         return;
     }
-    const fragment = detail.target.__data__;
-    d3.select("protvista-tooltip")
-        .data([fragment])
-        .enter()
-        .append("protvista-tooltip");
+    if (detail.eventtype == 'mouseover') {
+        if (!previousTooltip.empty() && previousTooltip.classed('click-open')) {
+        } else {
+            removeAllTooltips();
+            createTooltip(detail);
+        }
+        return;
+    }
+    removeAllTooltips();
+}
 
-    d3.select("protvista-tooltip")
-        .attr("x", detail.coords[0])
-        .attr("y", detail.coords[1])
-        .attr("title", fragment.tooltipContent?.title ?? "")
-        .attr("visible", true)
-        .html(fragment.tooltipContent?.render() ?? "")
-        .exit()
-        .remove();
+function createTooltip(detail: { eventtype: string; coords: number[]; feature: Accession; target: { __data__: Fragment; }; }, closeable = false) {
+    if (detail.target) {
+        const fragment = detail.target.__data__;
+        d3.select("protvista-tooltip")
+            .data([fragment])
+            .enter()
+            .append("protvista-tooltip");
+        d3.select("protvista-tooltip")
+            .attr("x", detail.coords[0])
+            .attr("y", detail.coords[1])
+            .attr("title", fragment.tooltipContent?.title ?? "")
+            .attr("visible", true)
+            .html(fragment.tooltipContent?.render() ?? "");
+        if (closeable) {
+            d3.select("protvista-tooltip").classed('click-open', true);
+        }
+    }
 }
 
 function removeAllTooltips() {
