@@ -9,7 +9,7 @@ export default class VariationFilter extends ProtvistaFilter {
         ((filterCase: FilterCase) => (variants: FilterVariationData[]) => FilterVariationData[])
         | ((filterCase: FilterCase) => (variants: VariationData) => Variant[])
     )>;
-    getCheckBox(filterItem: FilterCase) {
+    public getCheckBox(filterItem: FilterCase) {
         const { name, options } = filterItem;
         const { labels } = options;
         const isCompound = options.colors.length > 1;
@@ -46,7 +46,7 @@ export default class VariationFilter extends ProtvistaFilter {
         return result;
     }
 
-    static get styles() {
+    public static get styles() {
         return [
             ProtvistaFilter.styles,
             css` .protvista_checkbox.compound .checkmark
@@ -58,7 +58,7 @@ export default class VariationFilter extends ProtvistaFilter {
 
     }
 
-    toggleFilter(name: string) {
+    public toggleFilter(name: string) {
         if (!this.selectedFilters.has(name)) {
             this.selectedFilters.add(name);
         } else {

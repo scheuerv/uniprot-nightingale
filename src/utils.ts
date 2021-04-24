@@ -1,7 +1,6 @@
 import d3 = require("d3");
 
 import ColorConvert from "color-convert";
-import { ElementWithData } from "./renderers/basic-track-renderer";
 
 const loadComponent = function (name: string, className: CustomElementConstructor) {
     if (!customElements.get(name)) {
@@ -65,15 +64,9 @@ async function fetchWithTimeout(resource: string, options: RequestInitWithTimeOu
 
     return response;
 }
-function getClickedTrackFragments() {
-    return d3.selectAll('.fragment-group.clicked').nodes().map(fragment => {
-        const fragmentData = (fragment as ElementWithData).__data__;
-        return { start: fragmentData.start, end: fragmentData.end, color: fragmentData.color }
-    });
-}
 interface RequestInitWithTimeOut extends RequestInit {
     timeout: number;
 }
 export {
-    loadComponent, createRow, getDarkerColor, groupBy, groupByAndMap, fetchWithTimeout, getClickedTrackFragments
+    loadComponent, createRow, getDarkerColor, groupBy, groupByAndMap, fetchWithTimeout
 };

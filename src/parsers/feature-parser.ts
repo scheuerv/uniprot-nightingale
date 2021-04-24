@@ -10,10 +10,10 @@ import { createEmitter } from "ts-typed-events";
 export default class FeatureParser implements TrackParser<FeatureOutput> {
     private readonly emitOnDataLoaded = createEmitter<FeatureOutput[]>();
     public readonly onDataLoaded = this.emitOnDataLoaded.event;
-    failDataLoaded(): void {
+    public failDataLoaded(): void {
         this.emitOnDataLoaded.emit([]);
     }
-    async parse(uniprotId: string, data: ProteinFeatureInfo | ErrorResponse): Promise<TrackRenderer | null> {
+    public async parse(uniprotId: string, data: ProteinFeatureInfo | ErrorResponse): Promise<TrackRenderer | null> {
         if (isErrorResponse(data)) {
             this.emitOnDataLoaded.emit([]);
             return null;
@@ -55,7 +55,7 @@ export default class FeatureParser implements TrackParser<FeatureOutput> {
         }
     }
 
-    createLabel(category: string) {
+    private createLabel(category: string) {
         category = category[0].toUpperCase() + category.slice(1, category.length).replace(/_/g, ' ').toLowerCase();
         return category;
     }

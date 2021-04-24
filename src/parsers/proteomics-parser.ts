@@ -13,10 +13,10 @@ export default class ProteomicsParser implements TrackParser<ProteomicsOutput> {
     private readonly nonUnique = "NON_UNIQUE";
     private readonly emitOnDataLoaded = createEmitter<ProteomicsOutput[]>();
     public readonly onDataLoaded = this.emitOnDataLoaded.event;
-    failDataLoaded(): void {
+    public failDataLoaded(): void {
         this.emitOnDataLoaded.emit([]);
     }
-    async parse(uniprotId: string, data: ProteinFeatureInfo | ErrorResponse): Promise<TrackRenderer | null> {
+    public async parse(uniprotId: string, data: ProteinFeatureInfo | ErrorResponse): Promise<TrackRenderer | null> {
         if (isErrorResponse(data)) {
             this.emitOnDataLoaded.emit([]);
             return null;

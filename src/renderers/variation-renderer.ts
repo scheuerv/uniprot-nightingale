@@ -19,7 +19,7 @@ export default class VariationRenderer implements TrackRenderer {
 
     }
 
-    getCategoryContainer(sequence: string): CategoryContainer {
+    public getCategoryContainer(sequence: string): CategoryContainer {
         const variationGraph = d3.create("protvista-variation-graph")
             .attr("highlight-event", "onclick")
             .attr("id", "protvista-variation-graph")

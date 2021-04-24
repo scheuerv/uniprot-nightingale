@@ -10,10 +10,10 @@ export default class VariationParser implements TrackParser<VariationOutput> {
     private readonly categoryName = "Variation"
     private readonly emitOnDataLoaded = createEmitter<VariationOutput[]>();
     public readonly onDataLoaded = this.emitOnDataLoaded.event;
-    failDataLoaded(): void {
+    public failDataLoaded(): void {
         this.emitOnDataLoaded.emit([]);
     }
-    async parse(uniprotId: string, data: ProteinsAPIVariation | ErrorResponse): Promise<TrackRenderer | null> {
+    public async parse(uniprotId: string, data: ProteinsAPIVariation | ErrorResponse): Promise<TrackRenderer | null> {
         if (isErrorResponse(data)) {
             this.emitOnDataLoaded.emit([]);
             return null;

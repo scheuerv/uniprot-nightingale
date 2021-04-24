@@ -14,10 +14,15 @@ export default class BasicTrackRenderer<Output> implements TrackRenderer {
     private subtracks: BasicTrackContainer<Accession[]>[];
     private subtracksDiv: HTMLDivElement;
     private mainTrackRow: d3.Selection<HTMLDivElement, undefined, null, undefined>;
-    constructor(private readonly rows: TrackRow<Output>[], private readonly mainTrackLabel: string, private readonly emitOnLabelClick: Emitter<Output, SealedEvent<Output>> | undefined, private readonly displayArrow: boolean) {
+    constructor(
+        private readonly rows: TrackRow<Output>[],
+        private readonly mainTrackLabel: string,
+        private readonly emitOnLabelClick: Emitter<Output, SealedEvent<Output>> | undefined,
+        private readonly displayArrow: boolean
+    ) {
 
     }
-    getCategoryContainer(sequence: string): BasicCategoryContainer {
+    public getCategoryContainer(sequence: string): BasicCategoryContainer {
 
         [this.mainTrack, this.mainTrackRow] = this.getMainTrack(sequence);
         [this.subtracks, this.subtracksDiv] = this.getSubtracks(sequence);
@@ -90,11 +95,11 @@ export default class BasicTrackRenderer<Output> implements TrackRenderer {
             const labelElement = d3.create("div").text(subtrackData.label);
             if (subtrackData.output) {
                 labelElement.style("cursor", "pointer");
-                labelElement.on('mouseover',()=>{
-                    labelElement.classed('bold',true);
+                labelElement.on('mouseover', () => {
+                    labelElement.classed('bold', true);
                 })
-                labelElement.on('mouseout',()=>{
-                    labelElement.classed('bold',false);
+                labelElement.on('mouseout', () => {
+                    labelElement.classed('bold', false);
                 })
                 labelElement.on('click', () => {
                     this.emitOnLabelClick?.emit(subtrackData.output!);
@@ -119,38 +124,32 @@ export class TrackRow<Output> {
     }
 }
 export class Accession {
-
-    readonly coverage?: number;
-    readonly pdbStart?: number;
-    readonly pdbEnd?: number;
-    readonly uniprotStart?: number;
-    readonly uniprotEnd?: number;
     constructor
         (
-            readonly color: string | null,
-            readonly locations: Location[],
-            readonly type?: string,
-            readonly experimentalMethod?: string,
-            readonly coordinatesFile?: string
+            public readonly color: string | null,
+            public readonly locations: Location[],
+            public readonly type?: string,
+            public readonly experimentalMethod?: string,
+            public readonly coordinatesFile?: string
         ) { }
 }
 export class Location {
     constructor
         (
-            readonly fragments: Fragment[]
+            public readonly fragments: Fragment[]
         ) { }
 
 }
 
 export class Fragment {
     constructor(
-        readonly id: number,
-        readonly start: number,
-        readonly end: number,
-        readonly color: string,
-        readonly fill?: string,
-        readonly shape?: string,
-        readonly tooltipContent?: TooltipContent
+        public readonly id: number,
+        public readonly start: number,
+        public readonly end: number,
+        public readonly color: string,
+        public readonly fill?: string,
+        public readonly shape?: string,
+        public readonly tooltipContent?: TooltipContent
     ) { }
 }
 
@@ -161,8 +160,8 @@ export class FragmentWrapper {
     public readonly onMarkedChange = this.emitOnMarkedChange.event;
     private isMarked = false;
     constructor(
-        readonly fragmentElements: ElementWithData[] = [],
-        readonly fragmentData: Fragment,
+        public readonly fragmentElements: ElementWithData[] = [],
+        public readonly fragmentData: Fragment,
     ) {
         fragmentElements.forEach((fragmentElement, i) => {
             d3.select(fragmentElement).on("click", () => {
@@ -248,7 +247,7 @@ export class RowWrapper {
 export class RowWrapperBuilder {
     private readonly fragmentWrappers: FragmentWrapper[] = [];
     constructor(
-        readonly arrowElement: Element
+        public readonly arrowElement: Element
     ) { }
 
     public addFragmentWrapper(fragmentWrapper: FragmentWrapper) {

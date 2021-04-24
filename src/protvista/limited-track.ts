@@ -4,7 +4,7 @@ import DefaultLayout from "protvista-track/src/DefaultLayout";
 
 
 export default class LimitedTrack extends ProtvistaTrack {
-  getLayout() {
+  public getLayout() {
     if (String(this.getAttribute("layout")).toLowerCase() === "non-overlapping")
       return new LimitedNonOverlappingLayout({
         layoutHeight: this._height,

@@ -16,10 +16,10 @@ export default class BasicCategoryContainer implements CategoryContainer {
     get content(): HTMLElement {
         return this._categoryDiv;
     }
-    getMarkedTrackFragments(): TrackFragment[] {
+    public getMarkedTrackFragments(): TrackFragment[] {
         return this._rowWrappers[0]?.getMarkedFragments() ?? [];
     }
-    addData() {
+    public addData() {
         this._tracks.forEach(track => track.addData());
         const map: Map<number, ElementAndBuilder[]> = new Map();
         const mainRowElement = d3.select(this._categoryDiv).select('.track-row.main');
@@ -58,10 +58,10 @@ export default class BasicCategoryContainer implements CategoryContainer {
             this.emitOnHighlightChange.emit(trackFragments);
         });
     }
-    get rowWrappers() {
+    public get rowWrappers() {
         return this._rowWrappers;
     }
-    get trackContainers() {
+    public get trackContainers() {
         return this._tracks;
     }
 }

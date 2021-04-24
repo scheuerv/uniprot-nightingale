@@ -1,11 +1,11 @@
 import ProtvistaVariationGraph from "protvista-variation-graph";
 import { VariationData } from "../parsers/variation-parser";
 export default class VariationGraph extends ProtvistaVariationGraph {
-    set data(data: VariationData) {
+    public set data(data: VariationData) {
         this._originalData = data;
         super.data = data;
     }
-    _applyFilters() {
+    public _applyFilters() {
         super._applyFilters();
         const data = this.getCurrentData();
         const totalsArray = {

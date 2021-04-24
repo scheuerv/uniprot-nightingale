@@ -22,7 +22,7 @@ export default class TooltipContent {
     public get title() {
         return this._title;
     }
-    addEvidenceIfDefined(feature: Feature, uniprotId: string) {
+    public addEvidenceIfDefined(feature: Feature, uniprotId: string) {
         if (feature.evidences) {
             const groupedEvidencesByCode = groupBy(
                 feature.evidences,
@@ -42,7 +42,7 @@ export default class TooltipContent {
             });
         }
     }
-    addXRefsIfDefined(feature: Feature) {
+    public addXRefsIfDefined(feature: Feature) {
         if (feature.xrefs) {
             const groupedXrefsByCode = groupBy(
                 feature.xrefs.filter(xref => xref.id != undefined),

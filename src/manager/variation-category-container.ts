@@ -19,8 +19,8 @@ export default class VariationCategoryContainer implements CategoryContainer {
     constructor(
         private readonly variationGraph: BasicTrackContainer<VariationData>,
         private readonly variation: BasicTrackContainer<VariationData>,
-        protvistaFilter: VariationFilter,
-        mainTrackRow: d3.Selection<HTMLDivElement, undefined, null, undefined>,
+        public protvistaFilter: VariationFilter,
+        public mainTrackRow: d3.Selection<HTMLDivElement, undefined, null, undefined>,
         private readonly _categoryDiv: HTMLDivElement
     ) {
         mainTrackRow.select(".fa-arrow-circle-right").on("click", () => {
@@ -46,16 +46,16 @@ export default class VariationCategoryContainer implements CategoryContainer {
             }
         });
     }
-    get trackContainers() {
+    public get trackContainers() {
         return [this.variationGraph, this.variation];
     }
-    get content(): HTMLElement {
+    public get content(): HTMLElement {
         return this._categoryDiv;
     }
-    addData(): void {
+    public addData(): void {
         [this.variationGraph, this.variation].forEach(track => track.addData());
     }
-    getMarkedTrackFragments(): TrackFragment[] {
+    public getMarkedTrackFragments(): TrackFragment[] {
         if (this.arrowMarked) {
             return this.getFragments(this.variationGraph.track as ProtvistaVariationGraph);
         }

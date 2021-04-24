@@ -25,16 +25,17 @@ export default class TrackManager {
     public readonly onHighlightChange = this.emitOnHighlightChange.event;
     private readonly tracks: Track[] = [];
     private sequence: string = "";
-    private protvistaManager: ProtvistaManager;
     private lastClickedFragment: {
         fragment: ElementWithData,
         mouseX: number,
         mouseY: number
     } | undefined;
+    private readonly protvistaManagerD3 = d3.create("protvista-manager").attr("attributes", "length displaystart displayend highlightstart highlightend activefilters filters");
+    private readonly protvistaManager = this.protvistaManagerD3.node()! as ProtvistaManager;
     constructor(private readonly sequenceUrlGenerator: (url: string) => string) {
 
     }
-    static createDefault() {
+    public static createDefault() {
         const trackManager = new TrackManager(uniProtId => `https://www.uniprot.org/uniprot/${uniProtId}.fasta`)
         trackManager.addTrack(uniProtId => `https://www.ebi.ac.uk/pdbe/api/mappings/best_structures/${uniProtId}`, new PdbParser());
         trackManager.addTrack(uniProtId => `https://swissmodel.expasy.org/repository/uniprot/${uniProtId}.json?provider=swissmodel`, new SMRParser());
@@ -45,16 +46,13 @@ export default class TrackManager {
         return trackManager;
     }
 
-    getParsersByType<T extends TrackParser<any>>(filterType: Constructor<T>): T[] {
+    public getParsersByType<T extends TrackParser<any>>(filterType: Constructor<T>): T[] {
         return this.tracks.map(t => t.parser)
             .filter(parser => parser instanceof filterType)
             .map(parser => parser as T);
     }
 
-    async render(uniprotId: string, element: HTMLElement) {
-        this.protvistaManager = d3.create("protvista-manager")
-            .attr("attributes", "length displaystart displayend highlightstart highlightend activefilters filters")
-            .node()! as ProtvistaManager;
+    public async render(uniprotId: string, element: HTMLElement) {
         await fetchWithTimeout(this.sequenceUrlGenerator(uniprotId), { timeout: 8000 }).then(data => data.text())
             .then(data => {
                 const tokens = data.split(/\r?\n/);
@@ -117,18 +115,18 @@ export default class TrackManager {
                     const boundingRect = this.lastClickedFragment.fragment.getBoundingClientRect();
                     const mouseX = boundingRect.width * this.lastClickedFragment.mouseX;
                     const mouseY = boundingRect.height * this.lastClickedFragment.mouseY;
-                    d3.select("protvista-tooltip")
+                    this.protvistaManagerD3.select("protvista-tooltip")
                         .attr("x", boundingRect.x + mouseX)
                         .attr("y", boundingRect.y + mouseY)
                 }
             });
-            const protvistaNavigation = d3.select("protvista-navigation").node() as ProtvistaNavigation;
+            this.protvistaManagerD3.selectAll("protvista-track").on("change", () => {
                 this.updateTooltip(d3.event.detail, resizeObserver);
             });
+            const protvistaNavigation = this.protvistaManagerD3.select("protvista-navigation").node() as ProtvistaNavigation;
             let lastFocusedResidue: number | undefined;
-            d3.selectAll("protvista-track g.fragment-group").on("mousemove", (f, i) => {
+            this.protvistaManagerD3.selectAll("protvista-track g.fragment-group").on("mousemove", f => {
                 const feature = f as { start: number, end: number };
-                const e = d3.event;
                 const xScale = d3.scaleLinear<number>()
                     .domain([0, protvistaNavigation.width - 2 * protvistaNavigation._padding])
                     .rangeRound([
@@ -151,7 +149,7 @@ export default class TrackManager {
         });
 
     }
-    highlight(start: number, end: number) {
+    public highlight(start: number, end: number) {
         this.protvistaManager.dispatchEvent(new CustomEvent('change', {
             detail: {
                 highlight: `${start}:${end}`,
@@ -159,7 +157,7 @@ export default class TrackManager {
         }));
     }
 
-    highlightOff() {
+    public highlightOff() {
         this.protvistaManager.dispatchEvent(new CustomEvent('change', {
             detail: {
                 highlight: null,
@@ -167,14 +165,14 @@ export default class TrackManager {
         }));
     }
 
-    addTrack(urlGenerator: (url: string) => string, parser: TrackParser<any>) {
+    public addTrack(urlGenerator: (url: string) => string, parser: TrackParser<any>) {
         this.tracks.push({ urlGenerator, parser })
     }
     private updateTooltip(
         detail: { eventtype: string, coords: number[]; feature: Accession; target: ElementWithData | undefined; },
         resizeObserver: ResizeObserver
     ) {
-        const previousTooltip = d3.select("protvista-tooltip");
+        const previousTooltip = this.protvistaManagerD3.select("protvista-tooltip");
         if (detail.eventtype == 'mouseout') {
             if (!previousTooltip.empty() && previousTooltip.classed('click-open')) {
             } else {
@@ -203,11 +201,11 @@ export default class TrackManager {
         }
         if (detail.target) {
             const fragment = detail.target.__data__;
-            d3.select("protvista-tooltip")
+            this.protvistaManagerD3.selectAll("protvista-tooltip")
                 .data([fragment])
                 .enter()
                 .append("protvista-tooltip");
-            d3.select("protvista-tooltip")
+            this.protvistaManagerD3.selectAll("protvista-tooltip")
                 .attr("x", detail.coords[0])
                 .attr("y", detail.coords[1])
                 .attr("title", fragment.tooltipContent?.title ?? "")
@@ -220,12 +218,12 @@ export default class TrackManager {
                 const mouseY = (detail.coords[1] - boundingRect.y) / boundingRect.height;
                 this.lastClickedFragment = { fragment: fragment, mouseX: mouseX, mouseY: mouseY };
                 resizeObserver.observe(this.lastClickedFragment.fragment)
-                d3.select("protvista-tooltip").classed('click-open', true);
+                this.protvistaManagerD3.select("protvista-tooltip").classed('click-open', true);
             }
         }
     }
     private removeAllTooltips() {
-        d3.selectAll("protvista-tooltip").remove();
+        this.protvistaManagerD3.selectAll("protvista-tooltip").remove();
     }
 }
 

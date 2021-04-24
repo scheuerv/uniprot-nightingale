@@ -10,19 +10,19 @@ export default class CompositeCategoryContainer implements CategoryContainer {
             categoryContainer.onHighlightChange.on(trackFragment => this.emitOnHighlightChange.emit(trackFragment))
         })
     }
-    getMarkedTrackFragments(): TrackFragment[] {
+    public getMarkedTrackFragments(): TrackFragment[] {
         return this.categoryContainers.flatMap(categoryContainer => categoryContainer.getMarkedTrackFragments());
     }
-    get trackContainers() {
+    public get trackContainers() {
         return this.categoryContainers.flatMap(categoryContainer => categoryContainer.trackContainers);
     }
-    get content() {
+    public get content() {
         const div = document.createElement("div");
         this.categoryContainers.forEach(categoryContainer => div.appendChild(categoryContainer.content));
         return div;
 
     }
-    addData(): void {
+    public addData(): void {
         this.categoryContainers.forEach(categoryContainer => categoryContainer.addData());
     }
 

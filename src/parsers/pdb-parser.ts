@@ -13,10 +13,10 @@ export default class PdbParser implements TrackParser<PDBOutput> {
     private readonly observedColor = '#2e86c1';
     private readonly unobservedColor = '#bdbfc1';
     private id = 1;
-    failDataLoaded(): void {
+    public failDataLoaded(): void {
         this.emitOnDataLoaded.emit([]);
     }
-    async parse(uniprotId: string, data: PDBParserData): Promise<BasicTrackRenderer<PDBOutput> | null> {
+    public async parse(uniprotId: string, data: PDBParserData): Promise<BasicTrackRenderer<PDBOutput> | null> {
         const trackRows: TrackRow<PDBOutput>[] = [];
         const outputs: PDBOutput[] = []
         if (data[uniprotId]) {
