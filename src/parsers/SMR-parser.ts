@@ -29,7 +29,7 @@ export default class SMRParser implements TrackParser<SMROutput> {
             structure.chains.forEach(chain => {
                 let output: SMROutput | undefined = undefined;
                 if (sTemplate !== null) {
-                    output = { pdbId: sTemplate[1], chain: chain.id };
+                    output = { pdbId: sTemplate[1], chain: chain.id, coordinatesFile: coordinatesFile };
                     outputs.push(output)
                 }
                 const fragments = chain.segments.map(segment => {
@@ -41,7 +41,7 @@ export default class SMRParser implements TrackParser<SMROutput> {
 
                 const accesion = new Accession(null, [
                     new Location(fragments)
-                ], 'SMR', experimentalMethod, coordinatesFile)
+                ], 'SMR', experimentalMethod)
                 trackRows.push(new TrackRow([accesion], pdbId + ' ' + chain.id.toLowerCase(), output));
                 return outputs;
             });
@@ -56,7 +56,7 @@ export default class SMRParser implements TrackParser<SMROutput> {
     }
 
 }
-type SMROutput = { readonly pdbId: string, readonly chain: string };
+type SMROutput = { readonly pdbId: string, readonly chain: string, coordinatesFile: string };
 
 type SMRResult = {
     readonly sequence: string,

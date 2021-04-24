@@ -129,8 +129,7 @@ export class Accession {
             public readonly color: string | null,
             public readonly locations: Location[],
             public readonly type?: string,
-            public readonly experimentalMethod?: string,
-            public readonly coordinatesFile?: string
+            public readonly experimentalMethod?: string
         ) { }
 }
 export class Location {
