@@ -113,13 +113,20 @@ export default class TrackManager {
             const resizeObserver = new ResizeObserver(() => {
                 if (this.lastClickedFragment) {
                     const boundingRect = this.lastClickedFragment.fragment.getBoundingClientRect();
-                    const mouseX = boundingRect.width * this.lastClickedFragment.mouseX;
-                    const mouseY = boundingRect.height * this.lastClickedFragment.mouseY;
-                    this.protvistaManagerD3.select("protvista-tooltip")
-                        .attr("x", boundingRect.x + mouseX)
-                        .attr("y", boundingRect.y + mouseY)
+                    if (boundingRect.width == 0) {
+                        this.protvistaManagerD3.select("protvista-tooltip").attr('visible', null);
+                    }
+                    else {
+                        const mouseX = boundingRect.width * this.lastClickedFragment.mouseX;
+                        const mouseY = boundingRect.height * this.lastClickedFragment.mouseY;
+                        this.protvistaManagerD3.select("protvista-tooltip")
+                            .attr("x", boundingRect.x + mouseX)
+                            .attr("y", boundingRect.y + mouseY)
+                            .attr('visible', '');
+                    }
                 }
             });
+            resizeObserver.observe(element);
             this.protvistaManagerD3.selectAll("protvista-track").on("change", () => {
                 this.updateTooltip(d3.event.detail, resizeObserver);
             });

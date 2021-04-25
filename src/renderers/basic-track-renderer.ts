@@ -36,7 +36,7 @@ export default class BasicTrackRenderer<Output> implements TrackRenderer {
         categoryDiv!.append(this.subtracksDiv!);
         return new BasicCategoryContainer(trackContainers, categoryDiv!);
     }
-    private toggle(sequence: string) {
+    private toggle() {
         const classList = d3.select(this.mainTrack.track).node()?.parentElement!.classList;
         if (this.subtracksDiv.style.display === 'none') {
             this.subtracksDiv.style.display = 'block';
@@ -76,7 +76,7 @@ export default class BasicTrackRenderer<Output> implements TrackRenderer {
         track.parentElement!.appendChild(emptyTrack);
         mainTrackRow.attr("class", mainTrackRow.attr("class") + " main")
         mainTrackRow.select(".track-label").attr("class", "track-label main arrow-right").on('click', () =>
-            this.toggle(sequence)
+            this.toggle()
         );
         return [new MainTrackContainer<Accession[]>(track, emptyTrack, mainTrackDataAligned), mainTrackRow];
     }
