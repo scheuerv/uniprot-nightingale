@@ -1,4 +1,4 @@
-import TrackParser from './track-parser';
+import TrackParser, { Mapping } from './track-parser';
 import BasicTrackRenderer, { Fragment, Location, Accession, TrackRow } from '../renderers/basic-track-renderer';
 import { getDarkerColor } from '../utils';
 import { createEmitter } from 'ts-typed-events';
@@ -29,7 +29,7 @@ export default class SMRParser implements TrackParser<SMROutput> {
             structure.chains.forEach(chain => {
                 let output: SMROutput | undefined = undefined;
                 if (sTemplate !== null) {
-                    output = { pdbId: sTemplate[1], chain: chain.id, coordinatesFile: coordinatesFile };
+                    output = { pdbId: sTemplate[1], chain: chain.id, coordinatesFile: coordinatesFile, mapping: { uniprotStart: structure.from, pdbStart: structure.from, uniprotEnd: structure.to, pdbEnd: structure.to } };
                     outputs.push(output)
                 }
                 const fragments = chain.segments.map(segment => {
@@ -56,7 +56,9 @@ export default class SMRParser implements TrackParser<SMROutput> {
     }
 
 }
-type SMROutput = { readonly pdbId: string, readonly chain: string, coordinatesFile: string };
+type SMROutput = {
+    readonly pdbId: string, readonly chain: string, readonly coordinatesFile: string, readonly mapping: Mapping
+};
 
 type SMRResult = {
     readonly sequence: string,

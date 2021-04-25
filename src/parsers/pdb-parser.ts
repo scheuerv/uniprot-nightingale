@@ -1,4 +1,4 @@
-import TrackParser from './track-parser';
+import TrackParser, { Mapping } from './track-parser';
 import BasicTrackRenderer, { Fragment, Location, Accession, TrackRow } from '../renderers/basic-track-renderer';
 import { createEmitter } from 'ts-typed-events';
 import TooltipContent, { createBlast } from '../tooltip-content';
@@ -66,11 +66,11 @@ export default class PdbParser implements TrackParser<PDBOutput> {
                             result.data[pdbId].molecules.forEach((molecule) => {
                                 molecule.chains.forEach(chain => {
                                     const chainId = result.source.chain_id;
-                                    const output: PDBOutput = { pdbId: pdbId, chain: chainId };
-                                    outputs.push(output);
                                     const uniprotStart = result.source.unp_start;
                                     const uniprotEnd = result.source.unp_end;
                                     const pdbStart = result.source.start;
+                                    const output: PDBOutput = { pdbId: pdbId, chain: chainId, mapping: { uniprotStart: uniprotStart, uniprotEnd: uniprotEnd, pdbStart: pdbStart, pdbEnd: result.source.end } };
+                                    outputs.push(output);
                                     const observedFragments = chain.observed.map(fragment => {
                                         const start: number = Math.max(fragment.start.residue_number + uniprotStart - pdbStart, uniprotStart);
                                         const end: number = Math.min(fragment.end.residue_number + uniprotStart - pdbStart, uniprotEnd);
@@ -158,7 +158,7 @@ export default class PdbParser implements TrackParser<PDBOutput> {
         return tooltipContent;
     }
 }
-type PDBOutput = { readonly pdbId: string, readonly chain: string };
+type PDBOutput = { readonly pdbId: string, readonly chain: string, readonly mapping: Mapping };
 
 type PDBParserData = Record<string, readonly PDBParserItem[]>;
 

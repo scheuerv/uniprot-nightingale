@@ -62,3 +62,6 @@ type Evidence = {
     readonly source?: DbReferenceObject
 }
 
+export type Mapping = {
+    uniprotStart: number, uniprotEnd: number, pdbEnd: number, pdbStart: number
+}
