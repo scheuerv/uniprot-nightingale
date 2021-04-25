@@ -28,8 +28,8 @@
         "protvista-tooltip": "^3.1.2",
         "protvista-track": "^3.2.1",
         "protvista-variation": "^3.2.1",
-        "protvista-variation-adapter": "^3.2.1",
-        "protvista-variation-graph": "^3.2.1",
+        "protvista-variation-adapter": "^3.2.6",
+        "protvista-variation-graph": "^3.2.3",
         "ts-typed-events": "^3.0.0"
     },
     "devDependencies": {
