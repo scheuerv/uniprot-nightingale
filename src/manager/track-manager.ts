@@ -12,6 +12,8 @@ import VariationParser from '../parsers/variation-parser';
 import ProtvistaManager from 'protvista-manager';
 import { createEmitter } from "ts-typed-events";
 import ProtvistaNavigation from 'protvista-navigation';
+import OverlayScrollbars from 'overlayscrollbars';
+import 'overlayscrollbars/css/OverlayScrollbars.min.css'
 
 type Constructor<T> = new (...args: any[]) => T;
 export default class TrackManager {
@@ -153,6 +155,15 @@ export default class TrackManager {
                 this.emitOnFragmentMouseOut.emit();
             });
             this.emitOnRendered.emit();
+            
+            OverlayScrollbars(document.querySelectorAll('.subtracks-container.scrollable'), {
+                resize: "vertical",
+                paddingAbsolute: true,
+                scrollbars: {
+                    clickScrolling: true,
+                    autoHide: 'leave'
+                }
+            });
         });
 
     }

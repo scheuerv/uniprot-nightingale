@@ -9,7 +9,11 @@ div.track-row.main,
     margin-bottom: 0.1em;
     border-bottom: 0.1em solid #b2f5ff;
 }
-
+.subtracks-container.scrollable {
+    overflow-y: scroll;
+    min-height: 50px;
+    height: 200px;
+}
 div.track-content {
     display: block;
     width: 100%;

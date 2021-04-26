@@ -84,6 +84,10 @@ export default class BasicTrackRenderer<Output> implements TrackRenderer {
     private getSubtracks(sequence: string): [BasicTrackContainer<Accession[]>[], HTMLDivElement] {
         const subtrackContainers: BasicTrackContainer<Accession[]>[] = [];
         const subtracksDiv = d3.create("div").attr("class", "subtracks-container").style("display", "none").node()!;
+        if (this.rows.length >= 5) {
+            subtracksDiv.classList.add('scrollable');
+            subtracksDiv.style.maxHeight = this.rows.length * 43 + 'px';
+        }
         this.rows.forEach(subtrackData => {
             const d3Track = d3.create("protvista-track")
                 .attr("highlight-event", "onclick")
