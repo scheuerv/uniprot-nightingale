@@ -116,7 +116,9 @@ export default class TrackManager {
                 if (this.lastClickedFragment) {
                     const boundingRect = this.lastClickedFragment.fragment.getBoundingClientRect();
                     if (boundingRect.width == 0) {
-                        this.protvistaManagerD3.select("protvista-tooltip").attr('visible', null);
+                        resizeObserver.unobserve(this.lastClickedFragment.fragment);
+                        this.lastClickedFragment = undefined;
+                        this.removeAllTooltips();
                     }
                     else {
                         const mouseX = boundingRect.width * this.lastClickedFragment.mouseX;
