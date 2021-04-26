@@ -2,7 +2,7 @@ import d3 = require('d3');
 import CategoryContainer from './category-container';
 import TrackParser from '../parsers/track-parser';
 import { createRow, fetchWithTimeout } from '../utils';
-import { Accession, ElementWithData } from '../renderers/basic-track-renderer';
+import { ElementWithData } from '../renderers/basic-track-renderer';
 import PdbParser from '../parsers/pdb-parser';
 import AntigenParser from '../parsers/antigen-parser';
 import FeatureParser from '../parsers/feature-parser';
@@ -130,6 +130,14 @@ export default class TrackManager {
                     }
                 }
             });
+            OverlayScrollbars(document.querySelectorAll('.subtracks-container.scrollable'), {
+                resize: "vertical",
+                paddingAbsolute: true,
+                scrollbars: {
+                    clickScrolling: true,
+                    autoHide: 'leave'
+                }
+            });
             resizeObserver.observe(element);
             this.protvistaManagerD3.selectAll("protvista-track").on("change", () => {
                 this.updateTooltip(d3.event.detail, resizeObserver);
@@ -157,15 +165,6 @@ export default class TrackManager {
                 this.emitOnFragmentMouseOut.emit();
             });
             this.emitOnRendered.emit();
-            
-            OverlayScrollbars(document.querySelectorAll('.subtracks-container.scrollable'), {
-                resize: "vertical",
-                paddingAbsolute: true,
-                scrollbars: {
-                    clickScrolling: true,
-                    autoHide: 'leave'
-                }
-            });
         });
 
     }
@@ -189,7 +188,7 @@ export default class TrackManager {
         this.tracks.push({ urlGenerator, parser })
     }
     private updateTooltip(
-        detail: { eventtype: string, coords: number[]; feature: Accession; target: ElementWithData | undefined; },
+        detail: { eventtype: string, coords: number[]; target: ElementWithData | undefined; },
         resizeObserver: ResizeObserver
     ) {
         const previousTooltip = this.protvistaManagerD3.select("protvista-tooltip");
