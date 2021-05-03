@@ -56,8 +56,8 @@ export default class BasicTrackRenderer<Output> implements TrackRenderer {
         mainTrackData.forEach(accession => accession.locations[0].fragments.forEach(fragment => fragmentAligner.addFragment(fragment)))
         const mainTrackDataAligned = fragmentAligner.getAccessions();
         const track = d3.create("protvista-track")
-            .attr("highlight-event", "onclick")
-            .attr("height", 40)
+            .attr("highlight-event", "none")
+            .attr("height", 44)
             .attr("class", "main")
             .attr("layout", "non-overlapping")
             .attr("length", sequence.length).node() as ProtvistaTrack;
@@ -69,7 +69,7 @@ export default class BasicTrackRenderer<Output> implements TrackRenderer {
             this.displayArrow
         );
         const emptyTrack = d3.create("protvista-track")
-            .attr("height", 40)
+            .attr("height", 44)
             .attr("length", sequence.length)
             .attr("class", "empty")
             .node() as ProtvistaTrack;
@@ -90,8 +90,8 @@ export default class BasicTrackRenderer<Output> implements TrackRenderer {
         }
         this.rows.forEach(subtrackData => {
             const d3Track = d3.create("protvista-track")
-                .attr("highlight-event", "onclick")
-                .attr("height", 40)
+                .attr("highlight-event", "none")
+                .attr("height", 44)
                 .attr("layout", "non-overlapping");
             const subtrack = d3Track.node() as ProtvistaTrack;
 
@@ -200,6 +200,7 @@ export class FragmentWrapper {
 
 export class RowWrapper {
     private readonly markedFragments = new Set<FragmentWrapper>();
+    private readonly higlightedFragments = new Set<FragmentWrapper>();
     private readonly emitOnHighlightChange = createEmitter<TrackFragment[]>();
     public readonly onHighlightChange = this.emitOnHighlightChange.event;
     constructor(
@@ -209,16 +210,20 @@ export class RowWrapper {
         d3.select(arrowElement).on("click", this.arrowClick());
         fragmentWrappers.forEach(fragmentWrapper => {
             fragmentWrapper.onClick.on(isMarked => {
-                this.emitOnHighlightChange.emit(this.getMarkedFragments());
+                this.emitOnHighlightChange.emit(this.getMarkedTrackFragments());
             });
             fragmentWrapper.onMarkedChange.on(isMarked => {
                 if (isMarked) {
+                    if (d3.event.shiftKey) {
+                        this.higlightedFragments.add(fragmentWrapper);
+                    }
                     this.markedFragments.add(fragmentWrapper);
                     if (this.markedFragments.size == this.fragmentWrappers.length) {
                         this.arrowElement.classList.add('clicked');
                     }
                 }
                 else {
+                    this.higlightedFragments.delete(fragmentWrapper);
                     this.markedFragments.delete(fragmentWrapper);
                     this.arrowElement.classList.remove('clicked');
                 }
@@ -237,11 +242,16 @@ export class RowWrapper {
                     fragment.mark();
                 });
             }
-            this.emitOnHighlightChange.emit(this.getMarkedFragments());
+            this.emitOnHighlightChange.emit(this.getMarkedTrackFragments());
         }
     }
-    public getMarkedFragments() {
+    public getMarkedTrackFragments() {
         return Array.from(this.markedFragments).map(fragmentWrapper => {
+            return { start: fragmentWrapper.fragmentData.start, end: fragmentWrapper.fragmentData.end, color: fragmentWrapper.fragmentData.color };
+        });
+    }
+    public getHighlightedTrackFragments() {
+        return Array.from(this.higlightedFragments).map(fragmentWrapper => {
             return { start: fragmentWrapper.fragmentData.start, end: fragmentWrapper.fragmentData.end, color: fragmentWrapper.fragmentData.color };
         });
     }

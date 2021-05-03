@@ -63,6 +63,9 @@ export default class VariationCategoryContainer implements CategoryContainer {
             return [];
         }
     }
+    public getHighlightedTrackFragments(): TrackFragment[] {
+        return [];
+    }
     private getFragments(variationGraph: ProtvistaVariationGraph): TrackFragment[] {
         const histogram = Array.from(variationGraph._totalsArray.total);
         const max = Math.max.apply(Math, histogram);

@@ -17,7 +17,10 @@ export default class BasicCategoryContainer implements CategoryContainer {
         return this._categoryDiv;
     }
     public getMarkedTrackFragments(): TrackFragment[] {
-        return this._rowWrappers[0]?.getMarkedFragments() ?? [];
+        return this._rowWrappers[0]?.getMarkedTrackFragments() ?? [];
+    }
+    public getHighlightedTrackFragments(): TrackFragment[] {
+        return this._rowWrappers[0]?.getHighlightedTrackFragments() ?? [];
     }
     public addData() {
         this._tracks.forEach(track => track.addData());

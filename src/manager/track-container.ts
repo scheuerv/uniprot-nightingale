@@ -1,5 +1,6 @@
 import ProtvistaTrack from "protvista-track";
 export interface TrackContainer {
+    readonly track: ProtvistaTrack;
     addData(): void;
 }
 

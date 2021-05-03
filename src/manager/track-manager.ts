@@ -34,6 +34,9 @@ export default class TrackManager {
     } | undefined;
     private readonly protvistaManagerD3 = d3.create("protvista-manager").attr("attributes", "length displaystart displayend highlightstart highlightend activefilters filters");
     private readonly protvistaManager = this.protvistaManagerD3.node()! as ProtvistaManager;
+    private fixedHighlights: string = "";
+    private clickedHighlights: string = "";
+    private setHighlights: string = "";
     constructor(private readonly sequenceUrlGenerator: (url: string) => string) {
 
     }
@@ -107,7 +110,19 @@ export default class TrackManager {
 
             element.appendChild(this.protvistaManager);
             categoryContainers.forEach(categoryContainer => {
+                categoryContainer.trackContainers.forEach(trackContainer => {
+                    trackContainer.track.addEventListener("click", (e) => {
+                        if (!(e.target as Element).closest(".feature")) {
+                            this.removeAllTooltips();
+                        }
+                    });
+                });
                 categoryContainer.onHighlightChange.on(trackFragments => {
+                    const highligtedFragments = categoryContainers.flatMap(categoryContainer => categoryContainer.getHighlightedTrackFragments());
+                    this.clickedHighlights = highligtedFragments.map(fragment => {
+                        return `${fragment.start}:${fragment.end}:${fragment.color}`;
+                    }).join(',');
+                    this.applyHighlights();
                     this.emitOnHighlightChange.emit(categoryContainers.flatMap(categoryContainer => categoryContainer.getMarkedTrackFragments()));
                 });
                 categoryContainer.addData();
@@ -168,24 +183,30 @@ export default class TrackManager {
         });
 
     }
-    public highlight(start: number, end: number) {
-        this.protvistaManager.dispatchEvent(new CustomEvent('change', {
-            detail: {
-                highlight: `${start}:${end}`,
-            }, bubbles: true, cancelable: true
-        }));
+    public highlight(highlight: Highlight) {
+        this.setHighlights = `${highlight.start}:${highlight.end}${highlight.color ? ':' + highlight.color : ''}`;
+        this.applyHighlights();
+    }
+
+    public setFixedHighlights(highlights: Highlight[]) {
+        this.fixedHighlights = highlights.map(highlight => {
+            return `${highlight.start}:${highlight.end}${highlight.color ? ':' + highlight.color : ''}`;
+        }).join(',');
+        this.applyHighlights();
     }
 
     public highlightOff() {
-        this.protvistaManager.dispatchEvent(new CustomEvent('change', {
-            detail: {
-                highlight: null,
-            }, bubbles: true, cancelable: true
-        }));
+        this.setHighlights = "";
+        this.clickedHighlights = "";
+        this.applyHighlights();
     }
 
     public addTrack(urlGenerator: (url: string) => string, parser: TrackParser<any>) {
         this.tracks.push({ urlGenerator, parser })
+    }
+    private applyHighlights() {
+        this.protvistaManager.highlight = `${this.fixedHighlights ?? ''}${this.clickedHighlights ? ',' + this.clickedHighlights : ''}${this.setHighlights ? ',' + this.setHighlights : ''}`;
+        this.protvistaManager.applyAttributes();
     }
     private updateTooltip(
         detail: { eventtype: string, coords: number[]; target: ElementWithData | undefined; },
@@ -250,7 +271,11 @@ type Track = {
     readonly urlGenerator: (url: string) => string;
     readonly parser: TrackParser<any>;
 }
-
+export type Highlight = {
+    readonly start: number;
+    readonly end: number;
+    readonly color?: string;
+}
 export type TrackFragment = {
     readonly start: number;
     readonly end: number;

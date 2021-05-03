@@ -8,10 +8,10 @@ export default class LimitedTrack extends ProtvistaTrack {
   public getLayout() {
     if (String(this.getAttribute("layout")).toLowerCase() === "non-overlapping")
       return new LimitedNonOverlappingLayout({
-        layoutHeight: this._height,
+        layoutHeight: this.height,
       });
     return new DefaultLayout({
-      layoutHeight: this._height,
+      layoutHeight: this.height,
     });
   }
   public connectedCallback() {

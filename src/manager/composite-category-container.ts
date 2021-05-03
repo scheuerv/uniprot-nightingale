@@ -13,6 +13,9 @@ export default class CompositeCategoryContainer implements CategoryContainer {
     public getMarkedTrackFragments(): TrackFragment[] {
         return this.categoryContainers.flatMap(categoryContainer => categoryContainer.getMarkedTrackFragments());
     }
+    public getHighlightedTrackFragments(): TrackFragment[] {
+        return this.categoryContainers.flatMap(categoryContainer => categoryContainer.getHighlightedTrackFragments());
+    }
     public get trackContainers() {
         return this.categoryContainers.flatMap(categoryContainer => categoryContainer.trackContainers);
     }

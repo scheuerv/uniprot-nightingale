@@ -21,7 +21,7 @@ export default class VariationRenderer implements TrackRenderer {
 
     public getCategoryContainer(sequence: string): CategoryContainer {
         const variationGraph = d3.create("protvista-variation-graph")
-            .attr("highlight-event", "onclick")
+            .attr("highlight-event", "none")
             .attr("id", "protvista-variation-graph")
             .attr("length", sequence.length)
             .attr("height", 40).node() as ProtvistaVariationGraph;
@@ -29,7 +29,7 @@ export default class VariationRenderer implements TrackRenderer {
         const variationTrack = d3.create("protvista-variation")
             .attr("id", "protvista-variation")
             .attr("length", sequence.length)
-            .attr("highlight-event", "onclick").node() as ProtvistaVariation;
+            .attr("highlight-event", "none").node() as ProtvistaVariation;
         variationTrack.colorConfig = function (e: any) {
             return "black";
         }

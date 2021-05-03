@@ -8,4 +8,5 @@ export default interface CategoryContainer {
     readonly onHighlightChange: SealedEvent<TrackFragment[]>;
     addData(): void;
     getMarkedTrackFragments(): TrackFragment[];
+    getHighlightedTrackFragments(): TrackFragment[];
 }
