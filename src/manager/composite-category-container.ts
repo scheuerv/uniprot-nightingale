@@ -10,6 +10,9 @@ export default class CompositeCategoryContainer implements CategoryContainer {
             categoryContainer.onHighlightChange.on(trackFragment => this.emitOnHighlightChange.emit(trackFragment))
         })
     }
+    public clearHighlightedTrackFragments(): void {
+        this.categoryContainers.forEach(categoryContainer => categoryContainer.clearHighlightedTrackFragments());
+    }
     public getMarkedTrackFragments(): TrackFragment[] {
         return this.categoryContainers.flatMap(categoryContainer => categoryContainer.getMarkedTrackFragments());
     }

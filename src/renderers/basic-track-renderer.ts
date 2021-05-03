@@ -255,6 +255,9 @@ export class RowWrapper {
             return { start: fragmentWrapper.fragmentData.start, end: fragmentWrapper.fragmentData.end, color: fragmentWrapper.fragmentData.color };
         });
     }
+    public clearHighlightedTrackFragments() {
+        this.higlightedFragments.clear();
+    }
 }
 
 export class RowWrapperBuilder {

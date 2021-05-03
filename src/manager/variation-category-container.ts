@@ -46,6 +46,8 @@ export default class VariationCategoryContainer implements CategoryContainer {
             }
         });
     }
+    public clearHighlightedTrackFragments() {
+    }
     public get trackContainers() {
         return [this.variationGraph, this.variation];
     }

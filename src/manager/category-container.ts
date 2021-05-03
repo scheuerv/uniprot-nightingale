@@ -9,4 +9,5 @@ export default interface CategoryContainer {
     addData(): void;
     getMarkedTrackFragments(): TrackFragment[];
     getHighlightedTrackFragments(): TrackFragment[];
+    clearHighlightedTrackFragments(): void;
 }

@@ -22,6 +22,9 @@ export default class BasicCategoryContainer implements CategoryContainer {
     public getHighlightedTrackFragments(): TrackFragment[] {
         return this._rowWrappers[0]?.getHighlightedTrackFragments() ?? [];
     }
+    public clearHighlightedTrackFragments() {
+        this._rowWrappers[0]?.clearHighlightedTrackFragments();
+    }
     public addData() {
         this._tracks.forEach(track => track.addData());
         const map: Map<number, ElementAndBuilder[]> = new Map();
