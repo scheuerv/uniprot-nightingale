@@ -6,16 +6,16 @@ import BasicTrackContainer, { MainTrackContainer, TrackContainer } from '../mana
 import BasicCategoryContainer from '../manager/basic-category-container';
 import TooltipContent from '../tooltip-content';
 import { createEmitter, Emitter, SealedEvent } from 'ts-typed-events';
-import { TrackFragment } from '../manager/track-manager';
+import { Output, TrackFragment } from '../manager/track-manager';
 import FragmentAligner from '../parsers/fragment-aligner';
 
-export default class BasicTrackRenderer<Output> implements TrackRenderer {
+export default class BasicTrackRenderer implements TrackRenderer {
     private mainTrack: MainTrackContainer<Accession[]>;
     private subtracks: BasicTrackContainer<Accession[]>[];
     private subtracksDiv: HTMLDivElement;
     private mainTrackRow: d3.Selection<HTMLDivElement, undefined, null, undefined>;
     constructor(
-        private readonly rows: TrackRow<Output>[],
+        private readonly rows: TrackRow[],
         private readonly mainTrackLabel: string,
         private readonly emitOnLabelClick: Emitter<Output, SealedEvent<Output>> | undefined,
         private readonly displayArrow: boolean
@@ -122,7 +122,7 @@ export default class BasicTrackRenderer<Output> implements TrackRenderer {
     }
 
 }
-export class TrackRow<Output> {
+export class TrackRow {
     constructor(public readonly rowData: Accession[], public readonly label: string, public readonly output?: Output) {
 
     }

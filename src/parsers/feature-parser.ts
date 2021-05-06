@@ -31,9 +31,9 @@ export default class FeatureParser implements TrackParser {
                 typeFeatureFragmentAligner.addFragment(new Fragment(id++, parseInt(feature.begin), parseInt(feature.end), borderColor, fillColor, config[feature.type]?.shape, createFeatureTooltip(feature, uniprotId, data.sequence)));
             }
         });
-        const categoryRenderers: BasicTrackRenderer<unknown>[] = [];
+        const categoryRenderers: BasicTrackRenderer[] = [];
         for (const [category, categoryData] of categories.entries()) {
-            const typeTrackRows: TrackRow<unknown>[] = [];
+            const typeTrackRows: TrackRow[] = [];
             for (const [type, fragmentAligner] of categoryData) {
                 typeTrackRows.push(new TrackRow(fragmentAligner.getAccessions(), config[type]?.label ?? type));
             }

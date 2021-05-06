@@ -67,7 +67,7 @@ export default class TrackManager {
         Promise.all(
             this.tracks
                 .filter(track => this.isStructureTrackParser(track.parser))
-                .map(track => track.parser as StructureTrackParser<Output>)
+                .map(track => track.parser as StructureTrackParser)
                 .map(parser => {
                     return new Promise<Output | null>(resolve => {
                         parser.onStructureLoaded.on(outputs => {
@@ -262,7 +262,7 @@ export default class TrackManager {
         this.protvistaManager.highlight = `${this.fixedHighlights ?? ''}${this.clickedHighlights ? ',' + this.clickedHighlights : ''}${this.publicHighlights ? ',' + this.publicHighlights : ''}`;
         this.protvistaManager.applyAttributes();
     }
-    private isStructureTrackParser(object: unknown): object is StructureTrackParser<Output> {
+    private isStructureTrackParser(object: unknown): object is StructureTrackParser {
         return Object.prototype.hasOwnProperty.call(object, "onStructureLoaded")
             && Object.prototype.hasOwnProperty.call(object, "onLabelClick");
     }
@@ -339,6 +339,6 @@ export type TrackFragment = {
     readonly end: number;
     readonly color: string;
 }
-type Output = {
+export type Output = {
     readonly pdbId: string, readonly chain: string, readonly mapping: Mapping, readonly url: string, readonly format: "mmcif" | "cifCore" | "pdb" | "pdbqt" | "gro" | "xyz" | "mol" | "sdf" | "mol2"
 }

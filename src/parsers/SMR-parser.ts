@@ -1,23 +1,23 @@
-import { Mapping } from './track-parser';
 import BasicTrackRenderer, { Fragment, Location, Accession, TrackRow } from '../renderers/basic-track-renderer';
 import { getDarkerColor } from '../utils';
 import { createEmitter } from 'ts-typed-events';
 import TooltipContent, { createBlast } from '../tooltip-content';
 import StructureTrackParser from './structure-track-parser';
-export default class SMRParser implements StructureTrackParser<SMROutput> {
-    private readonly emitOnStructureLoaded = createEmitter<SMROutput[]>();
+import { Output } from '../manager/track-manager';
+export default class SMRParser implements StructureTrackParser {
+    private readonly emitOnStructureLoaded = createEmitter<Output[]>();
     public readonly onStructureLoaded = this.emitOnStructureLoaded.event;
-    private readonly emitOnLabelClick = createEmitter<SMROutput>();
+    private readonly emitOnLabelClick = createEmitter<Output>();
     public readonly onLabelClick = this.emitOnLabelClick.event;
     private readonly categoryName = "Predicted structures";
     private readonly color = '#2e86c1';
     public failDataLoaded(): void {
         this.emitOnStructureLoaded.emit([]);
     }
-    public async parse(uniprotId: string, data: SMRData): Promise<BasicTrackRenderer<SMROutput> | null> {
+    public async parse(uniprotId: string, data: SMRData): Promise<BasicTrackRenderer | null> {
         const result = data.result;
-        const trackRows: TrackRow<SMROutput>[] = [];
-        const outputs: SMROutput[] = []
+        const trackRows: TrackRow[] = [];
+        const outputs: Output[] = []
         result.structures.forEach((structure) => {
             const sTemplate = structure.template.match(/(.+)\.(.+)+\.(.+)/);
             const experimentalMethod = structure.provider + " (" + structure.method + ")";
@@ -28,7 +28,7 @@ export default class SMRParser implements StructureTrackParser<SMROutput> {
             }
             let id = 1;
             structure.chains.forEach(chain => {
-                let output: SMROutput | undefined = undefined;
+                let output: Output | undefined = undefined;
                 if (sTemplate !== null) {
                     output = { pdbId: sTemplate[1], chain: chain.id, url: coordinatesFile, format: "pdb", mapping: { uniprotStart: structure.from, pdbStart: structure.from, uniprotEnd: structure.to, pdbEnd: structure.to } };
                     outputs.push(output)
@@ -57,9 +57,6 @@ export default class SMRParser implements StructureTrackParser<SMROutput> {
     }
 
 }
-type SMROutput = {
-    readonly pdbId: string, readonly chain: string, readonly mapping: Mapping, readonly url: string, readonly format: string
-};
 
 type SMRResult = {
     readonly sequence: string,

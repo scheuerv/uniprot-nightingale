@@ -13,7 +13,7 @@ export default class AntigenParser implements TrackParser {
         }
         const features = groupBy(data.features, feature => feature.type);
         if (features.size > 0) {
-            const trackRows: TrackRow<unknown>[] = [];
+            const trackRows: TrackRow[] = [];
             let id = 1;
             features.forEach((typeFeatures, type) => {
                 const fillColor = config[type]?.color;

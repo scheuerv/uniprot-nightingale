@@ -1,14 +1,14 @@
-import { Mapping } from './track-parser';
 import BasicTrackRenderer, { Fragment, Location, Accession, TrackRow } from '../renderers/basic-track-renderer';
 import { createEmitter } from 'ts-typed-events';
 import TooltipContent, { createBlast } from '../tooltip-content';
 import { fetchWithTimeout } from '../utils';
 import StructureTrackParser from './structure-track-parser';
+import { Output } from '../manager/track-manager';
 
-export default class PdbParser implements StructureTrackParser<PDBOutput> {
-    private readonly emitOnStructureLoaded = createEmitter<PDBOutput[]>();
+export default class PdbParser implements StructureTrackParser {
+    private readonly emitOnStructureLoaded = createEmitter<Output[]>();
     public readonly onStructureLoaded = this.emitOnStructureLoaded.event;
-    private readonly emitOnLabelClick = createEmitter<PDBOutput>();
+    private readonly emitOnLabelClick = createEmitter<Output>();
     public readonly onLabelClick = this.emitOnLabelClick.event;
     private readonly categoryName = "Experimental structures";
     private readonly observedColor = '#2e86c1';
@@ -17,9 +17,9 @@ export default class PdbParser implements StructureTrackParser<PDBOutput> {
     public failDataLoaded(): void {
         this.emitOnStructureLoaded.emit([]);
     }
-    public async parse(uniprotId: string, data: PDBParserData): Promise<BasicTrackRenderer<PDBOutput> | null> {
-        const trackRows: TrackRow<PDBOutput>[] = [];
-        const outputs: PDBOutput[] = []
+    public async parse(uniprotId: string, data: PDBParserData): Promise<BasicTrackRenderer | null> {
+        const trackRows: TrackRow[] = [];
+        const outputs: Output[] = []
         if (data[uniprotId]) {
             const hash: Record<string, PDBParserItemAgg> = {};
             const dataDeduplicated: PDBParserItemAgg[] = [];
@@ -70,7 +70,7 @@ export default class PdbParser implements StructureTrackParser<PDBOutput> {
                                     const uniprotStart = result.source.unp_start;
                                     const uniprotEnd = result.source.unp_end;
                                     const pdbStart = result.source.start;
-                                    const output: PDBOutput = {
+                                    const output: Output = {
                                         pdbId: pdbId,
                                         chain: chainId,
                                         mapping: { uniprotStart: uniprotStart, uniprotEnd: uniprotEnd, pdbStart: pdbStart, pdbEnd: result.source.end },
@@ -165,7 +165,6 @@ export default class PdbParser implements StructureTrackParser<PDBOutput> {
         return tooltipContent;
     }
 }
-type PDBOutput = { readonly pdbId: string, readonly chain: string, readonly mapping: Mapping, readonly url: string, readonly format: string };
 
 type PDBParserData = Record<string, readonly PDBParserItem[]>;
 
