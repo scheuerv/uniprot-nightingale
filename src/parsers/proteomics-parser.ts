@@ -4,21 +4,14 @@ import TrackRenderer from '../renderers/track-renderer';
 import FragmentAligner from './fragment-aligner';
 import { getDarkerColor } from '../utils';
 const config = require("protvista-track/src/config").config;
-import { createEmitter } from "ts-typed-events";
 import { createFeatureTooltip } from '../tooltip-content';
 
-export default class ProteomicsParser implements TrackParser<ProteomicsOutput> {
+export default class ProteomicsParser implements TrackParser {
     private readonly categoryName = "Proteomics";
     private readonly unique = "UNIQUE";
     private readonly nonUnique = "NON_UNIQUE";
-    private readonly emitOnDataLoaded = createEmitter<ProteomicsOutput[]>();
-    public readonly onDataLoaded = this.emitOnDataLoaded.event;
-    public failDataLoaded(): void {
-        this.emitOnDataLoaded.emit([]);
-    }
     public async parse(uniprotId: string, data: ProteinFeatureInfo | ErrorResponse): Promise<TrackRenderer | null> {
         if (isErrorResponse(data)) {
-            this.emitOnDataLoaded.emit([]);
             return null;
         }
         const uniqueFragmentAligner = new FragmentAligner();
@@ -41,7 +34,6 @@ export default class ProteomicsParser implements TrackParser<ProteomicsOutput> {
             new TrackRow(uniqueFragmentAligner.getAccessions(), config[this.unique].label),
             new TrackRow(nonUniqueFragmentAligner.getAccessions(), config[this.nonUnique].label)
         ];
-        this.emitOnDataLoaded.emit([]);
         if (trackRows.length > 0) {
             return new BasicTrackRenderer(trackRows, this.categoryName, undefined, true);
         }
@@ -50,4 +42,3 @@ export default class ProteomicsParser implements TrackParser<ProteomicsOutput> {
         }
     }
 }
-type ProteomicsOutput = {};

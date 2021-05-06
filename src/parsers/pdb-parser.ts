@@ -1,12 +1,13 @@
-import TrackParser, { Mapping } from './track-parser';
+import { Mapping } from './track-parser';
 import BasicTrackRenderer, { Fragment, Location, Accession, TrackRow } from '../renderers/basic-track-renderer';
 import { createEmitter } from 'ts-typed-events';
 import TooltipContent, { createBlast } from '../tooltip-content';
 import { fetchWithTimeout } from '../utils';
+import StructureTrackParser from './structure-track-parser';
 
-export default class PdbParser implements TrackParser<PDBOutput> {
-    private readonly emitOnDataLoaded = createEmitter<PDBOutput[]>();
-    public readonly onDataLoaded = this.emitOnDataLoaded.event;
+export default class PdbParser implements StructureTrackParser<PDBOutput> {
+    private readonly emitOnStructureLoaded = createEmitter<PDBOutput[]>();
+    public readonly onStructureLoaded = this.emitOnStructureLoaded.event;
     private readonly emitOnLabelClick = createEmitter<PDBOutput>();
     public readonly onLabelClick = this.emitOnLabelClick.event;
     private readonly categoryName = "Experimental structures";
@@ -14,7 +15,7 @@ export default class PdbParser implements TrackParser<PDBOutput> {
     private readonly unobservedColor = '#bdbfc1';
     private id = 1;
     public failDataLoaded(): void {
-        this.emitOnDataLoaded.emit([]);
+        this.emitOnStructureLoaded.emit([]);
     }
     public async parse(uniprotId: string, data: PDBParserData): Promise<BasicTrackRenderer<PDBOutput> | null> {
         const trackRows: TrackRow<PDBOutput>[] = [];
@@ -69,7 +70,13 @@ export default class PdbParser implements TrackParser<PDBOutput> {
                                     const uniprotStart = result.source.unp_start;
                                     const uniprotEnd = result.source.unp_end;
                                     const pdbStart = result.source.start;
-                                    const output: PDBOutput = { pdbId: pdbId, chain: chainId, mapping: { uniprotStart: uniprotStart, uniprotEnd: uniprotEnd, pdbStart: pdbStart, pdbEnd: result.source.end } };
+                                    const output: PDBOutput = {
+                                        pdbId: pdbId,
+                                        chain: chainId,
+                                        mapping: { uniprotStart: uniprotStart, uniprotEnd: uniprotEnd, pdbStart: pdbStart, pdbEnd: result.source.end },
+                                        url: `https://www.ebi.ac.uk/pdbe/static/entry/${pdbId}_updated.cif`,
+                                        format: "mmcif"
+                                    };
                                     outputs.push(output);
                                     const observedFragments = chain.observed.map(fragment => {
                                         const start: number = Math.max(fragment.start.residue_number + uniprotStart - pdbStart, uniprotStart);
@@ -94,11 +101,11 @@ export default class PdbParser implements TrackParser<PDBOutput> {
                         });
                     return outputs;
                 });
-            this.emitOnDataLoaded.emit(outputs)
+            this.emitOnStructureLoaded.emit(outputs)
             return new BasicTrackRenderer(trackRows, this.categoryName, this.emitOnLabelClick, false);
         }
         else {
-            this.emitOnDataLoaded.emit(outputs)
+            this.emitOnStructureLoaded.emit(outputs)
             return null;
         }
     }
@@ -158,7 +165,7 @@ export default class PdbParser implements TrackParser<PDBOutput> {
         return tooltipContent;
     }
 }
-type PDBOutput = { readonly pdbId: string, readonly chain: string, readonly mapping: Mapping };
+type PDBOutput = { readonly pdbId: string, readonly chain: string, readonly mapping: Mapping, readonly url: string, readonly format: string };
 
 type PDBParserData = Record<string, readonly PDBParserItem[]>;
 

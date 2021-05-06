@@ -6,16 +6,9 @@ import TrackRenderer from "../renderers/track-renderer";
 import { config } from "protvista-track/src/config";
 import { getDarkerColor, } from "../utils";
 import { createFeatureTooltip } from "../tooltip-content";
-import { createEmitter } from "ts-typed-events";
-export default class FeatureParser implements TrackParser<FeatureOutput> {
-    private readonly emitOnDataLoaded = createEmitter<FeatureOutput[]>();
-    public readonly onDataLoaded = this.emitOnDataLoaded.event;
-    public failDataLoaded(): void {
-        this.emitOnDataLoaded.emit([]);
-    }
+export default class FeatureParser implements TrackParser {
     public async parse(uniprotId: string, data: ProteinFeatureInfo | ErrorResponse): Promise<TrackRenderer | null> {
         if (isErrorResponse(data)) {
-            this.emitOnDataLoaded.emit([]);
             return null;
         }
         const categories: Map<string, Map<string, FragmentAligner>> = new Map();
@@ -38,15 +31,14 @@ export default class FeatureParser implements TrackParser<FeatureOutput> {
                 typeFeatureFragmentAligner.addFragment(new Fragment(id++, parseInt(feature.begin), parseInt(feature.end), borderColor, fillColor, config[feature.type]?.shape, createFeatureTooltip(feature, uniprotId, data.sequence)));
             }
         });
-        const categoryRenderers: BasicTrackRenderer<FeatureOutput>[] = [];
+        const categoryRenderers: BasicTrackRenderer<unknown>[] = [];
         for (const [category, categoryData] of categories.entries()) {
-            const typeTrackRows: TrackRow<FeatureOutput>[] = [];
+            const typeTrackRows: TrackRow<unknown>[] = [];
             for (const [type, fragmentAligner] of categoryData) {
                 typeTrackRows.push(new TrackRow(fragmentAligner.getAccessions(), config[type]?.label ?? type));
             }
             categoryRenderers.push(new BasicTrackRenderer(typeTrackRows, categoriesConfig[category]?.label ? categoriesConfig[category]?.label : this.createLabel(category), undefined, true));
         }
-        this.emitOnDataLoaded.emit([])
         if (categories.size > 0) {
             return new CompositeTrackRenderer(categoryRenderers);
         }
@@ -84,7 +76,5 @@ const categoriesConfig: Record<string, { readonly label: string }> = {
         "label": "Variants"
     }
 }
-
-type FeatureOutput = {};
 
 

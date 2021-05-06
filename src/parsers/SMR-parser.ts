@@ -1,17 +1,18 @@
-import TrackParser, { Mapping } from './track-parser';
+import { Mapping } from './track-parser';
 import BasicTrackRenderer, { Fragment, Location, Accession, TrackRow } from '../renderers/basic-track-renderer';
 import { getDarkerColor } from '../utils';
 import { createEmitter } from 'ts-typed-events';
 import TooltipContent, { createBlast } from '../tooltip-content';
-export default class SMRParser implements TrackParser<SMROutput> {
-    private readonly emitOnDataLoaded = createEmitter<SMROutput[]>();
-    public readonly onDataLoaded = this.emitOnDataLoaded.event;
+import StructureTrackParser from './structure-track-parser';
+export default class SMRParser implements StructureTrackParser<SMROutput> {
+    private readonly emitOnStructureLoaded = createEmitter<SMROutput[]>();
+    public readonly onStructureLoaded = this.emitOnStructureLoaded.event;
     private readonly emitOnLabelClick = createEmitter<SMROutput>();
     public readonly onLabelClick = this.emitOnLabelClick.event;
     private readonly categoryName = "Predicted structures";
     private readonly color = '#2e86c1';
     public failDataLoaded(): void {
-        this.emitOnDataLoaded.emit([]);
+        this.emitOnStructureLoaded.emit([]);
     }
     public async parse(uniprotId: string, data: SMRData): Promise<BasicTrackRenderer<SMROutput> | null> {
         const result = data.result;
@@ -29,7 +30,7 @@ export default class SMRParser implements TrackParser<SMROutput> {
             structure.chains.forEach(chain => {
                 let output: SMROutput | undefined = undefined;
                 if (sTemplate !== null) {
-                    output = { pdbId: sTemplate[1], chain: chain.id, coordinatesFile: coordinatesFile, mapping: { uniprotStart: structure.from, pdbStart: structure.from, uniprotEnd: structure.to, pdbEnd: structure.to } };
+                    output = { pdbId: sTemplate[1], chain: chain.id, url: coordinatesFile, format: "pdb", mapping: { uniprotStart: structure.from, pdbStart: structure.from, uniprotEnd: structure.to, pdbEnd: structure.to } };
                     outputs.push(output)
                 }
                 const fragments = chain.segments.map(segment => {
@@ -46,7 +47,7 @@ export default class SMRParser implements TrackParser<SMROutput> {
                 return outputs;
             });
         })
-        this.emitOnDataLoaded.emit(outputs);
+        this.emitOnStructureLoaded.emit(outputs);
         if (trackRows.length > 0) {
             return new BasicTrackRenderer(trackRows, this.categoryName, this.emitOnLabelClick, false);
         }
@@ -57,7 +58,7 @@ export default class SMRParser implements TrackParser<SMROutput> {
 
 }
 type SMROutput = {
-    readonly pdbId: string, readonly chain: string, readonly coordinatesFile: string, readonly mapping: Mapping
+    readonly pdbId: string, readonly chain: string, readonly mapping: Mapping, readonly url: string, readonly format: string
 };
 
 type SMRResult = {

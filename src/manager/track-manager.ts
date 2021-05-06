@@ -1,6 +1,6 @@
 import d3 = require('d3');
 import CategoryContainer from './category-container';
-import TrackParser from '../parsers/track-parser';
+import TrackParser, { Mapping } from '../parsers/track-parser';
 import { createRow, fetchWithTimeout } from '../utils';
 import { ElementWithData } from '../renderers/basic-track-renderer';
 import PdbParser from '../parsers/pdb-parser';
@@ -13,12 +13,15 @@ import ProtvistaManager from 'protvista-manager';
 import { createEmitter } from "ts-typed-events";
 import ProtvistaNavigation from 'protvista-navigation';
 import OverlayScrollbars from 'overlayscrollbars';
+import StructureTrackParser from '../parsers/structure-track-parser';
 import 'overlayscrollbars/css/OverlayScrollbars.min.css'
 
 type Constructor<T> = new (...args: any[]) => T;
 export default class TrackManager {
     private readonly emitOnResidueMouseOver = createEmitter<number>();
     public readonly onResidueMouseOver = this.emitOnResidueMouseOver.event;
+    private readonly emitOnSelectedStructure = createEmitter<Output>();
+    public readonly onSelectedStructure = this.emitOnSelectedStructure.event;
     private readonly emitOnFragmentMouseOut = createEmitter();
     public readonly onFragmentMouseOut = this.emitOnFragmentMouseOut.event;
     private readonly emitOnRendered = createEmitter();
@@ -36,8 +39,9 @@ export default class TrackManager {
     private readonly protvistaManager = this.protvistaManagerD3.node()! as ProtvistaManager;
     private fixedHighlights: string = "";
     private clickedHighlights: string = "";
-    private setHighlights: string = "";
+    private publicHighlights: string = "";
     private readonly categoryContainers: CategoryContainer[] = [];
+    private activeStructure?: Output = undefined;
     constructor(private readonly sequenceUrlGenerator: (url: string) => string) {
 
     }
@@ -52,13 +56,42 @@ export default class TrackManager {
         return trackManager;
     }
 
-    public getParsersByType<T extends TrackParser<any>>(filterType: Constructor<T>): T[] {
+    public getParsersByType<T extends TrackParser>(filterType: Constructor<T>): T[] {
         return this.tracks.map(t => t.parser)
             .filter(parser => parser instanceof filterType)
             .map(parser => parser as T);
     }
 
     public async render(uniprotId: string, element: HTMLElement) {
+        this.activeStructure = undefined;
+        Promise.all(
+            this.tracks
+                .filter(track => this.isStructureTrackParser(track.parser))
+                .map(track => track.parser as StructureTrackParser<Output>)
+                .map(parser => {
+                    return new Promise<Output | null>(resolve => {
+                        parser.onStructureLoaded.on(outputs => {
+                            if (!this.activeStructure && outputs.length > 0) {
+                                return resolve(outputs[0]);
+                            } else {
+                                return resolve(null);
+                            }
+                        });
+                    });
+                })
+        ).then(outputs => {
+            for (let i = 0; i < outputs.length; i++) {
+                const output = outputs[i];
+                if (output != null) {
+                    this.activeStructure = output;
+                    this.setFixedHighlights([{ start: output.mapping.uniprotStart, end: output.mapping.uniprotEnd, color: '#0000001A' }]);
+                    this.emitOnSelectedStructure(output);
+                    break;
+                }
+            }
+
+        });
+
         await fetchWithTimeout(this.sequenceUrlGenerator(uniprotId), { timeout: 8000 }).then(data => data.text())
             .then(data => {
                 const tokens = data.split(/\r?\n/);
@@ -87,7 +120,9 @@ export default class TrackManager {
                             return track.parser.parse(uniprotId, data);
                         }), err => {
                             console.log(`API unavailable!`, err);
-                            track.parser.failDataLoaded();
+                            if (this.isStructureTrackParser(track.parser)) {
+                                track.parser.failDataLoaded();
+                            }
                             return Promise.reject();
                         }
                     )
@@ -181,37 +216,56 @@ export default class TrackManager {
                 this.emitOnFragmentMouseOut.emit();
             });
             this.emitOnRendered.emit();
+        }).catch(e => {
+            console.log(e);
         });
 
     }
-    public highlight(highlight: Highlight) {
-        this.setHighlights = `${highlight.start}:${highlight.end}${highlight.color ? ':' + highlight.color : ''}`;
+    public setHighlights(highlights: Highlight[]) {
+        this.publicHighlights = highlights.map(highlight => {
+            return `${highlight.start}:${highlight.end}${highlight.color ? ':' + highlight.color : ''}`;
+        }).join(',');
+        this.applyHighlights()
+    }
+    public clearHighlights() {
+        this.publicHighlights = '';
         this.applyHighlights();
     }
 
-    public setFixedHighlights(highlights: Highlight[]) {
+    public highlightOff() {
+        this.publicHighlights = "";
+        this.clickedHighlights = "";
+        this.categoryContainers.forEach(trackContainer => trackContainer.clearHighlightedTrackFragments());
+        this.applyHighlights();
+    }
+
+    public addTrack(urlGenerator: (url: string) => string, parser: TrackParser) {
+        this.tracks.push({ urlGenerator, parser });
+
+        if (this.isStructureTrackParser(parser)) {
+            parser.onLabelClick.on(output => {
+                this.activeStructure = output;
+                this.setFixedHighlights([{ start: output.mapping.uniprotStart, end: output.mapping.uniprotEnd, color: '#0000001A' }]);
+                this.emitOnSelectedStructure(output);
+            });
+        }
+    }
+
+    private setFixedHighlights(highlights: Highlight[]) {
         this.fixedHighlights = highlights.map(highlight => {
             return `${highlight.start}:${highlight.end}${highlight.color ? ':' + highlight.color : ''}`;
         }).join(',');
         this.applyHighlights();
     }
 
-    public highlightOff() {
-        this.setHighlights = "";
-        this.clickedHighlights = "";
-        this.categoryContainers.forEach(trackContainer => trackContainer.clearHighlightedTrackFragments());
-        this.applyHighlights();
-    }
-
-    public addTrack(urlGenerator: (url: string) => string, parser: TrackParser<any>) {
-        this.tracks.push({ urlGenerator, parser })
-    }
-
     private applyHighlights() {
-        this.protvistaManager.highlight = `${this.fixedHighlights ?? ''}${this.clickedHighlights ? ',' + this.clickedHighlights : ''}${this.setHighlights ? ',' + this.setHighlights : ''}`;
+        this.protvistaManager.highlight = `${this.fixedHighlights ?? ''}${this.clickedHighlights ? ',' + this.clickedHighlights : ''}${this.publicHighlights ? ',' + this.publicHighlights : ''}`;
         this.protvistaManager.applyAttributes();
     }
-
+    private isStructureTrackParser(object: unknown): object is StructureTrackParser<Output> {
+        return Object.prototype.hasOwnProperty.call(object, "onStructureLoaded")
+            && Object.prototype.hasOwnProperty.call(object, "onLabelClick");
+    }
     private updateTooltip(
         detail: { eventtype: string, coords: number[]; target: ElementWithData | undefined; },
         resizeObserver: ResizeObserver
@@ -273,7 +327,7 @@ export default class TrackManager {
 
 type Track = {
     readonly urlGenerator: (url: string) => string;
-    readonly parser: TrackParser<any>;
+    readonly parser: TrackParser;
 }
 export type Highlight = {
     readonly start: number;
@@ -284,4 +338,7 @@ export type TrackFragment = {
     readonly start: number;
     readonly end: number;
     readonly color: string;
+}
+type Output = {
+    readonly pdbId: string, readonly chain: string, readonly mapping: Mapping, readonly url: string, readonly format: "mmcif" | "cifCore" | "pdb" | "pdbqt" | "gro" | "xyz" | "mol" | "sdf" | "mol2"
 }

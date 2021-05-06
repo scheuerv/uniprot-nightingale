@@ -1,10 +1,6 @@
 import TrackRenderer from '../renderers/track-renderer';
-
-import { SealedEvent } from 'ts-typed-events';
-export default interface TrackParser<Output> {
-    readonly onDataLoaded: SealedEvent<Output[]>;
+export default interface TrackParser {
     parse(uniprotId: string, data: any): Promise<TrackRenderer | null>;
-    failDataLoaded(): void;
 }
 
 export function isErrorResponse(response: ErrorResponse | any): response is ErrorResponse {

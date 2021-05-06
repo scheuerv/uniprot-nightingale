@@ -3,28 +3,17 @@ import BasicTrackRenderer, { Fragment, TrackRow } from '../renderers/basic-track
 import TrackRenderer from '../renderers/track-renderer';
 import { config } from "protvista-track/src/config";
 import { getDarkerColor, groupBy } from '../utils';
-
-import { createEmitter } from "ts-typed-events";
 import FragmentAligner from './fragment-aligner';
 import { createFeatureTooltip } from '../tooltip-content';
-export default class AntigenParser implements TrackParser<AntigenOutput>  {
-
-    private readonly emitOnDataLoaded = createEmitter<AntigenOutput[]>();
-    public readonly onDataLoaded = this.emitOnDataLoaded.event;
+export default class AntigenParser implements TrackParser {
     private readonly categoryName = "Antigenic sequences";
-    public failDataLoaded(): void {
-        this.emitOnDataLoaded.emit([]);
-    }
     public async parse(uniprotId: string, data: ProteinFeatureInfo | ErrorResponse): Promise<TrackRenderer | null> {
         if (isErrorResponse(data)) {
-            this.emitOnDataLoaded.emit([]);
             return null;
         }
         const features = groupBy(data.features, feature => feature.type);
-        this.emitOnDataLoaded.emit([]);
-
         if (features.size > 0) {
-            const trackRows: TrackRow<AntigenOutput>[] = [];
+            const trackRows: TrackRow<unknown>[] = [];
             let id = 1;
             features.forEach((typeFeatures, type) => {
                 const fillColor = config[type]?.color;
@@ -42,4 +31,3 @@ export default class AntigenParser implements TrackParser<AntigenOutput>  {
         }
     }
 }
-type AntigenOutput = {};
