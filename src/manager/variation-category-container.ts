@@ -1,12 +1,12 @@
-import { VariationData } from "../parsers/variation-parser";
 import { createEmitter } from "ts-typed-events";
 import CategoryContainer from "./category-container";
-import BasicTrackContainer from "./track-container";
+import VariationTrackContainer from "./variation-track-container";
 import { TrackFragment } from "./track-manager";
 import ProtvistaVariationGraph from "protvista-variation-graph";
 import ColorConvert from "color-convert";
 import VariationFilter from "../protvista/variation-filter";
 import d3 = require('d3');
+import { TrackContainer } from "./track-container";
 
 export default class VariationCategoryContainer implements CategoryContainer {
     private readonly emitOnHighlightChange = createEmitter<TrackFragment[]>();
@@ -17,8 +17,8 @@ export default class VariationCategoryContainer implements CategoryContainer {
     };
     private arrowMarked = false;
     constructor(
-        private readonly variationGraph: BasicTrackContainer<VariationData>,
-        private readonly variation: BasicTrackContainer<VariationData>,
+        private readonly variationGraph: VariationTrackContainer,
+        private readonly variation: VariationTrackContainer,
         public protvistaFilter: VariationFilter,
         public mainTrackRow: d3.Selection<HTMLDivElement, undefined, null, undefined>,
         private readonly _categoryDiv: HTMLDivElement
@@ -45,6 +45,9 @@ export default class VariationCategoryContainer implements CategoryContainer {
                 }
             }
         });
+    }
+    public getFirstTrackContainerWithOutput(): TrackContainer | undefined {
+        return undefined;
     }
     public clearHighlightedTrackFragments() {
     }

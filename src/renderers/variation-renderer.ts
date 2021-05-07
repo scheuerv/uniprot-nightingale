@@ -3,15 +3,15 @@ import TrackRenderer from "./track-renderer";
 import ProtvistaVariationGraph from "protvista-variation-graph";
 import ProtvistaVariation from "protvista-variation";
 import VariationFilter, { FilterCase } from "../protvista/variation-filter";
-import BasicTrackContainer from "../manager/track-container";
+import VariationTrackContainer from "../manager/variation-track-container";
 import { createRow } from "../utils";
 import d3 = require('d3');
 import { VariationData } from "../parsers/variation-parser";
 import { filterCases } from "../protvista/variation-filter";
 import VariationCategoryContainer from "../manager/variation-category-container";
 export default class VariationRenderer implements TrackRenderer {
-    private variationGraph: BasicTrackContainer<VariationData>;
-    private variation: BasicTrackContainer<VariationData>;
+    private variationGraph: VariationTrackContainer;
+    private variation: VariationTrackContainer;
     private subtracksDiv: HTMLDivElement;
     private mainTrackRow: d3.Selection<HTMLDivElement, undefined, null, undefined>;
 
@@ -25,7 +25,7 @@ export default class VariationRenderer implements TrackRenderer {
             .attr("id", "protvista-variation-graph")
             .attr("length", sequence.length)
             .attr("height", 40).node() as ProtvistaVariationGraph;
-        this.variationGraph = new BasicTrackContainer(variationGraph, this.data);
+        this.variationGraph = new VariationTrackContainer(variationGraph, this.data);
         const variationTrack = d3.create("protvista-variation")
             .attr("id", "protvista-variation")
             .attr("length", sequence.length)
@@ -34,7 +34,7 @@ export default class VariationRenderer implements TrackRenderer {
             return "black";
         }
 
-        this.variation = new BasicTrackContainer(variationTrack, this.data);
+        this.variation = new VariationTrackContainer(variationTrack, this.data);
         const categoryDiv = d3.create("div").node()!;
         this.mainTrackRow = createRow(
             document.createTextNode(this.mainTrackLabel),

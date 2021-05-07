@@ -35,7 +35,7 @@ export default class ProteomicsParser implements TrackParser {
             new TrackRow(nonUniqueFragmentAligner.getAccessions(), config[this.nonUnique].label)
         ];
         if (trackRows.length > 0) {
-            return new BasicTrackRenderer(trackRows, this.categoryName, undefined, true);
+            return new BasicTrackRenderer(trackRows, this.categoryName, true);
         }
         else {
             return null;

@@ -1,5 +1,6 @@
 import { createEmitter } from "ts-typed-events";
 import CategoryContainer from "./category-container";
+import { TrackContainer } from "./track-container";
 import { TrackFragment } from "./track-manager";
 
 export default class CompositeCategoryContainer implements CategoryContainer {
@@ -9,6 +10,15 @@ export default class CompositeCategoryContainer implements CategoryContainer {
         categoryContainers.forEach(categoryContainer => {
             categoryContainer.onHighlightChange.on(trackFragment => this.emitOnHighlightChange.emit(trackFragment))
         })
+    }
+    public getFirstTrackContainerWithOutput(): TrackContainer | undefined {
+        for (let i = 0; i < this.categoryContainers.length; i++) {
+            const trackContainer = this.categoryContainers[i].getFirstTrackContainerWithOutput();
+            if(trackContainer)
+            {
+                return trackContainer
+            }    
+        }
     }
     public clearHighlightedTrackFragments(): void {
         this.categoryContainers.forEach(categoryContainer => categoryContainer.clearHighlightedTrackFragments());

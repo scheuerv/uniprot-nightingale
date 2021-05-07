@@ -5,19 +5,18 @@ import ProtvistaTrack from 'protvista-track';
 import BasicTrackContainer, { MainTrackContainer, TrackContainer } from '../manager/track-container';
 import BasicCategoryContainer from '../manager/basic-category-container';
 import TooltipContent from '../tooltip-content';
-import { createEmitter, Emitter, SealedEvent } from 'ts-typed-events';
+import { createEmitter } from 'ts-typed-events';
 import { Output, TrackFragment } from '../manager/track-manager';
 import FragmentAligner from '../parsers/fragment-aligner';
 
 export default class BasicTrackRenderer implements TrackRenderer {
     private mainTrack: MainTrackContainer<Accession[]>;
-    private subtracks: BasicTrackContainer<Accession[]>[];
+    private subtracks: BasicTrackContainer[];
     private subtracksDiv: HTMLDivElement;
     private mainTrackRow: d3.Selection<HTMLDivElement, undefined, null, undefined>;
     constructor(
         private readonly rows: TrackRow[],
         private readonly mainTrackLabel: string,
-        private readonly emitOnLabelClick: Emitter<Output, SealedEvent<Output>> | undefined,
         private readonly displayArrow: boolean
     ) {
 
@@ -81,8 +80,8 @@ export default class BasicTrackRenderer implements TrackRenderer {
         return [new MainTrackContainer<Accession[]>(track, emptyTrack, mainTrackDataAligned), mainTrackRow];
     }
 
-    private getSubtracks(sequence: string): [BasicTrackContainer<Accession[]>[], HTMLDivElement] {
-        const subtrackContainers: BasicTrackContainer<Accession[]>[] = [];
+    private getSubtracks(sequence: string): [BasicTrackContainer[], HTMLDivElement] {
+        const subtrackContainers: BasicTrackContainer[] = [];
         const subtracksDiv = d3.create("div").attr("class", "subtracks-container").style("display", "none").node()!;
         if (this.rows.length >= 5) {
             subtracksDiv.classList.add('scrollable');
@@ -97,18 +96,6 @@ export default class BasicTrackRenderer implements TrackRenderer {
 
             d3.select(subtrack).attr("length", sequence.length);
             const labelElement = d3.create("div").text(subtrackData.label);
-            if (subtrackData.output) {
-                labelElement.style("cursor", "pointer");
-                labelElement.on('mouseover', () => {
-                    labelElement.classed('bold', true);
-                })
-                labelElement.on('mouseout', () => {
-                    labelElement.classed('bold', false);
-                })
-                labelElement.on('click', () => {
-                    this.emitOnLabelClick?.emit(subtrackData.output!);
-                });
-            }
             const subTrackRowDiv = createRow(
                 labelElement.node()!,
                 subtrack,
@@ -116,7 +103,7 @@ export default class BasicTrackRenderer implements TrackRenderer {
                 this.displayArrow
             );
             subtracksDiv.appendChild(subTrackRowDiv.node()!);
-            subtrackContainers.push(new BasicTrackContainer<Accession[]>(subtrack, subtrackData.rowData));
+            subtrackContainers.push(new BasicTrackContainer(subtrack, subtrackData, labelElement));
         });
         return [subtrackContainers, subtracksDiv];
     }

@@ -1,19 +1,11 @@
 import BasicTrackRenderer, { Fragment, Location, Accession, TrackRow } from '../renderers/basic-track-renderer';
 import { getDarkerColor } from '../utils';
-import { createEmitter } from 'ts-typed-events';
 import TooltipContent, { createBlast } from '../tooltip-content';
-import StructureTrackParser from './structure-track-parser';
+import TrackParser from './track-parser';
 import { Output } from '../manager/track-manager';
-export default class SMRParser implements StructureTrackParser {
-    private readonly emitOnStructureLoaded = createEmitter<Output[]>();
-    public readonly onStructureLoaded = this.emitOnStructureLoaded.event;
-    private readonly emitOnLabelClick = createEmitter<Output>();
-    public readonly onLabelClick = this.emitOnLabelClick.event;
+export default class SMRParser implements TrackParser {
     private readonly categoryName = "Predicted structures";
     private readonly color = '#2e86c1';
-    public failDataLoaded(): void {
-        this.emitOnStructureLoaded.emit([]);
-    }
     public async parse(uniprotId: string, data: SMRData): Promise<BasicTrackRenderer | null> {
         const result = data.result;
         const trackRows: TrackRow[] = [];
@@ -47,9 +39,8 @@ export default class SMRParser implements StructureTrackParser {
                 return outputs;
             });
         })
-        this.emitOnStructureLoaded.emit(outputs);
         if (trackRows.length > 0) {
-            return new BasicTrackRenderer(trackRows, this.categoryName, this.emitOnLabelClick, false);
+            return new BasicTrackRenderer(trackRows, this.categoryName, false);
         }
         else {
             return null;

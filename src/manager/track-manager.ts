@@ -13,8 +13,8 @@ import ProtvistaManager from 'protvista-manager';
 import { createEmitter } from "ts-typed-events";
 import ProtvistaNavigation from 'protvista-navigation';
 import OverlayScrollbars from 'overlayscrollbars';
-import StructureTrackParser from '../parsers/structure-track-parser';
 import 'overlayscrollbars/css/OverlayScrollbars.min.css'
+import { TrackContainer } from './track-container';
 
 type Constructor<T> = new (...args: any[]) => T;
 export default class TrackManager {
@@ -41,7 +41,7 @@ export default class TrackManager {
     private clickedHighlights: string = "";
     private publicHighlights: string = "";
     private readonly categoryContainers: CategoryContainer[] = [];
-    private activeStructure?: Output = undefined;
+    private activeStructure?: TrackContainer = undefined;
     constructor(private readonly sequenceUrlGenerator: (url: string) => string) {
 
     }
@@ -64,34 +64,6 @@ export default class TrackManager {
 
     public async render(uniprotId: string, element: HTMLElement) {
         this.activeStructure = undefined;
-        Promise.all(
-            this.tracks
-                .filter(track => this.isStructureTrackParser(track.parser))
-                .map(track => track.parser as StructureTrackParser)
-                .map(parser => {
-                    return new Promise<Output | null>(resolve => {
-                        parser.onStructureLoaded.on(outputs => {
-                            if (!this.activeStructure && outputs.length > 0) {
-                                return resolve(outputs[0]);
-                            } else {
-                                return resolve(null);
-                            }
-                        });
-                    });
-                })
-        ).then(outputs => {
-            for (let i = 0; i < outputs.length; i++) {
-                const output = outputs[i];
-                if (output != null) {
-                    this.activeStructure = output;
-                    this.setFixedHighlights([{ start: output.mapping.uniprotStart, end: output.mapping.uniprotEnd, color: '#0000001A' }]);
-                    this.emitOnSelectedStructure(output);
-                    break;
-                }
-            }
-
-        });
-
         await fetchWithTimeout(this.sequenceUrlGenerator(uniprotId), { timeout: 8000 }).then(data => data.text())
             .then(data => {
                 const tokens = data.split(/\r?\n/);
@@ -120,9 +92,6 @@ export default class TrackManager {
                             return track.parser.parse(uniprotId, data);
                         }), err => {
                             console.log(`API unavailable!`, err);
-                            if (this.isStructureTrackParser(track.parser)) {
-                                track.parser.failDataLoaded();
-                            }
                             return Promise.reject();
                         }
                     )
@@ -139,13 +108,29 @@ export default class TrackManager {
                 .map(renderer => renderer!)
                 .forEach(renderer => {
                     const categoryContainer = renderer.getCategoryContainer(this.sequence);
+                    const trackContainer = categoryContainer.getFirstTrackContainerWithOutput();
+                    if (trackContainer && !this.activeStructure) {
+                        this.activeStructure = trackContainer;
+                        this.activeStructure.activate();
+                        const output = this.activeStructure.getOutput()!;
+                        this.setFixedHighlights([{ start: output.mapping.uniprotStart, end: output.mapping.uniprotEnd, color: '#0000001A' }]);
+                        this.emitOnSelectedStructure(output);
+                    }
                     this.categoryContainers.push(categoryContainer);
                     this.protvistaManager.appendChild(categoryContainer.content);
+
                 });
 
             element.appendChild(this.protvistaManager);
             this.categoryContainers.forEach(categoryContainer => {
                 categoryContainer.trackContainers.forEach(trackContainer => {
+                    trackContainer.onLabelClick.on(output => {
+                        this.activeStructure?.deactivate();
+                        this.activeStructure = trackContainer;
+                        this.activeStructure.activate()
+                        this.setFixedHighlights([{ start: output.mapping.uniprotStart, end: output.mapping.uniprotEnd, color: '#0000001A' }]);
+                        this.emitOnSelectedStructure(output);
+                    });
                     trackContainer.track.addEventListener("click", (e) => {
                         if (!(e.target as Element).closest(".feature")) {
                             this.removeAllTooltips();
@@ -241,14 +226,6 @@ export default class TrackManager {
 
     public addTrack(urlGenerator: (url: string) => string, parser: TrackParser) {
         this.tracks.push({ urlGenerator, parser });
-
-        if (this.isStructureTrackParser(parser)) {
-            parser.onLabelClick.on(output => {
-                this.activeStructure = output;
-                this.setFixedHighlights([{ start: output.mapping.uniprotStart, end: output.mapping.uniprotEnd, color: '#0000001A' }]);
-                this.emitOnSelectedStructure(output);
-            });
-        }
     }
 
     private setFixedHighlights(highlights: Highlight[]) {
@@ -261,10 +238,6 @@ export default class TrackManager {
     private applyHighlights() {
         this.protvistaManager.highlight = `${this.fixedHighlights ?? ''}${this.clickedHighlights ? ',' + this.clickedHighlights : ''}${this.publicHighlights ? ',' + this.publicHighlights : ''}`;
         this.protvistaManager.applyAttributes();
-    }
-    private isStructureTrackParser(object: unknown): object is StructureTrackParser {
-        return Object.prototype.hasOwnProperty.call(object, "onStructureLoaded")
-            && Object.prototype.hasOwnProperty.call(object, "onLabelClick");
     }
     private updateTooltip(
         detail: { eventtype: string, coords: number[]; target: ElementWithData | undefined; },

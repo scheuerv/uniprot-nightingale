@@ -12,9 +12,16 @@ export default class BasicCategoryContainer implements CategoryContainer {
     constructor(private readonly _tracks: TrackContainer[], private readonly _categoryDiv: HTMLDivElement) {
 
     }
-
     get content(): HTMLElement {
         return this._categoryDiv;
+    }
+    public getFirstTrackContainerWithOutput(): TrackContainer | undefined {
+        for (let i = 0; i < this.trackContainers.length; i++) {
+            const output = this.trackContainers[i].getOutput();
+            if (output) {
+                return this.trackContainers[i];
+            }
+        }
     }
     public getMarkedTrackFragments(): TrackFragment[] {
         return this._rowWrappers[0]?.getMarkedTrackFragments() ?? [];

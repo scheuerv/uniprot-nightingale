@@ -1,22 +1,14 @@
 import BasicTrackRenderer, { Fragment, Location, Accession, TrackRow } from '../renderers/basic-track-renderer';
-import { createEmitter } from 'ts-typed-events';
 import TooltipContent, { createBlast } from '../tooltip-content';
 import { fetchWithTimeout } from '../utils';
-import StructureTrackParser from './structure-track-parser';
+import TrackParser from './track-parser';
 import { Output } from '../manager/track-manager';
 
-export default class PdbParser implements StructureTrackParser {
-    private readonly emitOnStructureLoaded = createEmitter<Output[]>();
-    public readonly onStructureLoaded = this.emitOnStructureLoaded.event;
-    private readonly emitOnLabelClick = createEmitter<Output>();
-    public readonly onLabelClick = this.emitOnLabelClick.event;
+export default class PdbParser implements TrackParser {
     private readonly categoryName = "Experimental structures";
     private readonly observedColor = '#2e86c1';
     private readonly unobservedColor = '#bdbfc1';
     private id = 1;
-    public failDataLoaded(): void {
-        this.emitOnStructureLoaded.emit([]);
-    }
     public async parse(uniprotId: string, data: PDBParserData): Promise<BasicTrackRenderer | null> {
         const trackRows: TrackRow[] = [];
         const outputs: Output[] = []
@@ -101,11 +93,9 @@ export default class PdbParser implements StructureTrackParser {
                         });
                     return outputs;
                 });
-            this.emitOnStructureLoaded.emit(outputs)
-            return new BasicTrackRenderer(trackRows, this.categoryName, this.emitOnLabelClick, false);
+            return new BasicTrackRenderer(trackRows, this.categoryName, false);
         }
         else {
-            this.emitOnStructureLoaded.emit(outputs)
             return null;
         }
     }

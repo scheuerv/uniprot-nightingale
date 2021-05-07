@@ -37,7 +37,7 @@ export default class FeatureParser implements TrackParser {
             for (const [type, fragmentAligner] of categoryData) {
                 typeTrackRows.push(new TrackRow(fragmentAligner.getAccessions(), config[type]?.label ?? type));
             }
-            categoryRenderers.push(new BasicTrackRenderer(typeTrackRows, categoriesConfig[category]?.label ? categoriesConfig[category]?.label : this.createLabel(category), undefined, true));
+            categoryRenderers.push(new BasicTrackRenderer(typeTrackRows, categoriesConfig[category]?.label ? categoriesConfig[category]?.label : this.createLabel(category), true));
         }
         if (categories.size > 0) {
             return new CompositeTrackRenderer(categoryRenderers);
