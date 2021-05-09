@@ -76,7 +76,7 @@ export default class TrackManager {
                         d3.create('div').node()!, navigationElement.node()!
                     ).node()!
                 );
-                const sequenceElement = d3.create('protvista-sequence').attr("length", this.sequence.length).attr("sequence", this.sequence);
+                const sequenceElement = d3.create('protvista-sequence').attr("length", this.sequence.length).attr("sequence", this.sequence).attr("numberofticks", 10);
                 this.protvistaManager.appendChild(
                     createRow(
                         d3.create('div').node()!, sequenceElement.node()!
