@@ -22,7 +22,7 @@ export default class SMRParser implements TrackParser {
             structure.chains.forEach(chain => {
                 let output: Output | undefined = undefined;
                 if (sTemplate !== null) {
-                    output = { pdbId: sTemplate[1], chain: chain.id, url: coordinatesFile, format: "pdb", mapping: { uniprotStart: structure.from, pdbStart: structure.from, uniprotEnd: structure.to, pdbEnd: structure.to } };
+                    output = { pdbId: sTemplate[1], chain: chain.id, url: coordinatesFile, format: "pdb", mapping: { uniprotStart: structure.from, uniprotEnd: structure.to, fragmentMappings: [{ pdbStart: structure.from, pdbEnd: structure.to, from: structure.from, to: structure.to}] } };
                     outputs.push(output)
                 }
                 const fragments = chain.segments.map(segment => {

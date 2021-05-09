@@ -1,7 +1,7 @@
 import BasicTrackRenderer, { Fragment, Location, Accession, TrackRow } from '../renderers/basic-track-renderer';
 import TooltipContent, { createBlast } from '../tooltip-content';
 import { fetchWithTimeout } from '../utils';
-import TrackParser from './track-parser';
+import TrackParser, { FragmentMapping } from './track-parser';
 import { Output } from '../manager/track-manager';
 
 export default class PdbParser implements TrackParser {
@@ -62,17 +62,13 @@ export default class PdbParser implements TrackParser {
                                     const uniprotStart = result.source.unp_start;
                                     const uniprotEnd = result.source.unp_end;
                                     const pdbStart = result.source.start;
-                                    const output: Output = {
-                                        pdbId: pdbId,
-                                        chain: chainId,
-                                        mapping: { uniprotStart: uniprotStart, uniprotEnd: uniprotEnd, pdbStart: pdbStart, pdbEnd: result.source.end },
-                                        url: `https://www.ebi.ac.uk/pdbe/static/entry/${pdbId}_updated.cif`,
-                                        format: "mmcif"
-                                    };
-                                    outputs.push(output);
+                                    const mappings: FragmentMapping[] = [];
+                                    let useMapping = false;
                                     const observedFragments = chain.observed.map(fragment => {
+                                        useMapping = fragment.start.author_residue_number == fragment.start.residue_number;
                                         const start: number = Math.max(fragment.start.residue_number + uniprotStart - pdbStart, uniprotStart);
                                         const end: number = Math.min(fragment.end.residue_number + uniprotStart - pdbStart, uniprotEnd);
+                                        mappings.push({ pdbStart: useMapping ? pdbStart : uniprotStart, pdbEnd: useMapping ? result.source.end : uniprotEnd, from: start, to: end })
                                         return new Fragment(
                                             this.id++,
                                             start,
@@ -83,6 +79,14 @@ export default class PdbParser implements TrackParser {
                                             this.createTooltip(uniprotId, pdbId, chainId, start, end, result.source.experimental_method)
                                         );
                                     }).filter(fragment => fragment.end >= uniprotStart && fragment.start <= uniprotEnd);
+                                    const output: Output = {
+                                        pdbId: pdbId,
+                                        chain: chainId,
+                                        mapping: { uniprotStart: uniprotStart, uniprotEnd: uniprotEnd, fragmentMappings: mappings },
+                                        url: `https://www.ebi.ac.uk/pdbe/static/entry/${pdbId}_updated.cif`,
+                                        format: "mmcif"
+                                    };
+                                    outputs.push(output);
                                     const unobservedFragments = this.getUnobservedFragments(observedFragments, uniprotStart, uniprotEnd, pdbId, chainId, uniprotId, result.source.experimental_method);
                                     const fragments = observedFragments.concat(unobservedFragments);
                                     const accessions = [new Accession(null, [new Location(fragments)], 'PDB')];
