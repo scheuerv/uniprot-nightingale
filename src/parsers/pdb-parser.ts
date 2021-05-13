@@ -61,11 +61,19 @@ export default class PdbParser implements TrackParser {
                                     const uniprotStart = result.source.unp_start;
                                     const uniprotEnd = result.source.unp_end;
                                     const pdbStart = result.source.start;
-                                    const mappings: FragmentMapping[] = chain.observed.map(fragment => {
+                                    const mappings: FragmentMapping[] = [];
+                                    chain.observed.forEach(fragment => {
                                         const useMapping = fragment.start.author_residue_number == fragment.start.residue_number;
                                         const start: number = Math.max(fragment.start.residue_number + uniprotStart - pdbStart, uniprotStart);
                                         const end: number = Math.min(fragment.end.residue_number + uniprotStart - pdbStart, uniprotEnd);
-                                        return { pdbStart: useMapping ? pdbStart : uniprotStart, pdbEnd: useMapping ? result.source.end : uniprotEnd, from: start, to: end };
+                                        if (start <= end) {
+                                            mappings.push({ 
+                                                pdbStart: useMapping ? pdbStart : fragment.start.author_residue_number, 
+                                                pdbEnd: useMapping ? result.source.end : fragment.end.author_residue_number, 
+                                                from: start, 
+                                                to: end 
+                                            });
+                                        }
                                     });
                                     const output: Output = {
                                         pdbId: pdbId,
