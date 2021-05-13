@@ -18,7 +18,7 @@ export default class AntigenParser implements TrackParser {
             features.forEach((typeFeatures, type) => {
                 const fillColor = config[type]?.color;
                 const borderColor = getDarkerColor(fillColor)
-                let fragmentAligner = new FragmentAligner();
+                const fragmentAligner = new FragmentAligner();
                 typeFeatures.forEach(feature => {
                     fragmentAligner.addFragment(new Fragment(id++, parseInt(feature.begin), parseInt(feature.end), borderColor, fillColor, config[feature.type]?.shape, createFeatureTooltip(feature, uniprotId, data.sequence)));
                 })

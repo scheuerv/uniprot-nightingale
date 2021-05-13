@@ -137,6 +137,22 @@ export default class TrackManager {
                             this.highlightOff();
                         }
                     });
+
+                    trackContainer.track.addEventListener("change", (e) => {
+                        const event = e as CustomEvent;
+                        const detail: { eventtype: string, coords: number[]; target: ElementWithData | undefined; } = event.detail;
+                        this.updateTooltip(detail, resizeObserver);
+                        if (detail?.eventtype == 'click') {
+                            const output = detail.target?.__data__?.output;
+                            if (output) {
+                                this.activeStructure?.deactivate();
+                                this.activeStructure = trackContainer;
+                                this.activeStructure.activate()
+                                this.setFixedHighlights([{ start: output.mapping.uniprotStart, end: output.mapping.uniprotEnd, color: '#0000001A' }]);
+                                this.emitOnSelectedStructure(output);
+                            }
+                        }
+                    });
                 });
                 categoryContainer.onHighlightChange.on(trackFragments => {
                     const highligtedFragments = this.categoryContainers.flatMap(categoryContainer => categoryContainer.getHighlightedTrackFragments());
@@ -175,9 +191,6 @@ export default class TrackManager {
                 }
             });
             resizeObserver.observe(element);
-            this.protvistaManagerD3.selectAll("protvista-track").on("change", () => {
-                this.updateTooltip(d3.event.detail, resizeObserver);
-            });
             const protvistaNavigation = this.protvistaManagerD3.select("protvista-navigation").node() as ProtvistaNavigation;
             let lastFocusedResidue: number | undefined;
             this.protvistaManagerD3.selectAll("protvista-track g.fragment-group").on("mousemove", f => {

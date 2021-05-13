@@ -1,7 +1,8 @@
-import BasicTrackRenderer, { Fragment, Location, Accession, TrackRow } from '../renderers/basic-track-renderer';
+import BasicTrackRenderer, { Fragment, TrackRow } from '../renderers/basic-track-renderer';
 import { getDarkerColor } from '../utils';
 import TooltipContent, { createBlast } from '../tooltip-content';
 import TrackParser from './track-parser';
+import FragmentAligner from './fragment-aligner';
 import { Output } from '../manager/track-manager';
 export default class SMRParser implements TrackParser {
     private readonly categoryName = "Predicted structures";
@@ -9,36 +10,43 @@ export default class SMRParser implements TrackParser {
     public async parse(uniprotId: string, data: SMRData): Promise<BasicTrackRenderer | null> {
         const result = data.result;
         const trackRows: TrackRow[] = [];
-        const outputs: Output[] = []
+        const fragmentForTemplate: Record<string, Fragment[]> = {};
         result.structures.forEach((structure) => {
             const sTemplate = structure.template.match(/(.+)\.(.+)+\.(.+)/);
             const experimentalMethod = structure.provider + " (" + structure.method + ")";
             const coordinatesFile = structure.coordinates;
             let pdbId: string;
+            let chainId: string = "";
             if (sTemplate !== null) {
                 pdbId = sTemplate[1] + '.' + sTemplate[2];
+                chainId = sTemplate[3]
             }
             let id = 1;
             structure.chains.forEach(chain => {
                 let output: Output | undefined = undefined;
                 if (sTemplate !== null) {
-                    output = { pdbId: sTemplate[1], chain: chain.id, url: coordinatesFile, format: "pdb", mapping: { uniprotStart: structure.from, uniprotEnd: structure.to, fragmentMappings: [{ pdbStart: structure.from, pdbEnd: structure.to, from: structure.from, to: structure.to}] } };
-                    outputs.push(output)
+                    output = { pdbId: sTemplate[1], chain: chainId, url: coordinatesFile, format: "pdb", mapping: { uniprotStart: structure.from, uniprotEnd: structure.to, fragmentMappings: [{ pdbStart: structure.from, pdbEnd: structure.to, from: structure.from, to: structure.to }] } };
                 }
-                const fragments = chain.segments.map(segment => {
-                    const tooltipContent = new TooltipContent(`${pdbId.toUpperCase()}_${chain.id} ${segment.uniprot.from}${(segment.uniprot.from === segment.uniprot.to) ? "" : ("-" + segment.uniprot.to)}`);
-                    tooltipContent.addRowIfContentDefined('Description', structure.method ? 'Experimental method: ' + structure.method : undefined);
-                    tooltipContent.addRowIfContentDefined('BLAST', createBlast(uniprotId, segment.uniprot.from, segment.uniprot.to, `${pdbId}" "${chain.id.toLowerCase()}`));
-                    return new Fragment(id++, segment.uniprot.from, segment.uniprot.to, getDarkerColor(this.color), this.color, undefined, tooltipContent);
+                chain.segments.map(segment => {
+                    const tooltipContent = new TooltipContent(`${pdbId.toUpperCase()}_${chainId} ${segment.uniprot.from}${(segment.uniprot.from === segment.uniprot.to) ? "" : ("-" + segment.uniprot.to)}`);
+                    tooltipContent.addRowIfContentDefined('Description', structure.method ? 'Experimental method: ' + experimentalMethod : undefined);
+                    const key = `${pdbId} ${chainId.toLowerCase()}`;
+                    tooltipContent.addRowIfContentDefined('BLAST', createBlast(uniprotId, segment.uniprot.from, segment.uniprot.to, key));
+                    if (!fragmentForTemplate[key]) {
+                        fragmentForTemplate[key] = [];
+                    }
+                    fragmentForTemplate[key].push(new Fragment(id++, segment.uniprot.from, segment.uniprot.to, getDarkerColor(this.color), this.color, undefined, tooltipContent, output))
                 });
-
-                const accesion = new Accession(null, [
-                    new Location(fragments)
-                ], 'SMR', experimentalMethod)
-                trackRows.push(new TrackRow([accesion], pdbId + ' ' + chain.id.toLowerCase(), output));
-                return outputs;
             });
         })
+        for (const key in fragmentForTemplate) {
+            const fragments = fragmentForTemplate[key];
+            const fragmentAligner = new FragmentAligner();
+            fragments.forEach(feature => {
+                fragmentAligner.addFragment(feature);
+            })
+            trackRows.push(new TrackRow(fragmentAligner.getAccessions(), key, fragments[0].output));
+        }
         if (trackRows.length > 0) {
             return new BasicTrackRenderer(trackRows, this.categoryName, false);
         }

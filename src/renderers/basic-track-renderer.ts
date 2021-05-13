@@ -139,7 +139,8 @@ export class Fragment {
         public readonly color: string,
         public readonly fill?: string,
         public readonly shape?: string,
-        public readonly tooltipContent?: TooltipContent
+        public readonly tooltipContent?: TooltipContent,
+        public readonly output?: Output
     ) { }
 }
 

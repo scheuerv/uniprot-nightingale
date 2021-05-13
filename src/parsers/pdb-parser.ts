@@ -11,7 +11,6 @@ export default class PdbParser implements TrackParser {
     private id = 1;
     public async parse(uniprotId: string, data: PDBParserData): Promise<BasicTrackRenderer | null> {
         const trackRows: TrackRow[] = [];
-        const outputs: Output[] = []
         if (data[uniprotId]) {
             const hash: Record<string, PDBParserItemAgg> = {};
             const dataDeduplicated: PDBParserItemAgg[] = [];
@@ -62,23 +61,12 @@ export default class PdbParser implements TrackParser {
                                     const uniprotStart = result.source.unp_start;
                                     const uniprotEnd = result.source.unp_end;
                                     const pdbStart = result.source.start;
-                                    const mappings: FragmentMapping[] = [];
-                                    let useMapping = false;
-                                    const observedFragments = chain.observed.map(fragment => {
-                                        useMapping = fragment.start.author_residue_number == fragment.start.residue_number;
+                                    const mappings: FragmentMapping[] = chain.observed.map(fragment => {
+                                        const useMapping = fragment.start.author_residue_number == fragment.start.residue_number;
                                         const start: number = Math.max(fragment.start.residue_number + uniprotStart - pdbStart, uniprotStart);
                                         const end: number = Math.min(fragment.end.residue_number + uniprotStart - pdbStart, uniprotEnd);
-                                        mappings.push({ pdbStart: useMapping ? pdbStart : uniprotStart, pdbEnd: useMapping ? result.source.end : uniprotEnd, from: start, to: end })
-                                        return new Fragment(
-                                            this.id++,
-                                            start,
-                                            end,
-                                            this.observedColor,
-                                            this.observedColor,
-                                            undefined,
-                                            this.createTooltip(uniprotId, pdbId, chainId, start, end, result.source.experimental_method)
-                                        );
-                                    }).filter(fragment => fragment.end >= uniprotStart && fragment.start <= uniprotEnd);
+                                        return { pdbStart: useMapping ? pdbStart : uniprotStart, pdbEnd: useMapping ? result.source.end : uniprotEnd, from: start, to: end };
+                                    });
                                     const output: Output = {
                                         pdbId: pdbId,
                                         chain: chainId,
@@ -86,7 +74,20 @@ export default class PdbParser implements TrackParser {
                                         url: `https://www.ebi.ac.uk/pdbe/static/entry/${pdbId}_updated.cif`,
                                         format: "mmcif"
                                     };
-                                    outputs.push(output);
+                                    const observedFragments = chain.observed.map(fragment => {
+                                        const start: number = Math.max(fragment.start.residue_number + uniprotStart - pdbStart, uniprotStart);
+                                        const end: number = Math.min(fragment.end.residue_number + uniprotStart - pdbStart, uniprotEnd);
+                                        return new Fragment(
+                                            this.id++,
+                                            start,
+                                            end,
+                                            this.observedColor,
+                                            this.observedColor,
+                                            undefined,
+                                            this.createTooltip(uniprotId, pdbId, chainId, start, end, result.source.experimental_method),
+                                            output
+                                        );
+                                    }).filter(fragment => fragment.end >= uniprotStart && fragment.start <= uniprotEnd);
                                     const unobservedFragments = this.getUnobservedFragments(observedFragments, uniprotStart, uniprotEnd, pdbId, chainId, uniprotId, result.source.experimental_method);
                                     const fragments = observedFragments.concat(unobservedFragments);
                                     const accessions = [new Accession(null, [new Location(fragments)], 'PDB')];
@@ -95,7 +96,6 @@ export default class PdbParser implements TrackParser {
 
                             });
                         });
-                    return outputs;
                 });
             return new BasicTrackRenderer(trackRows, this.categoryName, false);
         }
