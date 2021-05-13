@@ -42,14 +42,14 @@ export default class TrackManager {
     private publicHighlights: string = "";
     private readonly categoryContainers: CategoryContainer[] = [];
     private activeStructure?: TrackContainer = undefined;
-    constructor(private readonly sequenceUrlGenerator: (url: string) => string) {
+    constructor(private readonly sequenceUrlGenerator: (url: string) => string, private readonly config?: Config) {
 
     }
-    public static createDefault() {
-        const trackManager = new TrackManager(uniProtId => `https://www.uniprot.org/uniprot/${uniProtId}.fasta`)
-        trackManager.addTrack(uniProtId => `https://www.ebi.ac.uk/pdbe/api/mappings/best_structures/${uniProtId}`, new PdbParser());
-        trackManager.addTrack(uniProtId => `https://swissmodel.expasy.org/repository/uniprot/${uniProtId}.json?provider=swissmodel`, new SMRParser());
-        trackManager.addTrack(uniProtId => `https://www.ebi.ac.uk/proteins/api/features/${uniProtId}`, new FeatureParser());
+    public static createDefault(config?: Config) {
+        const trackManager = new TrackManager(uniProtId => `https://www.uniprot.org/uniprot/${uniProtId}.fasta`, config)
+        trackManager.addTrack(uniProtId => `https://www.ebi.ac.uk/pdbe/api/mappings/best_structures/${uniProtId}`, new PdbParser(config?.pdbIds));
+        trackManager.addTrack(uniProtId => `https://swissmodel.expasy.org/repository/uniprot/${uniProtId}.json?provider=swissmodel`, new SMRParser(config?.smrIds));
+        trackManager.addTrack(uniProtId => `https://www.ebi.ac.uk/proteins/api/features/${uniProtId}`, new FeatureParser(config?.exclusions));
         trackManager.addTrack(uniProtId => `https://www.ebi.ac.uk/proteins/api/proteomics/${uniProtId}`, new ProteomicsParser());
         trackManager.addTrack(uniProtId => `https://www.ebi.ac.uk/proteins/api/antigen/${uniProtId}`, new AntigenParser());
         trackManager.addTrack(uniProtId => `https://www.ebi.ac.uk/proteins/api/variation/${uniProtId}`, new VariationParser());
@@ -238,7 +238,9 @@ export default class TrackManager {
     }
 
     public addTrack(urlGenerator: (url: string) => string, parser: TrackParser) {
-        this.tracks.push({ urlGenerator, parser });
+        if (!this.config?.exclusions?.includes(parser.categoryName)) {
+            this.tracks.push({ urlGenerator, parser });
+        }
     }
 
     private setFixedHighlights(highlights: Highlight[]) {
@@ -327,4 +329,11 @@ export type TrackFragment = {
 }
 export type Output = {
     readonly pdbId: string, readonly chain: string, readonly mapping: Mapping, readonly url: string, readonly format: "mmcif" | "cifCore" | "pdb" | "pdbqt" | "gro" | "xyz" | "mol" | "sdf" | "mol2"
+}
+
+export type Config = {
+    pdbIds?: string[],
+    smrIds?: string[],
+    categoryOrder?: string[],
+    exclusions?: string[],
 }

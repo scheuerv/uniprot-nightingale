@@ -3,10 +3,14 @@ import CompositeTrackRenderer from "../renderers/composite-track-renderer";
 import FragmentAligner from "./fragment-aligner";
 import TrackParser, { ErrorResponse, isErrorResponse, ProteinFeatureInfo } from "./track-parser";
 import TrackRenderer from "../renderers/track-renderer";
-import { config } from "protvista-track/src/config";
+import { config as trackConfig } from "protvista-track/src/config";
 import { getDarkerColor, } from "../utils";
 import { createFeatureTooltip } from "../tooltip-content";
 export default class FeatureParser implements TrackParser {
+    public readonly categoryName = "FEATURES";
+    constructor(private readonly exclusions?: string[]) {
+
+    }
     public async parse(uniprotId: string, data: ProteinFeatureInfo | ErrorResponse): Promise<TrackRenderer | null> {
         if (isErrorResponse(data)) {
             return null;
@@ -15,7 +19,7 @@ export default class FeatureParser implements TrackParser {
         const features = data.features;
         let id = 1;
         features.forEach(feature => {
-            if (feature.category) {
+            if (feature.category && !this.exclusions?.includes(feature.category)) {
                 let category = categories.get(feature.category);
                 if (!category) {
                     category = new Map();
@@ -26,21 +30,21 @@ export default class FeatureParser implements TrackParser {
                     typeFeatureFragmentAligner = new FragmentAligner();
                     category.set(feature.type, typeFeatureFragmentAligner);
                 }
-                const fillColor = config[feature.type]?.color;
+                const fillColor = trackConfig[feature.type]?.color;
                 const borderColor = getDarkerColor(fillColor);
-                typeFeatureFragmentAligner.addFragment(new Fragment(id++, parseInt(feature.begin), parseInt(feature.end), borderColor, fillColor, config[feature.type]?.shape, createFeatureTooltip(feature, uniprotId, data.sequence)));
+                typeFeatureFragmentAligner.addFragment(new Fragment(id++, parseInt(feature.begin), parseInt(feature.end), borderColor, fillColor, trackConfig[feature.type]?.shape, createFeatureTooltip(feature, uniprotId, data.sequence)));
             }
         });
         const categoryRenderers: BasicTrackRenderer[] = [];
         for (const [category, categoryData] of categories.entries()) {
             const typeTrackRows: TrackRow[] = [];
             for (const [type, fragmentAligner] of categoryData) {
-                typeTrackRows.push(new TrackRow(fragmentAligner.getAccessions(), config[type]?.label ?? type));
+                typeTrackRows.push(new TrackRow(fragmentAligner.getAccessions(), trackConfig[type]?.label ?? type));
             }
-            categoryRenderers.push(new BasicTrackRenderer(typeTrackRows, categoriesConfig[category]?.label ? categoriesConfig[category]?.label : this.createLabel(category), true));
+            categoryRenderers.push(new BasicTrackRenderer(typeTrackRows, categoriesConfig[category]?.label ? categoriesConfig[category]?.label : this.createLabel(category), true, category));
         }
         if (categories.size > 0) {
-            return new CompositeTrackRenderer(categoryRenderers);
+            return new CompositeTrackRenderer(categoryRenderers, this.categoryName);
         }
         else {
             return null;

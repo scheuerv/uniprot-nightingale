@@ -5,25 +5,31 @@ import TrackParser, { FragmentMapping } from './track-parser';
 import { Output } from '../manager/track-manager';
 
 export default class PdbParser implements TrackParser {
-    private readonly categoryName = "Experimental structures";
+    private readonly categoryLabel = "Experimental structures";
+    public readonly categoryName = "EXPERIMENTAL_STRUCTURES";
     private readonly observedColor = '#2e86c1';
     private readonly unobservedColor = '#bdbfc1';
     private id = 1;
+    constructor(private readonly pdbIds?: string[]) {
+
+    }
     public async parse(uniprotId: string, data: PDBParserData): Promise<BasicTrackRenderer | null> {
         const trackRows: TrackRow[] = [];
         if (data[uniprotId]) {
             const hash: Record<string, PDBParserItemAgg> = {};
             const dataDeduplicated: PDBParserItemAgg[] = [];
             for (const record of data[uniprotId]) {
-                if (!hash[record.pdb_id + "_" + record.chain_id]) {
-                    const recordAgg = {
-                        ...record,
-                        tax_ids: [record.tax_id]
-                    };
-                    hash[record.pdb_id + "_" + record.chain_id] = recordAgg;
-                    dataDeduplicated.push(recordAgg);
-                } else {
-                    hash[record.pdb_id + "_" + record.chain_id].tax_ids.push(record.tax_id)
+                if (this.pdbIds?.includes(record.pdb_id) || !this.pdbIds) {
+                    if (!hash[record.pdb_id + "_" + record.chain_id]) {
+                        const recordAgg = {
+                            ...record,
+                            tax_ids: [record.tax_id]
+                        };
+                        hash[record.pdb_id + "_" + record.chain_id] = recordAgg;
+                        dataDeduplicated.push(recordAgg);
+                    } else {
+                        hash[record.pdb_id + "_" + record.chain_id].tax_ids.push(record.tax_id)
+                    }
                 }
             }
             await Promise.allSettled(
@@ -44,12 +50,13 @@ export default class PdbParser implements TrackParser {
                     })
             ).then(
                 results => {
-                    results.map(promiseSettled => {
-                        if (promiseSettled.status == "fulfilled") {
-                            return promiseSettled.value;
-                        }
-                        return null;
-                    })
+                    results
+                        .map(promiseSettled => {
+                            if (promiseSettled.status == "fulfilled") {
+                                return promiseSettled.value;
+                            }
+                            return null;
+                        })
                         .filter(result => result != null)
                         .map(result => result!)
                         .forEach((resultJson: { source: PDBParserItemAgg, data: ChainData }) => {
@@ -67,11 +74,11 @@ export default class PdbParser implements TrackParser {
                                         const start: number = Math.max(fragment.start.residue_number + uniprotStart - pdbStart, uniprotStart);
                                         const end: number = Math.min(fragment.end.residue_number + uniprotStart - pdbStart, uniprotEnd);
                                         if (start <= end) {
-                                            mappings.push({ 
-                                                pdbStart: useMapping ? pdbStart : fragment.start.author_residue_number, 
-                                                pdbEnd: useMapping ? result.source.end : fragment.end.author_residue_number, 
-                                                from: start, 
-                                                to: end 
+                                            mappings.push({
+                                                pdbStart: useMapping ? pdbStart : fragment.start.author_residue_number,
+                                                pdbEnd: useMapping ? result.source.end : fragment.end.author_residue_number,
+                                                from: start,
+                                                to: end
                                             });
                                         }
                                     });
@@ -105,11 +112,11 @@ export default class PdbParser implements TrackParser {
                             });
                         });
                 });
-            return new BasicTrackRenderer(trackRows, this.categoryName, false);
+            if (trackRows.length > 0) {
+                return new BasicTrackRenderer(trackRows, this.categoryLabel, false, this.categoryName);
+            }
         }
-        else {
-            return null;
-        }
+        return null;
     }
     private urlGenerator(pdbId: string, chainId: string): string {
         return `https://www.ebi.ac.uk/pdbe/api/pdb/entry/polymer_coverage/${pdbId}/chain/${chainId}`;

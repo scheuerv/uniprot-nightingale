@@ -15,7 +15,7 @@ export default class VariationRenderer implements TrackRenderer {
     private subtracksDiv: HTMLDivElement;
     private mainTrackRow: d3.Selection<HTMLDivElement, undefined, null, undefined>;
 
-    constructor(private readonly data: VariationData, private readonly mainTrackLabel: string) {
+    constructor(private readonly data: VariationData, private readonly mainTrackLabel: string, public readonly categoryName: string) {
 
     }
 

@@ -17,7 +17,8 @@ export default class BasicTrackRenderer implements TrackRenderer {
     constructor(
         private readonly rows: TrackRow[],
         private readonly mainTrackLabel: string,
-        private readonly displayArrow: boolean
+        private readonly displayArrow: boolean,
+        public readonly categoryName: string
     ) {
 
     }

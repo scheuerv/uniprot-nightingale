@@ -3,11 +3,12 @@ import BasicTrackRenderer, { Fragment, TrackRow } from '../renderers/basic-track
 import TrackRenderer from '../renderers/track-renderer';
 import FragmentAligner from './fragment-aligner';
 import { getDarkerColor } from '../utils';
-const config = require("protvista-track/src/config").config;
+import { config as trackConfig}  from "protvista-track/src/config";
 import { createFeatureTooltip } from '../tooltip-content';
 
 export default class ProteomicsParser implements TrackParser {
-    private readonly categoryName = "Proteomics";
+    private readonly categoryLabel = "Proteomics";
+    public readonly categoryName = "PROTEOMICS";
     private readonly unique = "UNIQUE";
     private readonly nonUnique = "NON_UNIQUE";
     public async parse(uniprotId: string, data: ProteinFeatureInfo | ErrorResponse): Promise<TrackRenderer | null> {
@@ -17,25 +18,25 @@ export default class ProteomicsParser implements TrackParser {
         const uniqueFragmentAligner = new FragmentAligner();
         const nonUniqueFragmentAligner = new FragmentAligner();
         const features = data.features;
-        const colorUnique = config[this.unique].color;
-        const colorNonUnique = config[this.nonUnique].color;
+        const colorUnique = trackConfig[this.unique].color;
+        const colorNonUnique = trackConfig[this.nonUnique].color;
         const borderColorUnique = getDarkerColor(colorUnique);
         const borderColorNonUnique = getDarkerColor(colorNonUnique);
         let id = 1;
         features.forEach(feature => {
             if (feature.unique) {
-                uniqueFragmentAligner.addFragment(new Fragment(id++, parseInt(feature.begin), parseInt(feature.end), borderColorUnique, colorUnique, config[this.unique]?.shape, createFeatureTooltip(feature, uniprotId, this.unique)));
+                uniqueFragmentAligner.addFragment(new Fragment(id++, parseInt(feature.begin), parseInt(feature.end), borderColorUnique, colorUnique, trackConfig[this.unique]?.shape, createFeatureTooltip(feature, uniprotId, this.unique)));
             }
             else {
-                nonUniqueFragmentAligner.addFragment(new Fragment(id++, parseInt(feature.begin), parseInt(feature.end), borderColorNonUnique, colorNonUnique, config[this.nonUnique]?.shape, createFeatureTooltip(feature, uniprotId, this.nonUnique)));
+                nonUniqueFragmentAligner.addFragment(new Fragment(id++, parseInt(feature.begin), parseInt(feature.end), borderColorNonUnique, colorNonUnique, trackConfig[this.nonUnique]?.shape, createFeatureTooltip(feature, uniprotId, this.nonUnique)));
             }
         });
         const trackRows = [
-            new TrackRow(uniqueFragmentAligner.getAccessions(), config[this.unique].label),
-            new TrackRow(nonUniqueFragmentAligner.getAccessions(), config[this.nonUnique].label)
+            new TrackRow(uniqueFragmentAligner.getAccessions(), trackConfig[this.unique].label),
+            new TrackRow(nonUniqueFragmentAligner.getAccessions(), trackConfig[this.nonUnique].label)
         ];
         if (trackRows.length > 0) {
-            return new BasicTrackRenderer(trackRows, this.categoryName, true);
+            return new BasicTrackRenderer(trackRows, this.categoryLabel, true, this.categoryName);
         }
         else {
             return null;

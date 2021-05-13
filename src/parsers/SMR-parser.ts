@@ -5,8 +5,12 @@ import TrackParser from './track-parser';
 import FragmentAligner from './fragment-aligner';
 import { Output } from '../manager/track-manager';
 export default class SMRParser implements TrackParser {
-    private readonly categoryName = "Predicted structures";
+    private readonly categorylabel = "Predicted structures";
+    public readonly categoryName = "PREDICTED_STRUCTURES";
     private readonly color = '#2e86c1';
+    constructor(private readonly smrIds?: string[] ) {
+
+    }
     public async parse(uniprotId: string, data: SMRData): Promise<BasicTrackRenderer | null> {
         const result = data.result;
         const trackRows: TrackRow[] = [];
@@ -15,29 +19,31 @@ export default class SMRParser implements TrackParser {
             const sTemplate = structure.template.match(/(.+)\.(.+)+\.(.+)/);
             const experimentalMethod = structure.provider + " (" + structure.method + ")";
             const coordinatesFile = structure.coordinates;
-            let pdbId: string;
+            let smrId: string = "";
             let chainId: string = "";
             if (sTemplate !== null) {
-                pdbId = sTemplate[1] + '.' + sTemplate[2];
+                smrId = sTemplate[1] + '.' + sTemplate[2];
                 chainId = sTemplate[3]
             }
-            let id = 1;
-            structure.chains.forEach(chain => {
-                let output: Output | undefined = undefined;
-                if (sTemplate !== null) {
-                    output = { pdbId: sTemplate[1], chain: chainId, url: coordinatesFile, format: "pdb", mapping: { uniprotStart: structure.from, uniprotEnd: structure.to, fragmentMappings: [{ pdbStart: structure.from, pdbEnd: structure.to, from: structure.from, to: structure.to }] } };
-                }
-                chain.segments.map(segment => {
-                    const tooltipContent = new TooltipContent(`${pdbId.toUpperCase()}_${chainId} ${segment.uniprot.from}${(segment.uniprot.from === segment.uniprot.to) ? "" : ("-" + segment.uniprot.to)}`);
-                    tooltipContent.addRowIfContentDefined('Description', structure.method ? 'Experimental method: ' + experimentalMethod : undefined);
-                    const key = `${pdbId} ${chainId.toLowerCase()}`;
-                    tooltipContent.addRowIfContentDefined('BLAST', createBlast(uniprotId, segment.uniprot.from, segment.uniprot.to, key));
-                    if (!fragmentForTemplate[key]) {
-                        fragmentForTemplate[key] = [];
+            if (this.smrIds?.includes(smrId) || !this.smrIds) {
+                let id = 1;
+                structure.chains.forEach(chain => {
+                    let output: Output | undefined = undefined;
+                    if (sTemplate !== null) {
+                        output = { pdbId: sTemplate[1], chain: chainId, url: coordinatesFile, format: "pdb", mapping: { uniprotStart: structure.from, uniprotEnd: structure.to, fragmentMappings: [{ pdbStart: structure.from, pdbEnd: structure.to, from: structure.from, to: structure.to }] } };
                     }
-                    fragmentForTemplate[key].push(new Fragment(id++, segment.uniprot.from, segment.uniprot.to, getDarkerColor(this.color), this.color, undefined, tooltipContent, output))
+                    chain.segments.map(segment => {
+                        const tooltipContent = new TooltipContent(`${smrId.toUpperCase()}_${chainId} ${segment.uniprot.from}${(segment.uniprot.from === segment.uniprot.to) ? "" : ("-" + segment.uniprot.to)}`);
+                        tooltipContent.addRowIfContentDefined('Description', structure.method ? 'Experimental method: ' + experimentalMethod : undefined);
+                        const key = `${smrId} ${chainId.toLowerCase()}`;
+                        tooltipContent.addRowIfContentDefined('BLAST', createBlast(uniprotId, segment.uniprot.from, segment.uniprot.to, key));
+                        if (!fragmentForTemplate[key]) {
+                            fragmentForTemplate[key] = [];
+                        }
+                        fragmentForTemplate[key].push(new Fragment(id++, segment.uniprot.from, segment.uniprot.to, getDarkerColor(this.color), this.color, undefined, tooltipContent, output))
+                    });
                 });
-            });
+            }
         })
         for (const key in fragmentForTemplate) {
             const fragments = fragmentForTemplate[key];
@@ -48,7 +54,7 @@ export default class SMRParser implements TrackParser {
             trackRows.push(new TrackRow(fragmentAligner.getAccessions(), key, fragments[0].output));
         }
         if (trackRows.length > 0) {
-            return new BasicTrackRenderer(trackRows, this.categoryName, false);
+            return new BasicTrackRenderer(trackRows, this.categorylabel, false, this.categoryName);
         }
         else {
             return null;
