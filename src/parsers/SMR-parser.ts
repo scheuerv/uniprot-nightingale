@@ -11,7 +11,7 @@ export default class SMRParser implements TrackParser {
     constructor(private readonly smrIds?: string[] ) {
 
     }
-    public async parse(uniprotId: string, data: SMRData): Promise<BasicTrackRenderer | null> {
+    public async parse(uniprotId: string, data: SMRData): Promise<BasicTrackRenderer[] | null> {
         const result = data.result;
         const trackRows: TrackRow[] = [];
         const fragmentForTemplate: Record<string, Fragment[]> = {};
@@ -54,7 +54,7 @@ export default class SMRParser implements TrackParser {
             trackRows.push(new TrackRow(fragmentAligner.getAccessions(), key, fragments[0].output));
         }
         if (trackRows.length > 0) {
-            return new BasicTrackRenderer(trackRows, this.categorylabel, false, this.categoryName);
+            return [new BasicTrackRenderer(trackRows, this.categorylabel, false, this.categoryName)];
         }
         else {
             return null;

@@ -22,7 +22,6 @@ export default class FragmentAligner {
                 accessions.push(new Accession(null, [new Location([fragment])]))
             }
         })
-
         return accessions;
     }
     public addFragment(fragment: Fragment) {

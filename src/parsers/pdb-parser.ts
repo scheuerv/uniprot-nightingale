@@ -13,7 +13,7 @@ export default class PdbParser implements TrackParser {
     constructor(private readonly pdbIds?: string[]) {
 
     }
-    public async parse(uniprotId: string, data: PDBParserData): Promise<BasicTrackRenderer | null> {
+    public async parse(uniprotId: string, data: PDBParserData): Promise<BasicTrackRenderer[] | null> {
         const trackRows: TrackRow[] = [];
         if (data[uniprotId]) {
             const hash: Record<string, PDBParserItemAgg> = {};
@@ -113,7 +113,7 @@ export default class PdbParser implements TrackParser {
                         });
                 });
             if (trackRows.length > 0) {
-                return new BasicTrackRenderer(trackRows, this.categoryLabel, false, this.categoryName);
+                return [new BasicTrackRenderer(trackRows, this.categoryLabel, false, this.categoryName)];
             }
         }
         return null;

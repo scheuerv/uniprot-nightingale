@@ -6,7 +6,7 @@ import { VariantColors } from "../protvista/variation-filter";
 export default class VariationParser implements TrackParser {
     private readonly categoryLabel = "Variation";
     public readonly categoryName = "VARIATION";
-    public async parse(uniprotId: string, data: ProteinsAPIVariation | ErrorResponse): Promise<TrackRenderer | null> {
+    public async parse(uniprotId: string, data: ProteinsAPIVariation | ErrorResponse): Promise<TrackRenderer[] | null> {
         if (isErrorResponse(data)) {
             return null;
         }
@@ -15,7 +15,7 @@ export default class VariationParser implements TrackParser {
             accession: uniprotId
         });
         if (data.features.length > 0 && transformedData != null) {
-            return new VariationRenderer(transformedData, this.categoryLabel, this.categoryName);
+            return [new VariationRenderer(transformedData, this.categoryLabel, this.categoryName)];
         } else {
             return null;
         }

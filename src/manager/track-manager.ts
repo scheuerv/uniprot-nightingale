@@ -15,6 +15,7 @@ import ProtvistaNavigation from 'protvista-navigation';
 import OverlayScrollbars from 'overlayscrollbars';
 import 'overlayscrollbars/css/OverlayScrollbars.min.css'
 import { TrackContainer } from './track-container';
+import TrackRenderer from '../renderers/track-renderer';
 
 type Constructor<T> = new (...args: any[]) => T;
 export default class TrackManager {
@@ -97,15 +98,17 @@ export default class TrackManager {
                     )
             )
         ).then(renderers => {
-            renderers
+            const filteredRenderes = renderers
                 .map(promiseSettled => {
                     if (promiseSettled.status == "fulfilled") {
                         return promiseSettled.value;
                     }
                     return null;
                 })
+                .flatMap(renderer => renderer)
                 .filter(renderer => renderer != null)
-                .map(renderer => renderer!)
+                .map(renderer => renderer!);
+            this.sortRenderers(filteredRenderes, this.config?.categoryOrder)
                 .forEach(renderer => {
                     const categoryContainer = renderer.getCategoryContainer(this.sequence);
                     const trackContainer = categoryContainer.getFirstTrackContainerWithOutput();
@@ -118,7 +121,6 @@ export default class TrackManager {
                     }
                     this.categoryContainers.push(categoryContainer);
                     this.protvistaManager.appendChild(categoryContainer.content);
-
                 });
 
             element.appendChild(this.protvistaManager);
@@ -218,6 +220,24 @@ export default class TrackManager {
             console.log(e);
         });
 
+    }
+    private sortRenderers(filteredRenderes: TrackRenderer[], categoryOrder?: string[]): TrackRenderer[] {
+        const map = new Map<string, TrackRenderer>();
+        filteredRenderes.forEach(renderer => {
+            map.set(renderer.categoryName, renderer);
+        })
+        const sortedRenderers: TrackRenderer[] = [];
+        categoryOrder?.forEach(categoryName => {
+            const renderer = map.get(categoryName);
+            if (renderer) {
+                sortedRenderers.push(renderer);
+                map.delete(categoryName);
+            }
+        })
+        map.forEach(renderer => {
+            sortedRenderers.push(renderer);
+        })
+        return sortedRenderers;
     }
     public setHighlights(highlights: Highlight[]) {
         this.publicHighlights = highlights.map(highlight => {

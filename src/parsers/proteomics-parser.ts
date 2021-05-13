@@ -11,7 +11,7 @@ export default class ProteomicsParser implements TrackParser {
     public readonly categoryName = "PROTEOMICS";
     private readonly unique = "UNIQUE";
     private readonly nonUnique = "NON_UNIQUE";
-    public async parse(uniprotId: string, data: ProteinFeatureInfo | ErrorResponse): Promise<TrackRenderer | null> {
+    public async parse(uniprotId: string, data: ProteinFeatureInfo | ErrorResponse): Promise<TrackRenderer[] | null> {
         if (isErrorResponse(data)) {
             return null;
         }
@@ -36,7 +36,7 @@ export default class ProteomicsParser implements TrackParser {
             new TrackRow(nonUniqueFragmentAligner.getAccessions(), trackConfig[this.nonUnique].label)
         ];
         if (trackRows.length > 0) {
-            return new BasicTrackRenderer(trackRows, this.categoryLabel, true, this.categoryName);
+            return [new BasicTrackRenderer(trackRows, this.categoryLabel, true, this.categoryName)];
         }
         else {
             return null;

@@ -1,5 +1,4 @@
 import BasicTrackRenderer, { Fragment, TrackRow } from "../renderers/basic-track-renderer";
-import CompositeTrackRenderer from "../renderers/composite-track-renderer";
 import FragmentAligner from "./fragment-aligner";
 import TrackParser, { ErrorResponse, isErrorResponse, ProteinFeatureInfo } from "./track-parser";
 import TrackRenderer from "../renderers/track-renderer";
@@ -11,7 +10,7 @@ export default class FeatureParser implements TrackParser {
     constructor(private readonly exclusions?: string[]) {
 
     }
-    public async parse(uniprotId: string, data: ProteinFeatureInfo | ErrorResponse): Promise<TrackRenderer | null> {
+    public async parse(uniprotId: string, data: ProteinFeatureInfo | ErrorResponse): Promise<TrackRenderer[] | null> {
         if (isErrorResponse(data)) {
             return null;
         }
@@ -44,7 +43,7 @@ export default class FeatureParser implements TrackParser {
             categoryRenderers.push(new BasicTrackRenderer(typeTrackRows, categoriesConfig[category]?.label ? categoriesConfig[category]?.label : this.createLabel(category), true, category));
         }
         if (categories.size > 0) {
-            return new CompositeTrackRenderer(categoryRenderers, this.categoryName);
+            return categoryRenderers;
         }
         else {
             return null;

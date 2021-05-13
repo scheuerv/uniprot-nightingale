@@ -8,7 +8,7 @@ import { createFeatureTooltip } from '../tooltip-content';
 export default class AntigenParser implements TrackParser {
     private readonly categoryLabel = "Antigenic sequences";
     public readonly categoryName = "ANTIGEN"
-    public async parse(uniprotId: string, data: ProteinFeatureInfo | ErrorResponse): Promise<TrackRenderer | null> {
+    public async parse(uniprotId: string, data: ProteinFeatureInfo | ErrorResponse): Promise<TrackRenderer[] | null> {
         if (isErrorResponse(data)) {
             return null;
         }
@@ -26,7 +26,7 @@ export default class AntigenParser implements TrackParser {
                 trackRows.push(new TrackRow(fragmentAligner.getAccessions(), config[type]?.label));
 
             });
-            return new BasicTrackRenderer(trackRows, this.categoryLabel, true, this.categoryName);
+            return [new BasicTrackRenderer(trackRows, this.categoryLabel, true, this.categoryName)];
         } else {
             return null;
         }
