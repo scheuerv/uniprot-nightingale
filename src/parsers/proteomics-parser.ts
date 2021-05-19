@@ -3,7 +3,7 @@ import BasicTrackRenderer, { Fragment, TrackRow } from '../renderers/basic-track
 import TrackRenderer from '../renderers/track-renderer';
 import FragmentAligner from './fragment-aligner';
 import { getDarkerColor } from '../utils';
-import { config as trackConfig}  from "protvista-track/src/config";
+import { config as trackConfig } from "protvista-track/src/config";
 import { createFeatureTooltip } from '../tooltip-content';
 
 export default class ProteomicsParser implements TrackParser {
@@ -25,10 +25,10 @@ export default class ProteomicsParser implements TrackParser {
         let id = 1;
         features.forEach(feature => {
             if (feature.unique) {
-                uniqueFragmentAligner.addFragment(new Fragment(id++, parseInt(feature.begin), parseInt(feature.end), borderColorUnique, colorUnique, trackConfig[this.unique]?.shape, createFeatureTooltip(feature, uniprotId, this.unique)));
+                uniqueFragmentAligner.addFragment(new Fragment(id++, parseInt(feature.begin), parseInt(feature.end), borderColorUnique, colorUnique, trackConfig[this.unique]?.shape, createFeatureTooltip(feature, uniprotId, data.sequence, this.unique)));
             }
             else {
-                nonUniqueFragmentAligner.addFragment(new Fragment(id++, parseInt(feature.begin), parseInt(feature.end), borderColorNonUnique, colorNonUnique, trackConfig[this.nonUnique]?.shape, createFeatureTooltip(feature, uniprotId, this.nonUnique)));
+                nonUniqueFragmentAligner.addFragment(new Fragment(id++, parseInt(feature.begin), parseInt(feature.end), borderColorNonUnique, colorNonUnique, trackConfig[this.nonUnique]?.shape, createFeatureTooltip(feature, uniprotId, data.sequence, this.nonUnique)));
             }
         });
         const trackRows = [

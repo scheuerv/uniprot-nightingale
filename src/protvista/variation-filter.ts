@@ -1,4 +1,4 @@
-import { PredAlgorithmNameType, SourceType, Variant } from "protvista-variation-adapter/src/variants";
+import { PredAlgorithmNameType, SourceType, Variant } from "protvista-variation-adapter/dist/es/variants";
 
 import ProtvistaFilter from "protvista-filter";
 import d3 = require("d3");

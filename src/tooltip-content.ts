@@ -1,17 +1,23 @@
 import { config } from "protvista-track/src/config";
-import { DbReferenceObject, Feature } from "./parsers/track-parser";
 import ecoMap from "protvista-feature-adapter/src/evidences";
 import { groupBy } from "./utils";
+import { SourceType, Variant } from "protvista-variation-adapter/dist/es/variants";
+import { formatTooltip as variantFormatTooltip } from "protvista-variation-adapter/dist/es/tooltipGenerators";
+import { formatTooltip as featureFormatTooltip, DbReferenceObject, Feature } from "protvista-feature-adapter/src/BasicHelper";
 
-export default class TooltipContent {
-    private readonly _title: string;
+
+interface TooltipData {
+    render(): string;
+}
+class TooltipGeneral implements TooltipData {
+    constructor(private content: string) { }
+    public render(): string {
+        return this.content;
+    }
+}
+
+class TooltipDataTable implements TooltipData {
     private readonly contentRows: Row[] = [];
-    constructor(label: string) {
-        this._title = label;
-    }
-    public addRowIfContentDefined(label: string, content: string | undefined) {
-        if (content) { this.contentRows.push(new Row(label, content)); }
-    }
     public render(): string {
         let content = "<table>";
         this.contentRows.forEach(row =>
@@ -19,8 +25,11 @@ export default class TooltipContent {
         )
         return content + '</table>';
     }
-    public get title() {
-        return this._title;
+    public addRowIfContentDefined(label: string, content: string | undefined) {
+        if (content) {
+            this.contentRows.push(new Row(label, content));
+        }
+        return this;
     }
     public addEvidenceIfDefined(feature: Feature, uniprotId: string) {
         if (feature.evidences) {
@@ -41,6 +50,7 @@ export default class TooltipContent {
                 });
             });
         }
+        return this;
     }
     public addXRefsIfDefined(feature: Feature) {
         if (feature.xrefs) {
@@ -59,6 +69,39 @@ export default class TooltipContent {
                 }
             });
         }
+        return this;
+    }
+}
+export default class TooltipContent {
+    private readonly _title: string;
+    private readonly data: TooltipData[] = [];
+    constructor(label: string) {
+        this._title = label;
+    }
+    public addDataTable(): TooltipDataTable {
+        const table = new TooltipDataTable();
+        this.data.push(table);
+        return table;
+    }
+    public addVariant(variant: Variant) {
+        const general = new TooltipGeneral(variantFormatTooltip(variant));
+        this.data.push(general);
+        return general;
+    }
+    public addFeature(feature: Feature) {
+        const general = new TooltipGeneral(featureFormatTooltip(feature));
+        this.data.push(general);
+        return general;
+    }
+    public render(): string {
+        let content = "";
+        this.data.forEach(d =>
+            content += d.render()
+        );
+        return content;
+    }
+    public get title() {
+        return this._title;
     }
 
 }
@@ -98,11 +141,29 @@ export function createBlast(about: string, start: string | number, end: string |
 }
 export function createFeatureTooltip(feature: Feature, uniprotId: string, sequence: string, type?: string) {
     const tooltipContent = new TooltipContent(type ?? feature.type + " " + feature.begin + (feature.begin === feature.end ? "" : ("-" + feature.end)));
-    tooltipContent.addRowIfContentDefined('Description', feature.description);
-    tooltipContent.addRowIfContentDefined(feature.type == 'CONFLICT' ? 'Conflict' : 'Mutation', feature.alternativeSequence ? sequence.substring(parseInt(feature.begin) - 1, parseInt(feature.end)) + '>' + feature.alternativeSequence : undefined);
-    tooltipContent.addEvidenceIfDefined(feature, uniprotId);
-    tooltipContent.addXRefsIfDefined(feature);
-    tooltipContent.addRowIfContentDefined('Tools', getFeatureBlast(uniprotId, feature, type));
+    tooltipContent.addDataTable()
+        .addRowIfContentDefined('Description', feature.description)
+        .addRowIfContentDefined(feature.type == 'CONFLICT' ? 'Conflict' : 'Mutation', feature.alternativeSequence ? sequence.substring(parseInt(feature.begin) - 1, parseInt(feature.end)) + '>' + feature.alternativeSequence : undefined)
+        .addEvidenceIfDefined(feature, uniprotId)
+        .addXRefsIfDefined(feature)
+        .addRowIfContentDefined('Tools', getFeatureBlast(uniprotId, feature, type));
+    return tooltipContent;
+}
+
+export function createVariantTooltip(variant: Variant) {
+    const tooltipContent = new TooltipContent(variant.type + " " + variant.begin + (variant.begin === variant.end ? "" : ("-" + variant.end)));
+    let source: string | undefined = undefined;
+    if (variant.sourceType == SourceType.Mixed) {
+        source = 'UniProt and large scale studies';
+    }
+    else if (variant.sourceType == SourceType.LargeScaleStudy) {
+        source = 'Large scale studies';
+    }
+    else if (variant.sourceType == SourceType.UniProt) {
+        source = 'UniProt';
+    }
+    tooltipContent.addDataTable().addRowIfContentDefined('Source', source);
+    tooltipContent.addVariant(variant);
     return tooltipContent;
 }
 

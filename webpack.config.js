@@ -13,11 +13,9 @@ const sharedConfig = {
                 loader: 'ts-loader',
                 test: /\.(ts|tsx)$/,
                 include: [
-                    path.resolve(__dirname, 'src'),
-                     path.resolve(__dirname, 'node_modules/protvista-variation-adapter/src/variants.ts')
+                    path.resolve(__dirname, 'src')
                     ],
                 options: {
-                    allowTsInNodeModules: true,
                     configFile: path.resolve(__dirname, 'tsconfig.json')
                 }
             },

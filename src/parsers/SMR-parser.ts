@@ -8,7 +8,7 @@ export default class SMRParser implements TrackParser {
     private readonly categorylabel = "Predicted structures";
     public readonly categoryName = "PREDICTED_STRUCTURES";
     private readonly color = '#2e86c1';
-    constructor(private readonly smrIds?: string[] ) {
+    constructor(private readonly smrIds?: string[]) {
 
     }
     public async parse(uniprotId: string, data: SMRData): Promise<BasicTrackRenderer[] | null> {
@@ -20,23 +20,24 @@ export default class SMRParser implements TrackParser {
             const experimentalMethod = structure.provider + " (" + structure.method + ")";
             const coordinatesFile = structure.coordinates;
             let smrId: string = "";
-            let chainId: string = "";
+            let templateChain: string = "";
             if (sTemplate !== null) {
                 smrId = sTemplate[1] + '.' + sTemplate[2];
-                chainId = sTemplate[3]
+                templateChain = sTemplate[3]
             }
             if (this.smrIds?.includes(smrId) || !this.smrIds) {
                 let id = 1;
                 structure.chains.forEach(chain => {
                     let output: Output | undefined = undefined;
                     if (sTemplate !== null) {
-                        output = { pdbId: sTemplate[1], chain: chainId, url: coordinatesFile, format: "pdb", mapping: { uniprotStart: structure.from, uniprotEnd: structure.to, fragmentMappings: [{ pdbStart: structure.from, pdbEnd: structure.to, from: structure.from, to: structure.to }] } };
+                        output = { pdbId: sTemplate[1], chain: chain.id, url: coordinatesFile, format: "pdb", mapping: { uniprotStart: structure.from, uniprotEnd: structure.to, fragmentMappings: [{ pdbStart: structure.from, pdbEnd: structure.to, from: structure.from, to: structure.to }] } };
                     }
                     chain.segments.map(segment => {
-                        const tooltipContent = new TooltipContent(`${smrId.toUpperCase()}_${chainId} ${segment.uniprot.from}${(segment.uniprot.from === segment.uniprot.to) ? "" : ("-" + segment.uniprot.to)}`);
-                        tooltipContent.addRowIfContentDefined('Description', structure.method ? 'Experimental method: ' + experimentalMethod : undefined);
-                        const key = `${smrId} ${chainId.toLowerCase()}`;
-                        tooltipContent.addRowIfContentDefined('BLAST', createBlast(uniprotId, segment.uniprot.from, segment.uniprot.to, key));
+                        const tooltipContent = new TooltipContent(`${smrId.toUpperCase()}_${chain.id} ${segment.uniprot.from}${(segment.uniprot.from === segment.uniprot.to) ? "" : ("-" + segment.uniprot.to)}`);
+                        const key = `${smrId} ${templateChain.toLowerCase()}`;
+                        tooltipContent.addDataTable()
+                            .addRowIfContentDefined('Description', structure.method ? 'Experimental method: ' + experimentalMethod : undefined)
+                            .addRowIfContentDefined('BLAST', createBlast(uniprotId, segment.uniprot.from, segment.uniprot.to, key));
                         if (!fragmentForTemplate[key]) {
                             fragmentForTemplate[key] = [];
                         }

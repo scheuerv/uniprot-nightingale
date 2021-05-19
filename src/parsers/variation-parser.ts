@@ -1,8 +1,9 @@
 import TrackRenderer from "../renderers/track-renderer";
 import VariationRenderer from "../renderers/variation-renderer";
 import TrackParser, { ErrorResponse, isErrorResponse } from "./track-parser";
-import { SourceType, AminoAcid, Variant, Association, ProteinsAPIVariation, Xref } from "protvista-variation-adapter/src/variants";
+import { SourceType, AminoAcid, Variant, Association, ProteinsAPIVariation, Xref } from "protvista-variation-adapter/dist/es/variants";
 import { VariantColors } from "../protvista/variation-filter";
+import { createVariantTooltip } from "../tooltip-content";
 export default class VariationParser implements TrackParser {
     private readonly categoryLabel = "Variation";
     public readonly categoryName = "VARIATION";
@@ -39,7 +40,7 @@ export default class VariationParser implements TrackParser {
             start: variant.begin,
             xrefNames: this.getSourceType(variant.xrefs, variant.sourceType),
             hasPredictions: variant.predictions && variant.predictions.length > 0,
-            tooltipContent: "",
+            tooltipContent: createVariantTooltip(variant),
             color: this.variantsFill(variant, sequence.length)
         }));
         if (!variants) return null;

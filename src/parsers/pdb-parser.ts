@@ -169,8 +169,9 @@ export default class PdbParser implements TrackParser {
     }
     private createTooltip(uniprotId: string, pdbId: string, chainId: string, start: string | number, end: string | number, experimentalMethod?: string) {
         const tooltipContent = new TooltipContent(`${pdbId.toUpperCase()}_${chainId} ${start}${(start === end) ? "" : ("-" + end)}`);
-        tooltipContent.addRowIfContentDefined('Description', experimentalMethod ? 'Experimental method: ' + experimentalMethod : undefined);
-        tooltipContent.addRowIfContentDefined('BLAST', createBlast(uniprotId, start, end, `${pdbId}" "${chainId.toLowerCase()}`));
+        tooltipContent.addDataTable()
+            .addRowIfContentDefined('Description', experimentalMethod ? 'Experimental method: ' + experimentalMethod : undefined)
+            .addRowIfContentDefined('BLAST', createBlast(uniprotId, start, end, `${pdbId}" "${chainId.toLowerCase()}`));
         return tooltipContent;
     }
 }
