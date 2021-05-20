@@ -11,8 +11,8 @@ import { loadComponent } from "./utils";
 
 import TrackManager from "./manager/track-manager";
 import './main.css';
-import VariationGraph from "./protvista/variation-graph";
-import ProtvistaVariation from "protvista-variation";
+import FixedVariationGraph from "./protvista/variation-graph";
+import FixedProtvistaVariation from "./protvista/variation";
 import '@fortawesome/fontawesome-free/css/all.css';
 
 
@@ -23,8 +23,8 @@ const registerWebComponents = function () {
     loadComponent("protvista-track", LimitedTrack);
     loadComponent("protvista-navigation", ProtvistaNavigation);
     loadComponent("protvista-tooltip", ProtvistaTooltip);
-    loadComponent("protvista-variation-graph", VariationGraph);
-    loadComponent("protvista-variation", ProtvistaVariation);
+    loadComponent("protvista-variation-graph", FixedVariationGraph);
+    loadComponent("protvista-variation", FixedProtvistaVariation);
 }
 
 // Conditional loading of polyfill

@@ -1,10 +1,19 @@
 import ProtvistaVariationGraph from "protvista-variation-graph";
 import { VariationData } from "../parsers/variation-parser";
-export default class VariationGraph extends ProtvistaVariationGraph {
+import d3 = require('d3');
+export default class FixedVariationGraph extends ProtvistaVariationGraph {
     public set data(data: VariationData) {
         this._originalData = data;
         super.data = data;
     }
+
+    public connectedCallback() {
+        super.connectedCallback();
+        this.zoom.filter(function () {
+            return !d3.event.button && d3.event.type != "dblclick";
+        });
+    }
+
     public _applyFilters() {
         super._applyFilters();
         const data = this.getCurrentData();
