@@ -49,12 +49,20 @@ export default class TrackManager {
     }
     public static createDefault(config?: Config) {
         const trackManager = new TrackManager(uniProtId => `https://www.uniprot.org/uniprot/${uniProtId}.fasta`, config)
-        trackManager.addTrack(uniProtId => `https://www.ebi.ac.uk/pdbe/api/mappings/best_structures/${uniProtId}`, new PdbParser(config?.pdbIds));
-        trackManager.addTrack(uniProtId => `https://swissmodel.expasy.org/repository/uniprot/${uniProtId}.json?provider=swissmodel`, new SMRParser(config?.smrIds));
-        trackManager.addTrack(uniProtId => `https://www.ebi.ac.uk/proteins/api/features/${uniProtId}`, new FeatureParser(config?.exclusions));
-        trackManager.addTrack(uniProtId => `https://www.ebi.ac.uk/proteins/api/proteomics/${uniProtId}`, new ProteomicsParser());
-        trackManager.addTrack(uniProtId => `https://www.ebi.ac.uk/proteins/api/antigen/${uniProtId}`, new AntigenParser());
-        trackManager.addTrack(uniProtId => `https://www.ebi.ac.uk/proteins/api/variation/${uniProtId}`, new VariationParser());
+        trackManager.addFetchTrack(uniProtId => `https://www.ebi.ac.uk/pdbe/api/mappings/best_structures/${uniProtId}`, new PdbParser(config?.pdbIds));
+        trackManager.addFetchTrack(uniProtId => `https://swissmodel.expasy.org/repository/uniprot/${uniProtId}.json?provider=swissmodel`, new SMRParser(config?.smrIds));
+        trackManager.addFetchTrack(uniProtId => `https://www.ebi.ac.uk/proteins/api/features/${uniProtId}`, new FeatureParser(config?.exclusions));
+        trackManager.addFetchTrack(uniProtId => `https://www.ebi.ac.uk/proteins/api/proteomics/${uniProtId}`, new ProteomicsParser());
+        trackManager.addFetchTrack(uniProtId => `https://www.ebi.ac.uk/proteins/api/antigen/${uniProtId}`, new AntigenParser());
+        trackManager.addFetchTrack(uniProtId => `https://www.ebi.ac.uk/proteins/api/variation/${uniProtId}`, new VariationParser());
+        config?.customDataSources?.forEach(customDataSource => {
+            if (customDataSource.url) {
+                trackManager.addFetchTrack(uniProtId => `${customDataSource.url}${uniProtId}${customDataSource.useExtension ? '.json' : ''}`, new FeatureParser(config?.exclusions));
+            }
+            if (customDataSource.data) {
+                trackManager.addTrack(uniProtId => Promise.resolve(customDataSource.data), new FeatureParser(config?.exclusions));
+            }
+        });
         return trackManager;
     }
 
@@ -88,15 +96,13 @@ export default class TrackManager {
 
         Promise.allSettled(
             this.tracks.map(
-                track => fetchWithTimeout(track.urlGenerator(uniprotId), { timeout: 8000 })
-                    .then(
-                        data => data.json().then(data => {
-                            return track.parser.parse(uniprotId, data);
-                        }), err => {
-                            console.log(`API unavailable!`, err);
-                            return Promise.reject();
-                        }
-                    )
+                track => track.dataFetcher(uniprotId)
+                    .then(data => {
+                        return track.parser.parse(uniprotId, data);
+                    }, err => {
+                        console.log(`DATA unavailable!`, err);
+                        return Promise.reject();
+                    })
             )
         ).then(renderers => {
             const filteredRenderes = renderers
@@ -263,10 +269,18 @@ export default class TrackManager {
         this.applyHighlights();
     }
 
-    public addTrack(urlGenerator: (url: string) => string, parser: TrackParser) {
+    public addTrack(dataFetcher: (uniprotId: string) => Promise<any>, parser: TrackParser) {
         if (!this.config?.exclusions?.includes(parser.categoryName)) {
-            this.tracks.push({ urlGenerator, parser });
+            this.tracks.push({ dataFetcher: dataFetcher, parser });
         }
+    }
+    public addFetchTrack(urlGenerator: (uniprotId: string) => string, parser: TrackParser) {
+        this.addTrack(uniprodId => fetchWithTimeout(urlGenerator(uniprodId), { timeout: 8000 }).then(
+            data => data.json(),
+            err => {
+                console.log(`API unavailable!`, err);
+                return Promise.reject();
+            }), parser);
     }
 
     private setFixedHighlights(highlights: Highlight[]) {
@@ -340,7 +354,7 @@ export default class TrackManager {
 }
 
 type Track = {
-    readonly urlGenerator: (url: string) => string;
+    readonly dataFetcher: (uniprotId: string) => Promise<any>;
     readonly parser: TrackParser;
 }
 export type Highlight = {

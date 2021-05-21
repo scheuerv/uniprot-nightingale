@@ -29,7 +29,7 @@ export default class FeatureParser implements TrackParser {
                     typeFeatureFragmentAligner = new FragmentAligner();
                     category.set(feature.type, typeFeatureFragmentAligner);
                 }
-                const fillColor = trackConfig[feature.type]?.color;
+                const fillColor = feature.color ?? trackConfig[feature.type]?.color;
                 const borderColor = getDarkerColor(fillColor);
                 typeFeatureFragmentAligner.addFragment(new Fragment(id++, parseInt(feature.begin), parseInt(feature.end), borderColor, fillColor, trackConfig[feature.type]?.shape, createFeatureTooltip(feature, uniprotId, data.sequence)));
             }
@@ -38,7 +38,7 @@ export default class FeatureParser implements TrackParser {
         for (const [category, categoryData] of categories.entries()) {
             const typeTrackRows: Map<string, TrackRow> = new Map();
             for (const [type, fragmentAligner] of categoryData) {
-                typeTrackRows.set(type,new TrackRow(fragmentAligner.getAccessions(), trackConfig[type]?.label ?? type));
+                typeTrackRows.set(type, new TrackRow(fragmentAligner.getAccessions(), trackConfig[type]?.label ?? this.createLabel(type)));
             }
             categoryRenderers.push(new BasicTrackRenderer(typeTrackRows, categoriesConfig[category]?.label ? categoriesConfig[category]?.label : this.createLabel(category), true, category));
         }
