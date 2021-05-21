@@ -14,7 +14,7 @@ export default class PdbParser implements TrackParser {
 
     }
     public async parse(uniprotId: string, data: PDBParserData): Promise<BasicTrackRenderer[] | null> {
-        const trackRows: TrackRow[] = [];
+        const trackRows: Map<string, TrackRow> = new Map();
         if (data[uniprotId]) {
             const hash: Record<string, PDBParserItemAgg> = {};
             const dataDeduplicated: PDBParserItemAgg[] = [];
@@ -106,13 +106,13 @@ export default class PdbParser implements TrackParser {
                                     const unobservedFragments = this.getUnobservedFragments(observedFragments, uniprotStart, uniprotEnd, pdbId, chainId, uniprotId, result.source.experimental_method);
                                     const fragments = observedFragments.concat(unobservedFragments);
                                     const accessions = [new Accession(null, [new Location(fragments)], 'PDB')];
-                                    trackRows.push(new TrackRow(accessions, pdbId + ' ' + chainId.toLowerCase(), output));
+                                    trackRows.set(pdbId + ' ' + chainId.toLowerCase(), new TrackRow(accessions, pdbId + ' ' + chainId.toLowerCase(), output));
                                 });
 
                             });
                         });
                 });
-            if (trackRows.length > 0) {
+            if (trackRows.size > 0) {
                 return [new BasicTrackRenderer(trackRows, this.categoryLabel, false, this.categoryName)];
             }
         }

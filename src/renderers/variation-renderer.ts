@@ -18,6 +18,9 @@ export default class VariationRenderer implements TrackRenderer {
     constructor(private readonly data: VariationData, private readonly mainTrackLabel: string, public readonly categoryName: string) {
 
     }
+    combine(other: TrackRenderer): TrackRenderer {
+        throw new Error("Method not implemented.");
+    }
 
     public getCategoryContainer(sequence: string): CategoryContainer {
         const variationGraph = d3.create("protvista-variation-graph")

@@ -13,7 +13,7 @@ export default class SMRParser implements TrackParser {
     }
     public async parse(uniprotId: string, data: SMRData): Promise<BasicTrackRenderer[] | null> {
         const result = data.result;
-        const trackRows: TrackRow[] = [];
+        const trackRows: Map<string,TrackRow> = new Map();
         const fragmentForTemplate: Record<string, Fragment[]> = {};
         result.structures.forEach((structure) => {
             const sTemplate = structure.template.match(/(.+)\.(.+)+\.(.+)/);
@@ -52,9 +52,9 @@ export default class SMRParser implements TrackParser {
             fragments.forEach(feature => {
                 fragmentAligner.addFragment(feature);
             })
-            trackRows.push(new TrackRow(fragmentAligner.getAccessions(), key, fragments[0].output));
+            trackRows.set(key,new TrackRow(fragmentAligner.getAccessions(), key, fragments[0].output));
         }
-        if (trackRows.length > 0) {
+        if (trackRows.size > 0) {
             return [new BasicTrackRenderer(trackRows, this.categorylabel, false, this.categoryName)];
         }
         else {

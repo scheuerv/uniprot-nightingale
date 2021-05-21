@@ -31,11 +31,11 @@ export default class ProteomicsParser implements TrackParser {
                 nonUniqueFragmentAligner.addFragment(new Fragment(id++, parseInt(feature.begin), parseInt(feature.end), borderColorNonUnique, colorNonUnique, trackConfig[this.nonUnique]?.shape, createFeatureTooltip(feature, uniprotId, data.sequence, this.nonUnique)));
             }
         });
-        const trackRows = [
-            new TrackRow(uniqueFragmentAligner.getAccessions(), trackConfig[this.unique].label),
-            new TrackRow(nonUniqueFragmentAligner.getAccessions(), trackConfig[this.nonUnique].label)
-        ];
-        if (trackRows.length > 0) {
+        const trackRows = new Map([
+            [this.unique, new TrackRow(uniqueFragmentAligner.getAccessions(), trackConfig[this.unique].label)],
+            [this.nonUnique, new TrackRow(nonUniqueFragmentAligner.getAccessions(), trackConfig[this.nonUnique].label)]
+        ]);
+        if (trackRows.size > 0) {
             return [new BasicTrackRenderer(trackRows, this.categoryLabel, true, this.categoryName)];
         }
         else {

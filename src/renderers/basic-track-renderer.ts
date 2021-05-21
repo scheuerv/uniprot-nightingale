@@ -15,12 +15,48 @@ export default class BasicTrackRenderer implements TrackRenderer {
     private subtracksDiv: HTMLDivElement;
     private mainTrackRow: d3.Selection<HTMLDivElement, undefined, null, undefined>;
     constructor(
-        private readonly rows: TrackRow[],
+        private readonly rows: Map<string, TrackRow>,
         private readonly mainTrackLabel: string,
         private readonly displayArrow: boolean,
         public readonly categoryName: string
     ) {
 
+    }
+    public combine(other: TrackRenderer): TrackRenderer {
+        if (other instanceof BasicTrackRenderer) {
+            const combined: Map<string, TrackRow> = new Map();
+            this.rows.forEach((row, type) => {
+                combined.set(type, row)
+            })
+            let maxId = Math.max.apply(Math, Array.from(other.rows.values())
+                .flatMap(trackRow => trackRow.rowData)
+                .flatMap(typeRowDatum => typeRowDatum.locations[0].fragments)
+                .map(fragment => fragment.id));
+            other.rows.forEach((otherTypeRow, type) => {
+                const thisTypeRow = combined.get(type);
+                if (thisTypeRow) {
+                    const accessionsWithFixedId = thisTypeRow.rowData.map(accession => {
+                        const fragmentsWithFixedId = accession.locations[0].fragments.map(fragment => {
+                            if (fragment.id <= maxId) {
+                                return new Fragment(++maxId, fragment.start, fragment.end, fragment.color, fragment.fill, fragment.shape, fragment.tooltipContent, fragment.output)
+                            }
+                            else {
+                                return fragment
+                            }
+                        });
+                        return new Accession(accession.color, [new Location(fragmentsWithFixedId)], accession.type, accession.experimentalMethod);
+                    })
+                    const combinedTrackRow = new TrackRow(otherTypeRow.rowData.concat(accessionsWithFixedId), otherTypeRow.label, otherTypeRow.output);
+                    combined.set(type, combinedTrackRow);
+                }
+                else {
+                    combined.set(type, otherTypeRow);
+                }
+            })
+            return new BasicTrackRenderer(combined, other.mainTrackLabel, other.displayArrow, other.categoryName)
+        } else {
+            throw new Error("Can't combine BasicTrackRenderer with: " + (typeof other));
+        }
     }
     public getCategoryContainer(sequence: string): BasicCategoryContainer {
 
@@ -51,7 +87,7 @@ export default class BasicTrackRenderer implements TrackRenderer {
         }
     }
     private getMainTrack(sequence: string): [MainTrackContainer<Accession[]>, d3.Selection<HTMLDivElement, undefined, null, undefined>] {
-        const mainTrackData = this.rows.flatMap(row => row.rowData);
+        const mainTrackData = Array.from(this.rows.values()).flatMap(row => row.rowData);
         const fragmentAligner = new FragmentAligner();
         mainTrackData.forEach(accession => accession.locations[0].fragments.forEach(fragment => fragmentAligner.addFragment(fragment)))
         const mainTrackDataAligned = fragmentAligner.getAccessions();
@@ -84,9 +120,9 @@ export default class BasicTrackRenderer implements TrackRenderer {
     private getSubtracks(sequence: string): [BasicTrackContainer[], HTMLDivElement] {
         const subtrackContainers: BasicTrackContainer[] = [];
         const subtracksDiv = d3.create("div").attr("class", "subtracks-container").style("display", "none").node()!;
-        if (this.rows.length >= 5) {
+        if (this.rows.size >= 5) {
             subtracksDiv.classList.add('scrollable');
-            subtracksDiv.style.maxHeight = this.rows.length * 43 + 'px';
+            subtracksDiv.style.maxHeight = this.rows.size * 43 + 'px';
         }
         this.rows.forEach(subtrackData => {
             const d3Track = d3.create("protvista-track")

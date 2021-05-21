@@ -16,6 +16,7 @@ import OverlayScrollbars from 'overlayscrollbars';
 import 'overlayscrollbars/css/OverlayScrollbars.min.css'
 import { TrackContainer } from './track-container';
 import TrackRenderer from '../renderers/track-renderer';
+import { Feature } from 'protvista-feature-adapter/src/BasicHelper';
 
 type Constructor<T> = new (...args: any[]) => T;
 export default class TrackManager {
@@ -224,7 +225,12 @@ export default class TrackManager {
     private sortRenderers(filteredRenderes: TrackRenderer[], categoryOrder?: string[]): TrackRenderer[] {
         const map = new Map<string, TrackRenderer>();
         filteredRenderes.forEach(renderer => {
-            map.set(renderer.categoryName, renderer);
+            const previousRenderer = map.get(renderer.categoryName);
+            if (previousRenderer) {
+                map.set(renderer.categoryName, previousRenderer.combine(renderer))
+            } else {
+                map.set(renderer.categoryName, renderer);
+            }
         })
         const sortedRenderers: TrackRenderer[] = [];
         categoryOrder?.forEach(categoryName => {
@@ -356,4 +362,21 @@ export type Config = {
     smrIds?: string[],
     categoryOrder?: string[],
     exclusions?: string[],
+    customDataSources?: CustomDataSource[],
+}
+
+type CustomDataSource = {
+    source: string,
+    useExtension: boolean,
+    url?: string,
+    data: CustomDataSourceData
+}
+type CustomDataSourceData = {
+    sequence: string,
+    features: CustomDataSourceFeature[]
+}
+type CustomDataSourceFeature = Feature & {
+    type: string,
+    category: string,
+    color: string
 }

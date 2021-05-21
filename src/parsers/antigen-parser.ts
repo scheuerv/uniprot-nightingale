@@ -14,7 +14,7 @@ export default class AntigenParser implements TrackParser {
         }
         const features = groupBy(data.features, feature => feature.type);
         if (features.size > 0) {
-            const trackRows: TrackRow[] = [];
+            const trackRows: Map<string,TrackRow> = new Map();
             let id = 1;
             features.forEach((typeFeatures, type) => {
                 const fillColor = config[type]?.color;
@@ -23,7 +23,7 @@ export default class AntigenParser implements TrackParser {
                 typeFeatures.forEach(feature => {
                     fragmentAligner.addFragment(new Fragment(id++, parseInt(feature.begin), parseInt(feature.end), borderColor, fillColor, config[feature.type]?.shape, createFeatureTooltip(feature, uniprotId, data.sequence)));
                 })
-                trackRows.push(new TrackRow(fragmentAligner.getAccessions(), config[type]?.label));
+                trackRows.set(type,new TrackRow(fragmentAligner.getAccessions(), config[type]?.label));
 
             });
             return [new BasicTrackRenderer(trackRows, this.categoryLabel, true, this.categoryName)];
