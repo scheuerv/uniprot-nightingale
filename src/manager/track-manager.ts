@@ -57,10 +57,10 @@ export default class TrackManager {
         trackManager.addFetchTrack(uniProtId => `https://www.ebi.ac.uk/proteins/api/variation/${uniProtId}`, new VariationParser());
         config?.customDataSources?.forEach(customDataSource => {
             if (customDataSource.url) {
-                trackManager.addFetchTrack(uniProtId => `${customDataSource.url}${uniProtId}${customDataSource.useExtension ? '.json' : ''}`, new FeatureParser(config?.exclusions));
+                trackManager.addFetchTrack(uniProtId => `${customDataSource.url}${uniProtId}${customDataSource.useExtension ? '.json' : ''}`, new FeatureParser(config?.exclusions, customDataSource.source));
             }
             if (customDataSource.data) {
-                trackManager.addTrack(uniProtId => Promise.resolve(customDataSource.data), new FeatureParser(config?.exclusions));
+                trackManager.addTrack(uniProtId => Promise.resolve(customDataSource.data), new FeatureParser(config?.exclusions, customDataSource.source));
             }
         });
         return trackManager;

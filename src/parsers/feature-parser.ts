@@ -7,7 +7,7 @@ import { getDarkerColor, } from "../utils";
 import { createFeatureTooltip } from "../tooltip-content";
 export default class FeatureParser implements TrackParser {
     public readonly categoryName = "FEATURES";
-    constructor(private readonly exclusions?: string[]) {
+    constructor(private readonly exclusions?: string[], private readonly dataSource?: string) {
 
     }
     public async parse(uniprotId: string, data: ProteinFeatureInfo | ErrorResponse): Promise<TrackRenderer[] | null> {
@@ -31,7 +31,7 @@ export default class FeatureParser implements TrackParser {
                 }
                 const fillColor = feature.color ?? trackConfig[feature.type]?.color;
                 const borderColor = getDarkerColor(fillColor);
-                typeFeatureFragmentAligner.addFragment(new Fragment(id++, parseInt(feature.begin), parseInt(feature.end), borderColor, fillColor, trackConfig[feature.type]?.shape, createFeatureTooltip(feature, uniprotId, data.sequence)));
+                typeFeatureFragmentAligner.addFragment(new Fragment(id++, parseInt(feature.begin), parseInt(feature.end), borderColor, fillColor, trackConfig[feature.type]?.shape, createFeatureTooltip(feature, uniprotId, data.sequence, this.dataSource, undefined)));
             }
         });
         const categoryRenderers: BasicTrackRenderer[] = [];

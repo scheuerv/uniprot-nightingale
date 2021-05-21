@@ -25,10 +25,10 @@ export default class ProteomicsParser implements TrackParser {
         let id = 1;
         features.forEach(feature => {
             if (feature.unique) {
-                uniqueFragmentAligner.addFragment(new Fragment(id++, parseInt(feature.begin), parseInt(feature.end), borderColorUnique, colorUnique, trackConfig[this.unique]?.shape, createFeatureTooltip(feature, uniprotId, data.sequence, this.unique)));
+                uniqueFragmentAligner.addFragment(new Fragment(id++, parseInt(feature.begin), parseInt(feature.end), borderColorUnique, colorUnique, trackConfig[this.unique]?.shape, createFeatureTooltip(feature, uniprotId, data.sequence, undefined, this.unique)));
             }
             else {
-                nonUniqueFragmentAligner.addFragment(new Fragment(id++, parseInt(feature.begin), parseInt(feature.end), borderColorNonUnique, colorNonUnique, trackConfig[this.nonUnique]?.shape, createFeatureTooltip(feature, uniprotId, data.sequence, this.nonUnique)));
+                nonUniqueFragmentAligner.addFragment(new Fragment(id++, parseInt(feature.begin), parseInt(feature.end), borderColorNonUnique, colorNonUnique, trackConfig[this.nonUnique]?.shape, createFeatureTooltip(feature, uniprotId, data.sequence, undefined, this.nonUnique)));
             }
         });
         const trackRows = new Map([

@@ -139,9 +139,10 @@ function getFeatureBlast(accession: string, feature: Feature, key?: string) {
 export function createBlast(about: string, start: string | number, end: string | number, key: string) {
     return `<span><a href="http://www.uniprot.org/blast/?about=${about}[${start}-${end}]&key=${key}" target="_blank">BLAST</a>`;
 }
-export function createFeatureTooltip(feature: Feature, uniprotId: string, sequence: string, type?: string) {
+export function createFeatureTooltip(feature: Feature, uniprotId: string, sequence: string, dataSource?: string, type?: string) {
     const tooltipContent = new TooltipContent(type ?? feature.type + " " + feature.begin + (feature.begin === feature.end ? "" : ("-" + feature.end)));
     tooltipContent.addDataTable()
+        .addRowIfContentDefined('Source', dataSource)
         .addRowIfContentDefined('Description', feature.description)
         .addRowIfContentDefined(feature.type == 'CONFLICT' ? 'Conflict' : 'Mutation', feature.alternativeSequence ? sequence.substring(parseInt(feature.begin) - 1, parseInt(feature.end)) + '>' + feature.alternativeSequence : undefined)
         .addEvidenceIfDefined(feature, uniprotId)
