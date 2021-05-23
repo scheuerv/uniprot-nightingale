@@ -17,6 +17,7 @@ import 'overlayscrollbars/css/OverlayScrollbars.min.css'
 import { TrackContainer } from './track-container';
 import TrackRenderer from '../renderers/track-renderer';
 import { Feature } from 'protvista-feature-adapter/src/BasicHelper';
+import { ProteinsAPIVariation } from 'protvista-variation-adapter/dist/es/variants';
 
 type Constructor<T> = new (...args: any[]) => T;
 export default class TrackManager {
@@ -54,13 +55,24 @@ export default class TrackManager {
         trackManager.addFetchTrack(uniProtId => `https://www.ebi.ac.uk/proteins/api/features/${uniProtId}`, new FeatureParser(config?.exclusions));
         trackManager.addFetchTrack(uniProtId => `https://www.ebi.ac.uk/proteins/api/proteomics/${uniProtId}`, new ProteomicsParser());
         trackManager.addFetchTrack(uniProtId => `https://www.ebi.ac.uk/proteins/api/antigen/${uniProtId}`, new AntigenParser());
-        trackManager.addFetchTrack(uniProtId => `https://www.ebi.ac.uk/proteins/api/variation/${uniProtId}`, new VariationParser());
+        trackManager.addFetchTrack(uniProtId => `https://www.ebi.ac.uk/proteins/api/variation/${uniProtId}`, new VariationParser(config?.overwritePredictions), (data: ProteinsAPIVariation) => data?.features ?? data);
         config?.customDataSources?.forEach(customDataSource => {
             if (customDataSource.url) {
                 trackManager.addFetchTrack(uniProtId => `${customDataSource.url}${uniProtId}${customDataSource.useExtension ? '.json' : ''}`, new FeatureParser(config?.exclusions, customDataSource.source));
             }
             if (customDataSource.data) {
-                trackManager.addTrack(uniProtId => Promise.resolve(customDataSource.data), new FeatureParser(config?.exclusions, customDataSource.source));
+                const variationFeatures: CustomDataSourceFeature[] = [];
+                const otherFeatures: CustomDataSourceFeature[] = [];
+                customDataSource.data.features.forEach(feature => {
+                    if (feature.category == "VARIATION") {
+                        variationFeatures.push(feature);
+                    }
+                    else {
+                        otherFeatures.push(feature);
+                    }
+                });
+                trackManager.addTrack(uniProtId => Promise.resolve({ sequence: customFeatures.sequence, features: variationFeatures }), new VariationParser(config?.overwritePredictions, customDataSource.source));
+                trackManager.addTrack(uniProtId => Promise.resolve(otherFeatures), new FeatureParser(config?.exclusions, customDataSource.source));
             }
         });
         return trackManager;
@@ -274,9 +286,12 @@ export default class TrackManager {
             this.tracks.push({ dataFetcher: dataFetcher, parser });
         }
     }
-    public addFetchTrack(urlGenerator: (uniprotId: string) => string, parser: TrackParser) {
+    public addFetchTrack(urlGenerator: (uniprotId: string) => string, parser: TrackParser, mapper?: (data: any) => any) {
         this.addTrack(uniprodId => fetchWithTimeout(urlGenerator(uniprodId), { timeout: 8000 }).then(
-            data => data.json(),
+            data => {
+                const json = data.json();
+                return mapper ? mapper(json) : json;
+            },
             err => {
                 console.log(`API unavailable!`, err);
                 return Promise.reject();
@@ -377,6 +392,7 @@ export type Config = {
     categoryOrder?: string[],
     exclusions?: string[],
     customDataSources?: CustomDataSource[],
+    overwritePredictions?: boolean
 }
 
 type CustomDataSource = {
@@ -392,5 +408,5 @@ type CustomDataSourceData = {
 type CustomDataSourceFeature = Feature & {
     type: string,
     category: string,
-    color: string
+    color?: string
 }

@@ -1,13 +1,13 @@
-import { PredAlgorithmNameType, SourceType, Variant } from "protvista-variation-adapter/dist/es/variants";
+import { PredAlgorithmNameType, SourceType } from "protvista-variation-adapter/dist/es/variants";
 
 import ProtvistaFilter from "protvista-filter";
 import d3 = require("d3");
 import { html, css } from "lit-element";
-import { VariationData } from "../parsers/variation-parser";
+import { VariantWithSources, VariationData } from "../parsers/variation-parser";
 export default class VariationFilter extends ProtvistaFilter {
     public multiFor: Map<string, (
         ((filterCase: FilterCase) => (variants: FilterVariationData[]) => FilterVariationData[])
-        | ((filterCase: FilterCase) => (variants: VariationData) => Variant[])
+        | ((filterCase: FilterCase) => (variants: VariationData) => VariantWithSources[])
     )>;
     public getCheckBox(filterItem: FilterCase) {
         const { name, options } = filterItem;
@@ -101,7 +101,7 @@ function filterDataVariation(filterName: string, data: FilterVariationData[]): F
     }
     data.forEach(feature => {
         const clonedVariants = Object.assign({}, feature);
-        clonedVariants.variants = feature.variants.filter((variant: Variant) => {
+        clonedVariants.variants = feature.variants.filter((variant: VariantWithSources) => {
             return filter.properties.every(property => {
                 return property(variant);
             });
@@ -110,12 +110,12 @@ function filterDataVariation(filterName: string, data: FilterVariationData[]): F
     });
     return newData;
 };
-function filterDataVariationGraph(filterName: string, data: VariationData): Variant[] {
+function filterDataVariationGraph(filterName: string, data: VariationData): VariantWithSources[] {
     const filter = getFilterByName(filterName);
     if (!filter) {
         return data.variants;
     }
-    return data.variants.filter((variant: Variant) => {
+    return data.variants.filter((variant: VariantWithSources) => {
         return filter.properties.every(property => {
             return property(variant);
         });
@@ -145,9 +145,9 @@ export type FilterCase = {
         readonly labels: string[],
         readonly colors: string[]
     },
-    readonly properties: ((variant: Variant) => boolean)[],
+    readonly properties: ((variant: VariantWithSources) => boolean)[],
     readonly filterDataVariation: (variants: FilterVariationData[]) => FilterVariationData[]
-    readonly filterDataVariationGraph: (variants: VariationData) => Variant[];
+    readonly filterDataVariationGraph: (variants: VariationData) => VariantWithSources[];
 }
 export const filterCases: FilterCase[] = [
     {
@@ -161,7 +161,7 @@ export const filterCases: FilterCase[] = [
             colors: [VariantColors.UPDiseaseColor]
         },
         properties: [
-            function (variant: Variant) {
+            function (variant: VariantWithSources) {
                 if (variant.association) { return variant.association?.some(association => association.disease === true); }
                 return false;
             }
@@ -184,11 +184,11 @@ export const filterCases: FilterCase[] = [
             colors: [VariantColors.deleteriousColor, VariantColors.benignColor]
         },
         properties: [
-            function (variant: Variant) {
+            function (variant: VariantWithSources) {
                 if (variant.alternativeSequence) return /[^*]/.test(variant.alternativeSequence);
                 return false;
             },
-            function (variant: Variant) {
+            function (variant: VariantWithSources) {
                 return [SourceType.LargeScaleStudy, null].some((orProp) => {
                     return variant.sourceType == orProp;
                 });
@@ -223,12 +223,12 @@ export const filterCases: FilterCase[] = [
             colors: [VariantColors.UPNonDiseaseColor]
         },
         properties: [
-            function (variant: Variant) {
+            function (variant: VariantWithSources) {
                 return variant.association?.every(association => {
                     return association.disease !== true;
                 }) || (!variant.association);
             },
-            function (variant: Variant) {
+            function (variant: VariantWithSources) {
                 return [
                     SourceType.UniProt,
                     SourceType.Mixed
@@ -256,7 +256,7 @@ export const filterCases: FilterCase[] = [
             colors: [VariantColors.othersColor]
         },
         properties: [
-            function (variant: Variant) {
+            function (variant: VariantWithSources) {
                 return variant.alternativeSequence === '*';
             }
         ],
@@ -287,11 +287,11 @@ export const filterCases: FilterCase[] = [
                 }
                 return variant.association === undefined;
             },
-            function (variant: Variant) {
+            function (variant: VariantWithSources) {
                 if (variant.alternativeSequence) return /[^*]/.test(variant.alternativeSequence);
                 return false;
             },
-            function (variant: Variant) {
+            function (variant: VariantWithSources) {
                 return [SourceType.LargeScaleStudy].some((orProp) => {
                     return variant.sourceType == orProp;
                 });
@@ -315,7 +315,7 @@ export const filterCases: FilterCase[] = [
             colors: ["grey"]
         },
         properties: [
-            function (variant: Variant) {
+            function (variant: VariantWithSources) {
                 return [SourceType.UniProt, SourceType.Mixed].some((orProp) => {
                     return variant.sourceType == orProp;
                 });
@@ -340,7 +340,7 @@ export const filterCases: FilterCase[] = [
             colors: ["grey"]
         },
         properties: [
-            function (variant: Variant) {
+            function (variant: VariantWithSources) {
                 return [SourceType.LargeScaleStudy, SourceType.Mixed].some((orProp) => {
                     return variant.sourceType == orProp;
                 });
@@ -360,7 +360,7 @@ type FilterVariationData = {
     readonly type: string,
     readonly normal: string,
     readonly pos: number,
-    variants: Variant[]
+    variants: VariantWithSources[]
 }
 
 

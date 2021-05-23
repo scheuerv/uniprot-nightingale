@@ -1,12 +1,14 @@
 import TrackRenderer from "../renderers/track-renderer";
 import VariationRenderer from "../renderers/variation-renderer";
 import TrackParser, { ErrorResponse, isErrorResponse } from "./track-parser";
-import { SourceType, AminoAcid, Variant, Association, ProteinsAPIVariation, Xref } from "protvista-variation-adapter/dist/es/variants";
+import { SourceType, AminoAcid, Variant, ProteinsAPIVariation, Xref, Prediction, Evidence, ConsequenceType } from "protvista-variation-adapter/dist/es/variants";
 import { VariantColors } from "../protvista/variation-filter";
-import { createVariantTooltip } from "../tooltip-content";
+import TooltipContent, { createVariantTooltip } from "../tooltip-content";
+import { existAssociation } from "../utils";
 export default class VariationParser implements TrackParser {
     private readonly categoryLabel = "Variation";
     public readonly categoryName = "VARIATION";
+    constructor(private readonly overwritePredictions?: boolean, private readonly customSource?: string) { }
     public async parse(uniprotId: string, data: ProteinsAPIVariation | ErrorResponse): Promise<TrackRenderer[] | null> {
         if (isErrorResponse(data)) {
             return null;
@@ -14,50 +16,42 @@ export default class VariationParser implements TrackParser {
         const transformedData = this.transformData({
             ...data,
             accession: uniprotId
-        });
+        }, uniprotId, this.overwritePredictions);
         if (data.features.length > 0 && transformedData != null) {
-            return [new VariationRenderer(transformedData, this.categoryLabel, this.categoryName)];
+            return [new VariationRenderer(transformedData, this.categoryLabel, this.categoryName, uniprotId, this.overwritePredictions)];
         } else {
             return null;
         }
     }
-    private getSourceType(xrefs: Xref[], sourceType: SourceType) {
-        const xrefNames = xrefs ? xrefs.map((ref) => ref.name) : [];
-        if (sourceType === "uniprot" || sourceType === "mixed") {
-            xrefNames.push("uniprot");
-        }
-        return xrefNames;
-    };
 
     private transformData(
-        data: ProteinsAPIVariation
+        data: ProteinsAPIVariation, uniprotId: string, overwritePredictions?: boolean
     ): VariationData | null {
         const { sequence, features } = data;
         const variants = features.map((variant) => ({
             ...variant,
-            accession: variant.genomicLocation,
             variant: variant.alternativeSequence ? variant.alternativeSequence : "-",
             start: variant.begin,
-            xrefNames: this.getSourceType(variant.xrefs, variant.sourceType),
-            hasPredictions: variant.predictions && variant.predictions.length > 0,
-            tooltipContent: createVariantTooltip(variant),
-            color: this.variantsFill(variant, sequence.length)
+            end: variant.end,
+            tooltipContent: createVariantTooltip(variant, uniprotId, undefined, overwritePredictions, this.customSource),
+            color: this.variantsFill(variant, sequence.length),
+            customSource: this.customSource
         }));
         if (!variants) return null;
         return { sequence, variants };
     };
 
-    private variantsFill(variant: Variant, length: number) {
+    private variantsFill(variant: VariantWithSources, length: number): string {
         if ((variant.alternativeSequence === '*') || (parseInt(variant.begin) > length)) {
             return VariantColors.othersColor;
         } else if ((variant.sourceType === SourceType.UniProt) ||
             (variant.sourceType === SourceType.Mixed)) {
-            if (this.existAssociation(variant.association)) {
+            if (existAssociation(variant.association)) {
                 return VariantColors.UPDiseaseColor;
             } else {
                 return VariantColors.UPNonDiseaseColor;
             }
-        } else if (variant.sourceType === SourceType.LargeScaleStudy && this.existAssociation(variant.association)) {
+        } else if (variant.sourceType === SourceType.LargeScaleStudy && existAssociation(variant.association)) {
             return VariantColors.UPDiseaseColor;
         } else {
             var predictionScore = this.getPredictionColorScore(variant);
@@ -70,10 +64,10 @@ export default class VariationParser implements TrackParser {
         }
     };
 
-    private getPredictionColorScore(variant: Variant): number | undefined {
-        let polyphenPrediction;
+    private getPredictionColorScore(variant: VariantWithSources): number | undefined {
+        let polyphenPrediction: undefined | string;
         let polyphenScore = 0;
-        let siftPrediction;
+        let siftPrediction: undefined | string;
         let siftScore = 0;
         if (variant.predictions) {
             variant.predictions.forEach(function (prediction) {
@@ -110,23 +104,8 @@ export default class VariationParser implements TrackParser {
             return undefined;
         }
     };
-    private existAssociation(association: Association[] | undefined): boolean {
-        if (association) {
-            if (association.length !== 0) {
-                if (association[0].name || association[0].description) {
-                    return true;
-                } else {
-                    return false;
-                }
-            } else {
-                return false;
-            }
-        } else {
-            return false;
-        }
-    };
 
-    private getVariantsFillColor(variant: Variant, predictionScore: number | undefined) {
+    private getVariantsFillColor(variant: VariantWithSources, predictionScore: number | undefined) {
 
         if (predictionScore !== undefined) {
             return VariantColors.getPredictionColor(predictionScore);
@@ -138,5 +117,23 @@ export default class VariationParser implements TrackParser {
 
 export type VariationData = {
     readonly sequence: string,
-    readonly variants: Variant[]
+    readonly variants: VariantWithDescription[]
 }
+
+export type VariantWithDescription = Variant & {
+    readonly description?: string;    
+    readonly customSource?: string;
+}
+export type VariantWithSources = VariantWithDescription & {
+    readonly otherSources?: Record<string, OtherSourceData>;
+    readonly tooltipContent?: TooltipContent;
+}
+
+export type OtherSourceData =
+    {
+        readonly predictions?: Prediction[];
+        readonly description?: string;
+        readonly evidences?: Evidence[];
+        readonly consequenceType?: ConsequenceType;
+        readonly xrefs?: Xref[];
+    }

@@ -1,16 +1,16 @@
 import { config } from "protvista-track/src/config";
 import ecoMap from "protvista-feature-adapter/src/evidences";
-import { groupBy } from "./utils";
-import { SourceType, Variant } from "protvista-variation-adapter/dist/es/variants";
-import { formatTooltip as variantFormatTooltip } from "protvista-variation-adapter/dist/es/tooltipGenerators";
-import { formatTooltip as featureFormatTooltip, DbReferenceObject, Feature } from "protvista-feature-adapter/src/BasicHelper";
+import { existAssociation, groupBy } from "./utils";
+import { Association, Prediction, SourceType } from "protvista-variation-adapter/dist/es/variants";
+import { formatTooltip as featureFormatTooltip, DbReferenceObject, Feature, Evidence } from "protvista-feature-adapter/src/BasicHelper";
+import { OtherSourceData, VariantWithDescription } from "./parsers/variation-parser";
 
 
 interface TooltipData {
     render(): string;
 }
 class TooltipGeneral implements TooltipData {
-    constructor(private content: string) { }
+    constructor(private readonly content: string) { }
     public render(): string {
         return this.content;
     }
@@ -18,23 +18,25 @@ class TooltipGeneral implements TooltipData {
 
 class TooltipDataTable implements TooltipData {
     private readonly contentRows: Row[] = [];
+    constructor(private readonly title?: string) { }
     public render(): string {
         let content = "<table>";
+        content += this.title ? '<tr> <td>' + this.title + '</td></tr>' : "";
         this.contentRows.forEach(row =>
             content += '<tr> <td>' + row.label + '</td><td>' + row.content + '</td></tr>'
         )
         return content + '</table>';
     }
-    public addRowIfContentDefined(label: string, content: string | undefined) {
+    public addRowIfContentDefined(label: string, content: string | undefined): TooltipDataTable {
         if (content) {
             this.contentRows.push(new Row(label, content));
         }
         return this;
     }
-    public addEvidenceIfDefined(feature: Feature, uniprotId: string) {
-        if (feature.evidences) {
+    public addEvidenceIfDefined(evidences: Evidence[] | undefined, uniprotId: string): TooltipDataTable {
+        if (evidences) {
             const groupedEvidencesByCode = groupBy(
-                feature.evidences,
+                evidences,
                 evidence => evidence.code
             );
             groupedEvidencesByCode.forEach((evidences, code) => {
@@ -52,10 +54,10 @@ class TooltipDataTable implements TooltipData {
         }
         return this;
     }
-    public addXRefsIfDefined(feature: Feature) {
-        if (feature.xrefs) {
+    public addXRefsIfDefined(xrefs?: DbReferenceObject[]): TooltipDataTable {
+        if (xrefs) {
             const groupedXrefsByCode = groupBy(
-                feature.xrefs.filter(xref => xref.id != undefined),
+                xrefs.filter(xref => xref.id != undefined),
                 xref => xref.id
             );
             let first = true;
@@ -71,6 +73,25 @@ class TooltipDataTable implements TooltipData {
         }
         return this;
     }
+    public addDiseaseAssociationIfDefined(associations: Association[] | undefined): TooltipDataTable {
+        if (existAssociation(associations)) {
+            this.addRowIfContentDefined("Disease Association", "");
+            associations?.forEach(association => {
+                if (association.name) {
+                    this.addRowIfContentDefined("Disease", `<span><a href="http://www.uniprot.org/diseases/?query=${association.name}" target="_blank">${association.name}</a></span>`)
+                }
+                this.addRowIfContentDefined("Description", association.description);
+                this.addXRefsIfDefined(association.dbReferences);
+            })
+        }
+        return this;
+    }
+    public addVariantPredictionsIfDefined(predictions: Prediction[] | undefined): TooltipDataTable {
+        predictions?.forEach(prediction => {
+            this.addRowIfContentDefined(prediction.predAlgorithmNameType, prediction.predictionValType ? `${prediction.predictionValType}${prediction.score != undefined ? `, score: ${prediction.score}` : ""}` : undefined)
+        })
+        return this;
+    }
 }
 export default class TooltipContent {
     private readonly _title: string;
@@ -78,15 +99,10 @@ export default class TooltipContent {
     constructor(label: string) {
         this._title = label;
     }
-    public addDataTable(): TooltipDataTable {
-        const table = new TooltipDataTable();
+    public addDataTable(title?: string): TooltipDataTable {
+        const table = new TooltipDataTable(title);
         this.data.push(table);
         return table;
-    }
-    public addVariant(variant: Variant) {
-        const general = new TooltipGeneral(variantFormatTooltip(variant));
-        this.data.push(general);
-        return general;
     }
     public addFeature(feature: Feature) {
         const general = new TooltipGeneral(featureFormatTooltip(feature));
@@ -144,28 +160,117 @@ export function createFeatureTooltip(feature: Feature, uniprotId: string, sequen
     tooltipContent.addDataTable()
         .addRowIfContentDefined('Source', dataSource)
         .addRowIfContentDefined('Description', feature.description)
+        .addRowIfContentDefined('Alignment score', feature.matchScore ? `${feature.matchScore}%` : undefined)
         .addRowIfContentDefined(feature.type == 'CONFLICT' ? 'Conflict' : 'Mutation', feature.alternativeSequence ? sequence.substring(parseInt(feature.begin) - 1, parseInt(feature.end)) + '>' + feature.alternativeSequence : undefined)
-        .addEvidenceIfDefined(feature, uniprotId)
-        .addXRefsIfDefined(feature)
+        .addEvidenceIfDefined(feature.evidences, uniprotId)
+        .addXRefsIfDefined(feature.xrefs)
         .addRowIfContentDefined('Tools', getFeatureBlast(uniprotId, feature, type));
     return tooltipContent;
 }
 
-export function createVariantTooltip(variant: Variant) {
+export function createVariantTooltip(variant: VariantWithDescription, uniprotId: string, otherSources?: Record<string, OtherSourceData>, overwritePredictions?: boolean, customSource?: string) {
     const tooltipContent = new TooltipContent(variant.type + " " + variant.begin + (variant.begin === variant.end ? "" : ("-" + variant.end)));
-    let source: string | undefined = undefined;
+    let sourceText: string | undefined = undefined;
+    let customSources: string | undefined = undefined;
+    if (otherSources) {
+        for (const source in otherSources) {
+            customSources = customSources ? `${customSources}, ${source}` : source;
+        }
+    }
+    else if (customSource) {
+        customSources = customSource;
+    }
+    let uniprotEvidences = variant.evidences;
+    let lssEvidences = variant.evidences;
+    let isUniprot = false;
+    let isLss = false;
     if (variant.sourceType == SourceType.Mixed) {
-        source = 'UniProt and large scale studies';
+        isUniprot = true;
+        isLss = true;
+        sourceText = 'UniProt and large scale studies' + `${customSources ? ` custom source(${customSources})` : ""}`;
+        uniprotEvidences = [];
+        lssEvidences = [];
+        variant.evidences?.forEach(evidence => {
+            const eco = ecoMap.filter((record) => record.name == evidence.code)[0]
+            if (eco.isManual) {
+                uniprotEvidences?.push(evidence);
+            } else {
+                lssEvidences?.push(evidence);
+            }
+        })
     }
     else if (variant.sourceType == SourceType.LargeScaleStudy) {
-        source = 'Large scale studies';
+        uniprotEvidences = undefined;
+        isLss = true;
+        sourceText = 'Large scale studies' + `${customSources ? ` custom source (${customSources})` : ""}`;;
     }
     else if (variant.sourceType == SourceType.UniProt) {
-        source = 'UniProt';
+        isUniprot = true;
+        lssEvidences = undefined;
+        sourceText = 'UniProt' + `${customSources ? ` custom source (${customSources})` : ""}`;;
     }
-    tooltipContent.addDataTable().addRowIfContentDefined('Source', source);
-    tooltipContent.addVariant(variant);
+    else if (customSources) {
+        sourceText = `Custom data (${customSources})`;
+    }
+    tooltipContent.addDataTable()
+        .addRowIfContentDefined('Source', sourceText)
+        .addRowIfContentDefined('Variant', `${variant.alternativeSequence ? `${variant.wildType} > ${variant.alternativeSequence}` : undefined}`);
+    if (isUniprot) {
+        tooltipContent.addDataTable('Uniprot')
+            .addRowIfContentDefined("Feature ID", variant.ftId)
+            .addEvidenceIfDefined(uniprotEvidences, uniprotId)
+            .addRowIfContentDefined("Disease Association", variant.association ? "" : undefined)
+            .addDiseaseAssociationIfDefined(variant.association);
+    }
+    if (isLss) {
+        const lssDataTable = tooltipContent.addDataTable('Large Scale Studies')
+            .addRowIfContentDefined("Consequence", variant.consequenceType);
+        if (!overwritePredictions || !existsPrediciton(otherSources)) {
+            lssDataTable.addVariantPredictionsIfDefined(variant.predictions);
+        }
+        lssDataTable.addEvidenceIfDefined(lssEvidences, uniprotId)
+            .addXRefsIfDefined(variant.xrefs);
+    }
+    if (otherSources) {
+        let predictionsAdded = false;
+        for (const source in otherSources) {
+            const data = otherSources[source];
+            const customSourceDataTable = tooltipContent.addDataTable(source)
+                .addRowIfContentDefined('Description', data.description)
+                .addRowIfContentDefined("Consequence", data.consequenceType);
+            if (overwritePredictions && !predictionsAdded) {
+                if (data.predictions) {
+                    predictionsAdded = true;
+                    customSourceDataTable.addVariantPredictionsIfDefined(data.predictions);
+                }
+            }
+            customSourceDataTable.addEvidenceIfDefined(data.evidences, uniprotId)
+                .addXRefsIfDefined(data.xrefs);
+        }
+    }
+    else if (customSource) {
+        tooltipContent.addDataTable(customSource)
+            .addRowIfContentDefined('Description', variant.description)
+            .addRowIfContentDefined("Consequence", variant.consequenceType)
+            .addVariantPredictionsIfDefined(variant.predictions)
+            .addEvidenceIfDefined(variant.evidences, uniprotId)
+            .addXRefsIfDefined(variant.xrefs);
+    }
+
     return tooltipContent;
+}
+
+function existsPrediciton(otherSources?: Record<string, OtherSourceData>): boolean {
+    for (const source in otherSources) {
+        const otherSource = otherSources[source];
+        if (otherSource.predictions)
+            for (const prediction of otherSource.predictions) {
+                if (prediction.predictionValType) {
+                    return true;
+                }
+            }
+    }
+    return false;
 }
 
 function convertTypeToLabel(name: string) {
@@ -187,11 +292,9 @@ function getEvidenceText(code: string, sources: DbReferenceObject[]) {
             }
         }).length;
 
-        if (publications > 0) {
-            evidenceText = publications + " ";
-        }
-        evidenceText += eco.shortDescription ?? code;
-    } else if (acronym === 'ISM') {
+        evidenceText += publications + " " + eco.shortDescription ?? code;
+    }
+    else if (acronym === 'ISM') {
         evidenceText = sources.length === 0 ? 'Sequence Analysis' : sources[0].name + ' annotation';
     }
     else if (acronym === 'AA') {

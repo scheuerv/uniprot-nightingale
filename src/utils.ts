@@ -1,6 +1,7 @@
 import d3 = require("d3");
 
 import ColorConvert from "color-convert";
+import { Association } from "protvista-variation-adapter/dist/es/variants";
 
 const loadComponent = function (name: string, className: CustomElementConstructor) {
     if (!customElements.get(name)) {
@@ -67,6 +68,17 @@ async function fetchWithTimeout(resource: string, options: RequestInitWithTimeOu
 interface RequestInitWithTimeOut extends RequestInit {
     timeout: number;
 }
+function existAssociation(association: Association[] | undefined): boolean {
+    if (association) {
+        if (association.length !== 0) {
+            if (association[0].name || association[0].description) {
+                return true;
+            }
+        }
+    }
+    return false;
+};
+
 export {
-    loadComponent, createRow, getDarkerColor, groupBy, groupByAndMap, fetchWithTimeout
+    loadComponent, createRow, getDarkerColor, groupBy, groupByAndMap, fetchWithTimeout, existAssociation
 };
