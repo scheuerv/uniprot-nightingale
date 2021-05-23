@@ -161,7 +161,7 @@ export function createFeatureTooltip(feature: Feature, uniprotId: string, sequen
         .addRowIfContentDefined('Source', dataSource)
         .addRowIfContentDefined('Description', feature.description)
         .addRowIfContentDefined('Alignment score', feature.matchScore ? `${feature.matchScore}%` : undefined)
-        .addRowIfContentDefined(feature.type == 'CONFLICT' ? 'Conflict' : 'Mutation', feature.alternativeSequence ? sequence.substring(parseInt(feature.begin) - 1, parseInt(feature.end)) + '>' + feature.alternativeSequence : undefined)
+        .addRowIfContentDefined(feature.type == 'CONFLICT' ? 'Conflict' : 'Mutation', feature.alternativeSequence ? (sequence.substring(parseInt(feature.begin) - 1, parseInt(feature.end)) + '>' + feature.alternativeSequence) : undefined)
         .addEvidenceIfDefined(feature.evidences, uniprotId)
         .addXRefsIfDefined(feature.xrefs)
         .addRowIfContentDefined('Tools', getFeatureBlast(uniprotId, feature, type));

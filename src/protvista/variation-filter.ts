@@ -1,4 +1,4 @@
-import { PredAlgorithmNameType, SourceType } from "protvista-variation-adapter/dist/es/variants";
+import { SourceType } from "protvista-variation-adapter/dist/es/variants";
 
 import ProtvistaFilter from "protvista-filter";
 import d3 = require("d3");
@@ -279,13 +279,7 @@ export const filterCases: FilterCase[] = [
         },
         properties: [
             function (variant) {
-                if (!variant.predictions) return false;
-                for (const prediction of variant.predictions) {
-                    if (prediction.predAlgorithmNameType == PredAlgorithmNameType.PolyPhen || prediction.predAlgorithmNameType == PredAlgorithmNameType.Sift) {
-                        return false;
-                    }
-                }
-                return variant.association === undefined;
+                return !variant.association && !variant.predictions;
             },
             function (variant: VariantWithSources) {
                 if (variant.alternativeSequence) return /[^*]/.test(variant.alternativeSequence);

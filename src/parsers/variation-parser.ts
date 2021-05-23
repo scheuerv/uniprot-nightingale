@@ -1,7 +1,7 @@
 import TrackRenderer from "../renderers/track-renderer";
 import VariationRenderer from "../renderers/variation-renderer";
 import TrackParser, { ErrorResponse, isErrorResponse } from "./track-parser";
-import { SourceType, AminoAcid, Variant, ProteinsAPIVariation, Xref, Prediction, Evidence, ConsequenceType } from "protvista-variation-adapter/dist/es/variants";
+import { SourceType, AminoAcid, Variant, Xref, Prediction, Evidence, ConsequenceType } from "protvista-variation-adapter/dist/es/variants";
 import { VariantColors } from "../protvista/variation-filter";
 import TooltipContent, { createVariantTooltip } from "../tooltip-content";
 import { existAssociation } from "../utils";
@@ -13,10 +13,7 @@ export default class VariationParser implements TrackParser {
         if (isErrorResponse(data)) {
             return null;
         }
-        const transformedData = this.transformData({
-            ...data,
-            accession: uniprotId
-        }, uniprotId, this.overwritePredictions);
+        const transformedData = this.transformData(data, uniprotId, this.overwritePredictions);
         if (data.features.length > 0 && transformedData != null) {
             return [new VariationRenderer(transformedData, this.categoryLabel, this.categoryName, uniprotId, this.overwritePredictions)];
         } else {
@@ -27,21 +24,33 @@ export default class VariationParser implements TrackParser {
     private transformData(
         data: ProteinsAPIVariation, uniprotId: string, overwritePredictions?: boolean
     ): VariationData | null {
+
         const { sequence, features } = data;
-        const variants = features.map((variant) => ({
-            ...variant,
-            variant: variant.alternativeSequence ? variant.alternativeSequence : "-",
-            start: variant.begin,
-            end: variant.end,
-            tooltipContent: createVariantTooltip(variant, uniprotId, undefined, overwritePredictions, this.customSource),
-            color: this.variantsFill(variant, sequence.length),
-            customSource: this.customSource
-        }));
+        const variants = features.map((variant: VariantWithSources) => {
+            if (variant.alternativeSequence === undefined) {
+                console.warn("Variant alternative sequence changed to * as no alternative sequence provided by the API", variant);
+            }
+            const alternativeSequence = variant.alternativeSequence ?? AminoAcid.Empty;
+            const variantWithoutTooltip = {
+                ...variant,
+                variant: alternativeSequence,
+                alternativeSequence: alternativeSequence,
+                start: variant.begin,
+                end: variant.end,
+                customSource: this.customSource
+            }
+            return {
+                ...variantWithoutTooltip,
+                tooltipContent: createVariantTooltip(variantWithoutTooltip, uniprotId, undefined, overwritePredictions, this.customSource),
+                color: this.variantsFill(variantWithoutTooltip, sequence.length, overwritePredictions)
+
+            }
+        });
         if (!variants) return null;
         return { sequence, variants };
     };
 
-    private variantsFill(variant: VariantWithSources, length: number): string {
+    private variantsFill(variant: VariantWithSources, length: number, overwritePredictions?: boolean): string {
         if ((variant.alternativeSequence === '*') || (parseInt(variant.begin) > length)) {
             return VariantColors.othersColor;
         } else if ((variant.sourceType === SourceType.UniProt) ||
@@ -54,17 +63,28 @@ export default class VariationParser implements TrackParser {
         } else if (variant.sourceType === SourceType.LargeScaleStudy && existAssociation(variant.association)) {
             return VariantColors.UPDiseaseColor;
         } else {
-            var predictionScore = this.getPredictionColorScore(variant);
+            let externalPrediction: number | undefined;
+            let extDatum: OtherSourceData | undefined = undefined;
+            if (variant.otherSources) {
+                for (const source in variant.otherSources) {
+                    const data = variant.otherSources[source];
+                    externalPrediction = this.getPredictionColorScore(data);
+                    extDatum = data;
+                    break;
+                }
+
+            }
+            const predictionScore = this.getPredictionColorScore(variant);
 
             if (variant.sourceType === SourceType.LargeScaleStudy && predictionScore === undefined) {
                 return VariantColors.unknownColor;
             }
+            return this.getVariantsFillColor(variant, predictionScore, extDatum, externalPrediction, overwritePredictions);
 
-            return this.getVariantsFillColor(variant, predictionScore);
         }
-    };
+    }
 
-    private getPredictionColorScore(variant: VariantWithSources): number | undefined {
+    private getPredictionColorScore(variant: OtherSourceData): number | undefined {
         let polyphenPrediction: undefined | string;
         let polyphenScore = 0;
         let siftPrediction: undefined | string;
@@ -79,10 +99,6 @@ export default class VariationParser implements TrackParser {
                     siftScore = prediction.score;
                 }
             })
-        }
-        if (variant.alternativeSequence === undefined) {
-            variant.alternativeSequence = AminoAcid.Empty;
-            console.warn("Variant alternative sequence changed to * as no alternative sequence provided by the API", variant);
         }
         var sift = false,
             polyphen = false;
@@ -105,10 +121,19 @@ export default class VariationParser implements TrackParser {
         }
     };
 
-    private getVariantsFillColor(variant: VariantWithSources, predictionScore: number | undefined) {
-
-        if (predictionScore !== undefined) {
-            return VariantColors.getPredictionColor(predictionScore);
+    private getVariantsFillColor(variant: VariantWithSources, predictionScore: number | undefined, extDatum: OtherSourceData | undefined, externalPredictionScore: number | undefined, overwritePredictions?: boolean) {
+        if (overwritePredictions) {
+            if (externalPredictionScore !== undefined) {
+                return VariantColors.getPredictionColor(externalPredictionScore);
+            } else if (predictionScore !== undefined) {
+                return VariantColors.getPredictionColor(predictionScore);
+            }
+        } else {
+            if (predictionScore !== undefined) {
+                return VariantColors.getPredictionColor(predictionScore);
+            } else if (externalPredictionScore !== undefined) {
+                return VariantColors.getPredictionColor(externalPredictionScore);
+            }
         }
         return VariantColors.othersColor;
     };
@@ -121,8 +146,9 @@ export type VariationData = {
 }
 
 export type VariantWithDescription = Variant & {
-    readonly description?: string;    
+    readonly description?: string;
     readonly customSource?: string;
+    readonly variant: string;
 }
 export type VariantWithSources = VariantWithDescription & {
     readonly otherSources?: Record<string, OtherSourceData>;
@@ -137,3 +163,7 @@ export type OtherSourceData =
         readonly consequenceType?: ConsequenceType;
         readonly xrefs?: Xref[];
     }
+export type ProteinsAPIVariation = {
+    sequence: string;
+    features: VariantWithSources[];
+};

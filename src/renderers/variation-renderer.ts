@@ -16,12 +16,22 @@ export default class VariationRenderer implements TrackRenderer {
     private subtracksDiv: HTMLDivElement;
     private mainTrackRow: d3.Selection<HTMLDivElement, undefined, null, undefined>;
 
-    constructor(private readonly data: VariationData, private readonly mainTrackLabel: string, public readonly categoryName: string, private readonly uniprotId: string, private readonly overwritePredictions?: boolean) {
+    constructor(
+        private readonly data: VariationData,
+        private readonly mainTrackLabel: string,
+        public readonly categoryName: string,
+        private readonly uniprotId: string,
+        private readonly overwritePredictions?: boolean) {
 
     }
     public combine(other: TrackRenderer): TrackRenderer {
         if (other instanceof VariationRenderer) {
-            return new VariationRenderer({ sequence: this.data.sequence, variants: this.combineVariants(this.data.variants, other.data.variants) }, this.mainTrackLabel, this.categoryName, this.uniprotId, this.overwritePredictions)
+            return new VariationRenderer(
+                { sequence: this.data.sequence, variants: this.combineVariants(this.data.variants, other.data.variants) },
+                this.mainTrackLabel,
+                this.categoryName,
+                this.uniprotId,
+                this.overwritePredictions)
         }
         else {
             throw new Error("Can't combine VariationRenderer with: " + (typeof other));
