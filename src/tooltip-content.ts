@@ -3,7 +3,7 @@ import ecoMap from "protvista-feature-adapter/src/evidences";
 import { existAssociation, groupBy } from "./utils";
 import { Association, Prediction, SourceType } from "protvista-variation-adapter/dist/es/variants";
 import { formatTooltip as featureFormatTooltip, DbReferenceObject, Feature, Evidence } from "protvista-feature-adapter/src/BasicHelper";
-import { OtherSourceData, VariantWithDescription } from "./parsers/variation-parser";
+import { OtherSourceData, VariantWithSources } from "./parsers/variation-parser";
 
 
 interface TooltipData {
@@ -168,7 +168,7 @@ export function createFeatureTooltip(feature: Feature, uniprotId: string, sequen
     return tooltipContent;
 }
 
-export function createVariantTooltip(variant: VariantWithDescription, uniprotId: string, otherSources?: Record<string, OtherSourceData>, overwritePredictions?: boolean, customSource?: string) {
+export function createVariantTooltip(variant: VariantWithSources, uniprotId: string, otherSources?: Record<string, OtherSourceData>, overwritePredictions?: boolean, customSource?: string) {
     const tooltipContent = new TooltipContent(variant.type + " " + variant.begin + (variant.begin === variant.end ? "" : ("-" + variant.end)));
     let sourceText: string | undefined = undefined;
     let customSources: string | undefined = undefined;

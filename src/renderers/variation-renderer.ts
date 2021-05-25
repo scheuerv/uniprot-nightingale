@@ -2,9 +2,9 @@ import CategoryContainer from "../manager/category-container";
 import TrackRenderer from "./track-renderer";
 import ProtvistaVariationGraph from "protvista-variation-graph";
 import ProtvistaVariation from "protvista-variation";
-import VariationFilter, { FilterCase } from "../protvista/variation-filter";
+import VariationFilter, { FilterCase, filterDataVariation, filterDataVariationGraph, FilterVariationData } from "../protvista/variation-filter";
 import VariationTrackContainer from "../manager/variation-track-container";
-import { createRow } from "../utils";
+import { createRow, variantsFill } from "../utils";
 import d3 = require('d3');
 import { OtherSourceData, VariantWithSources, VariationData } from "../parsers/variation-parser";
 import { filterCases } from "../protvista/variation-filter";
@@ -27,7 +27,7 @@ export default class VariationRenderer implements TrackRenderer {
     public combine(other: TrackRenderer): TrackRenderer {
         if (other instanceof VariationRenderer) {
             return new VariationRenderer(
-                { sequence: this.data.sequence, variants: this.combineVariants(this.data.variants, other.data.variants) },
+                this.combineVariants(this.data, other.data),
                 this.mainTrackLabel,
                 this.categoryName,
                 this.uniprotId,
@@ -68,7 +68,6 @@ export default class VariationRenderer implements TrackRenderer {
 
         categoryDiv.appendChild(this.mainTrackRow.node()!);
         this.subtracksDiv = d3.create("div").attr("class", "subtracks-container").style("display", "none").node()!;
-
         const protvistaFilter = d3.create("protvista-filter").node() as VariationFilter;
         const trackRowDiv = createRow(
             protvistaFilter,
@@ -77,17 +76,95 @@ export default class VariationRenderer implements TrackRenderer {
         );
         this.subtracksDiv.appendChild(trackRowDiv.node()!);
         categoryDiv.append(this.subtracksDiv!);
-        protvistaFilter.filters = filterCases;
+        const customSources: Map<string, FilterCase> = new Map();
+        const customConsequences: Map<string, FilterCase> = new Map();
+        this.data.variants.forEach(variant => {
+            if (variant.otherSources) {
+                for (const source in variant.otherSources) {
+                    const consequence = variant.otherSources[source].consequenceType;
+                    if (consequence && !customConsequences.has(consequence)) {
+                        const filterCase: FilterCase = {
+                            name: consequence,
+                            type: {
+                                name: "consequence",
+                                text: "Filter Consequence"
+                            },
+                            options: {
+                                labels: [consequence],
+                                colors: ["grey"]
+                            },
+                            properties: [
+                                function (filteredVariant: VariantWithSources) {
+                                    for (const source in filteredVariant.otherSources) {
+                                        const filteredVariantConsequence = filteredVariant.otherSources[source].consequenceType;
+                                        if (filteredVariantConsequence == consequence) {
+                                            return true;
+                                        }
+                                    }
+                                    return false;
+                                }
+                            ],
+                            filterDataVariation: function (variants: FilterVariationData[]) {
+                                return filterDataVariation(filterCase, variants);
+                            },
+                            filterDataVariationGraph: function (variants: VariationData) {
+                                return filterDataVariationGraph(filterCase, variants);
+                            }
+                        };
+                        customConsequences.set(consequence, filterCase);
+                    }
+                }
+            }
+        });
+        this.data.customSources.forEach(customSource => {
+            const filterCase: FilterCase = {
+                name: customSource,
+                type: {
+                    name: "dataSource",
+                    text: "Filter data source"
+                },
+                options: {
+                    labels: [customSource],
+                    colors: ["grey"]
+                },
+                properties: [
+                    function (variant: VariantWithSources) {
+                        if (variant.customSource == customSource) {
+                            return true;
+                        }
+                        for (const source in variant.otherSources) {
+                            if (source == customSource) {
+                                return true;
+                            }
+                        }
+                        return false;
+                    }
+                ],
+                filterDataVariation: function (variants: FilterVariationData[]) {
+                    return filterDataVariation(filterCase, variants);
+                },
+                filterDataVariationGraph: function (variants: VariationData) {
+                    return filterDataVariationGraph(filterCase, variants);
+                }
+            };
+            customSources.set(customSource, filterCase);
+        });
+
+        protvistaFilter.filters = filterCases.concat(Array.from(customSources.values())).concat(Array.from(customConsequences.values()));
         protvistaFilter.multiFor = new Map();
         protvistaFilter.multiFor.set('protvista-variation-graph', (filterCase: FilterCase) => filterCase.filterDataVariationGraph);
         protvistaFilter.multiFor.set('protvista-variation', (filterCase: FilterCase) => filterCase.filterDataVariation);
         return new VariationCategoryContainer(this.variationGraph, this.variation, protvistaFilter, this.mainTrackRow, categoryDiv!);
     }
-    private combineVariants(variants1: VariantWithSources[], variants2: VariantWithSources[]): VariantWithSources[] {
+    private combineVariants(variants1: VariationData, variants2: VariationData): VariationData {
         const map: Map<string, VariantWithSources> = new Map();
-        this.combineAllSources(variants1, map);
-        this.combineAllSources(variants2, map);
-        return Array.from(map.values());
+        this.combineAllSources(variants1.variants, map);
+        this.combineAllSources(variants2.variants, map);
+        return {
+            sequence: variants1.sequence,
+            customSources: variants1.customSources.concat(variants2.customSources),
+            variants: Array.from(map.values())
+        };
     }
 
     private combineAllSources(variants: VariantWithSources[], map: Map<string, VariantWithSources>): void {
@@ -116,6 +193,7 @@ export default class VariationRenderer implements TrackRenderer {
             const newVariant: VariantWithSources = {
                 ...variant2,
                 tooltipContent: createVariantTooltip(variant2, this.uniprotId, newSources, this.overwritePredictions),
+                color: variantsFill(variant2, newSources, this.overwritePredictions),
                 otherSources: newSources
             };
             return newVariant;

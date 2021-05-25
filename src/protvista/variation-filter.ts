@@ -93,9 +93,8 @@ function getFilterByName(name: string) {
     }
 }
 
-function filterDataVariation(filterName: string, data: FilterVariationData[]): FilterVariationData[] {
+export function filterDataVariation(filter: FilterCase, data: FilterVariationData[]): FilterVariationData[] {
     var newData: FilterVariationData[] = [];
-    const filter = getFilterByName(filterName);
     if (!filter) {
         return data;
     }
@@ -110,8 +109,7 @@ function filterDataVariation(filterName: string, data: FilterVariationData[]): F
     });
     return newData;
 };
-function filterDataVariationGraph(filterName: string, data: VariationData): VariantWithSources[] {
-    const filter = getFilterByName(filterName);
+export function filterDataVariationGraph(filter: FilterCase, data: VariationData): VariantWithSources[] {
     if (!filter) {
         return data.variants;
     }
@@ -167,10 +165,10 @@ export const filterCases: FilterCase[] = [
             }
         ],
         filterDataVariation: function (variants: FilterVariationData[]) {
-            return filterDataVariation("disease", variants);
+            return filterDataVariation(getFilterByName("disease")!, variants);
         },
         filterDataVariationGraph: function (variants: VariationData) {
-            return filterDataVariationGraph("disease", variants);
+            return filterDataVariationGraph(getFilterByName("disease")!, variants);
         }
     },
     {
@@ -206,10 +204,10 @@ export const filterCases: FilterCase[] = [
         ],
 
         filterDataVariation: function (variants: FilterVariationData[]) {
-            return filterDataVariation("prediction", variants);
+            return filterDataVariation(getFilterByName("prediction")!, variants);
         },
         filterDataVariationGraph: function (variants: VariationData) {
-            return filterDataVariationGraph("prediction", variants);
+            return filterDataVariationGraph(getFilterByName("prediction")!, variants);
         }
     },
     {
@@ -239,10 +237,10 @@ export const filterCases: FilterCase[] = [
         ],
 
         filterDataVariation: function (variants: FilterVariationData[]) {
-            return filterDataVariation("nonDisease", variants);
+            return filterDataVariation(getFilterByName("nonDisease")!, variants);
         },
         filterDataVariationGraph: function (variants: VariationData) {
-            return filterDataVariationGraph("nonDisease", variants);
+            return filterDataVariationGraph(getFilterByName("nonDisease")!, variants);
         }
     },
     {
@@ -261,10 +259,10 @@ export const filterCases: FilterCase[] = [
             }
         ],
         filterDataVariation: function (variants: FilterVariationData[]) {
-            return filterDataVariation("uncertain", variants);
+            return filterDataVariation(getFilterByName("uncertain")!, variants);
         },
         filterDataVariationGraph: function (variants: VariationData) {
-            return filterDataVariationGraph("uncertain", variants);
+            return filterDataVariationGraph(getFilterByName("uncertain")!, variants);
         }
     },
     {
@@ -292,10 +290,10 @@ export const filterCases: FilterCase[] = [
             }
         ],
         filterDataVariation: function (variants: FilterVariationData[]) {
-            return filterDataVariation("unknown", variants);
+            return filterDataVariation(getFilterByName("unknown")!, variants);
         },
         filterDataVariationGraph: function (variants: VariationData) {
-            return filterDataVariationGraph("unknown", variants);
+            return filterDataVariationGraph(getFilterByName("unknown")!, variants);
         }
     },
     {
@@ -317,10 +315,10 @@ export const filterCases: FilterCase[] = [
         ],
 
         filterDataVariation: function (variants: FilterVariationData[]) {
-            return filterDataVariation("uniprot", variants);
+            return filterDataVariation(getFilterByName("uniprot")!, variants);
         },
         filterDataVariationGraph: function (variants: VariationData) {
-            return filterDataVariationGraph("uniprot", variants);
+            return filterDataVariationGraph(getFilterByName("uniprot")!, variants);
         }
     },
     {
@@ -342,15 +340,15 @@ export const filterCases: FilterCase[] = [
         ],
 
         filterDataVariation: function (variants: FilterVariationData[]) {
-            return filterDataVariation("lss", variants);
+            return filterDataVariation(getFilterByName("lss")!, variants);
         },
         filterDataVariationGraph: function (variants: VariationData) {
-            return filterDataVariationGraph("lss", variants);
+            return filterDataVariationGraph(getFilterByName("lss")!, variants);
         }
     },
 ];
 
-type FilterVariationData = {
+export type FilterVariationData = {
     readonly type: string,
     readonly normal: string,
     readonly pos: number,
