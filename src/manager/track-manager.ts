@@ -72,7 +72,7 @@ export default class TrackManager {
                     }
                 });
                 trackManager.addTrack(uniProtId => Promise.resolve({ sequence: customDataSource.data.sequence, features: variationFeatures }), new VariationParser(config?.overwritePredictions, customDataSource.source));
-                trackManager.addTrack(uniProtId => Promise.resolve({ sequence: customDataSource.data.sequence, features:  otherFeatures}), new FeatureParser(config?.exclusions, customDataSource.source));
+                trackManager.addTrack(uniProtId => Promise.resolve({ sequence: customDataSource.data.sequence, features: otherFeatures }), new FeatureParser(config?.exclusions, customDataSource.source));
             }
         });
         return trackManager;
