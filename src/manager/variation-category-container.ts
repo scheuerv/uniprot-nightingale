@@ -7,10 +7,14 @@ import ColorConvert from "color-convert";
 import VariationFilter from "../protvista/variation-filter";
 import d3 = require('d3');
 import { TrackContainer } from "./track-container";
+import { VariantWithSources } from "src/parsers/variation-parser";
 
 export default class VariationCategoryContainer implements CategoryContainer {
     private readonly emitOnHighlightChange = createEmitter<TrackFragment[]>();
+    private readonly highlightedVariants: Map<string, TrackFragment> = new Map();
+    private readonly markedVariants: Map<string, TrackFragment> = new Map();
     public readonly onHighlightChange = this.emitOnHighlightChange.event;
+
     private readonly variationColors = {
         min: 200,
         max: 50
@@ -45,11 +49,33 @@ export default class VariationCategoryContainer implements CategoryContainer {
                 }
             }
         });
+        this.variation.track.addEventListener("change", (e) => {
+            const event = e as CustomEvent;
+            if (event.detail.eventtype == 'click' && event.detail.feature) {
+                const variant = event.detail.feature as VariantWithSources;
+                const tokens = variant.color.split(/[,()]+/);
+                const color = '#' + ColorConvert.rgb.hex([parseInt(tokens[1]), parseInt(tokens[2]), parseInt(tokens[3])])
+                const trackFragment: TrackFragment = { start: parseInt(variant.begin), end: parseInt(variant.end), color: color };
+                const key = `${variant.begin}:${variant.end}:${color}`;
+                if (this.markedVariants.has(key)) {
+                    this.highlightedVariants.delete(key);
+                    this.markedVariants.delete(key)
+                }
+                else {
+                    this.markedVariants.set(key, trackFragment);
+                    if (d3.event.shiftKey) {
+                        this.highlightedVariants.set(key, trackFragment);
+                    }
+                }
+                this.emitOnHighlightChange([trackFragment]);
+            }
+        })
     }
     public getFirstTrackContainerWithOutput(): TrackContainer | undefined {
         return undefined;
     }
     public clearHighlightedTrackFragments() {
+        this.highlightedVariants.clear();
     }
     public get trackContainers() {
         return [this.variationGraph, this.variation];
@@ -62,14 +88,14 @@ export default class VariationCategoryContainer implements CategoryContainer {
     }
     public getMarkedTrackFragments(): TrackFragment[] {
         if (this.arrowMarked) {
-            return this.getFragments(this.variationGraph.track as ProtvistaVariationGraph);
+            return this.getFragments(this.variationGraph.track as ProtvistaVariationGraph).concat(Array.from(this.markedVariants.values()));
         }
         else {
-            return [];
+            return Array.from(this.markedVariants.values());
         }
     }
     public getHighlightedTrackFragments(): TrackFragment[] {
-        return [];
+        return Array.from(this.highlightedVariants.values());
     }
     private getFragments(variationGraph: ProtvistaVariationGraph): TrackFragment[] {
         const histogram = Array.from(variationGraph._totalsArray.total);
