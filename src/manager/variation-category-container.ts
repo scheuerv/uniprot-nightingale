@@ -7,7 +7,7 @@ import ColorConvert from "color-convert";
 import VariationFilter from "../protvista/variation-filter";
 import d3 = require('d3');
 import { TrackContainer } from "./track-container";
-import { VariantWithSources } from "src/parsers/variation-parser";
+import { VariantWithSources } from "../parsers/variation-parser";
 
 export default class VariationCategoryContainer implements CategoryContainer {
     private readonly emitOnHighlightChange = createEmitter<TrackFragment[]>();
