@@ -6,7 +6,6 @@ import { ElementWithData } from '../renderers/basic-track-renderer';
 import PdbParser, { PDBParserItem } from '../parsers/pdb-parser';
 import AntigenParser from '../parsers/antigen-parser';
 import FeatureParser from '../parsers/feature-parser';
-import ProteomicsParser from '../parsers/proteomics-parser';
 import SMRParser from '../parsers/SMR-parser';
 import VariationParser from '../parsers/variation-parser';
 import ProtvistaManager from 'protvista-manager';
@@ -90,7 +89,7 @@ export default class TrackManager {
         trackManager.addFetchTrack(uniProtId => `https://www.ebi.ac.uk/pdbe/api/mappings/best_structures/${uniProtId}`, new PdbParser(config?.pdbIds));
         trackManager.addFetchTrack(uniProtId => `https://swissmodel.expasy.org/repository/uniprot/${uniProtId}.json?provider=swissmodel`, new SMRParser(config?.smrIds));
         trackManager.addFetchTrack(uniProtId => `https://www.ebi.ac.uk/proteins/api/features/${uniProtId}`, new FeatureParser(config?.exclusions));
-        trackManager.addFetchTrack(uniProtId => `https://www.ebi.ac.uk/proteins/api/proteomics/${uniProtId}`, new ProteomicsParser());
+        trackManager.addFetchTrack(uniProtId => `https://www.ebi.ac.uk/proteins/api/proteomics/${uniProtId}`, new FeatureParser(config?.exclusions));
         trackManager.addFetchTrack(uniProtId => `https://www.ebi.ac.uk/proteins/api/antigen/${uniProtId}`, new AntigenParser());
         trackManager.addFetchTrack(uniProtId => `https://www.ebi.ac.uk/proteins/api/variation/${uniProtId}`, new VariationParser(config?.overwritePredictions), (data: ProteinsAPIVariation) => data?.features ?? data);
         config?.customDataSources?.forEach(customDataSource => {

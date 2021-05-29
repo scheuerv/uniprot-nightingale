@@ -5,8 +5,12 @@ import TrackRenderer from "../renderers/track-renderer";
 import { config as trackConfig } from "protvista-track/src/config";
 import { getDarkerColor, } from "../utils";
 import { createFeatureTooltip } from "../tooltip-content";
+import { Feature } from "protvista-feature-adapter/src/BasicHelper";
 export default class FeatureParser implements TrackParser {
     public readonly categoryName = "FEATURES";
+
+    private readonly unique = "UNIQUE";
+    private readonly nonUnique = "NON_UNIQUE";
     constructor(private readonly exclusions?: string[], private readonly dataSource?: string) {
 
     }
@@ -18,20 +22,21 @@ export default class FeatureParser implements TrackParser {
         const features = data.features;
         let id = 1;
         features.forEach(feature => {
-            if (feature.category && !this.exclusions?.includes(feature.category)) {
-                let category = categories.get(feature.category);
+            const processedFeature = this.prepareFeature(feature);
+            if (processedFeature.category && !this.exclusions?.includes(processedFeature.category)) {
+                let category = categories.get(processedFeature.category);
                 if (!category) {
                     category = new Map();
-                    categories.set(feature.category, category);
+                    categories.set(processedFeature.category, category);
                 }
                 let typeFeatureFragmentAligner = category.get(feature.type)
                 if (!typeFeatureFragmentAligner) {
                     typeFeatureFragmentAligner = new FragmentAligner();
-                    category.set(feature.type, typeFeatureFragmentAligner);
+                    category.set(processedFeature.type, typeFeatureFragmentAligner);
                 }
-                const fillColor = feature.color ?? trackConfig[feature.type]?.color;
+                const fillColor = processedFeature.color ?? trackConfig[processedFeature.type]?.color;
                 const borderColor = getDarkerColor(fillColor);
-                typeFeatureFragmentAligner.addFragment(new Fragment(id++, parseInt(feature.begin), parseInt(feature.end), borderColor, fillColor, trackConfig[feature.type]?.shape, createFeatureTooltip(feature, uniprotId, data.sequence, this.dataSource, undefined)));
+                typeFeatureFragmentAligner.addFragment(new Fragment(id++, parseInt(processedFeature.begin), parseInt(processedFeature.end), borderColor, fillColor, trackConfig[processedFeature.type]?.shape, createFeatureTooltip(processedFeature, uniprotId, data.sequence, this.dataSource, undefined)));
             }
         });
         const categoryRenderers: BasicTrackRenderer[] = [];
@@ -53,6 +58,23 @@ export default class FeatureParser implements TrackParser {
     private createLabel(category: string) {
         category = category[0].toUpperCase() + category.slice(1, category.length).replace(/_/g, ' ').toLowerCase();
         return category;
+    }
+
+    private prepareFeature(feature: Feature): Feature {
+        if (feature.type == 'PROTEOMICS') {
+            let newType: string;
+            if (feature.unique) {
+                newType = this.unique;
+            } else {
+                newType = this.nonUnique;
+            }
+            return {
+                ...feature,
+                category: 'PROTEOMICS',
+                type: newType
+            }
+        }
+        return feature;
     }
 
 }
@@ -79,5 +101,4 @@ const categoriesConfig: Record<string, { readonly label: string }> = {
         "label": "Variants"
     }
 }
-
 
