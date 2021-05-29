@@ -40,6 +40,10 @@ div.track-content.main .empty {
     stroke-width: 2px;
     filter: brightness(70%);
 }
+circle.feature.clicked {
+    stroke-width: 2px;
+    stroke: black;
+}
 
 protvista-track svg,
 protvista-navigation svg,

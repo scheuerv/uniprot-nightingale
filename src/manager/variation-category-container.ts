@@ -8,11 +8,12 @@ import VariationFilter from "../protvista/variation-filter";
 import d3 = require('d3');
 import { TrackContainer } from "./track-container";
 import { VariantWithSources } from "../parsers/variation-parser";
+import VariationGraphTrackContainer from "./variation-graph-track-container";
 
 export default class VariationCategoryContainer implements CategoryContainer {
     private readonly emitOnHighlightChange = createEmitter<TrackFragment[]>();
     private readonly highlightedVariants: Map<string, TrackFragment> = new Map();
-    private readonly markedVariants: Map<string, TrackFragment> = new Map();
+    private readonly markedVariants: Map<string, TrackFragmentWithElement> = new Map();
     public readonly onHighlightChange = this.emitOnHighlightChange.event;
 
     private readonly variationColors = {
@@ -21,11 +22,11 @@ export default class VariationCategoryContainer implements CategoryContainer {
     };
     private arrowMarked = false;
     constructor(
-        private readonly variationGraph: VariationTrackContainer,
+        private readonly variationGraph: VariationGraphTrackContainer,
         private readonly variation: VariationTrackContainer,
-        public protvistaFilter: VariationFilter,
-        public mainTrackRow: d3.Selection<HTMLDivElement, undefined, null, undefined>,
-        private readonly _categoryDiv: HTMLDivElement
+        private readonly _categoryDiv: HTMLDivElement,
+        protvistaFilter: VariationFilter,
+        mainTrackRow: d3.Selection<HTMLDivElement, undefined, null, undefined>
     ) {
         mainTrackRow.select(".fa-arrow-circle-right").on("click", () => {
             {
@@ -38,17 +39,28 @@ export default class VariationCategoryContainer implements CategoryContainer {
                 } else {
                     classList.add("clicked");
                     this.arrowMarked = true;
-                    this.emitOnHighlightChange.emit(this.getFragments(this.variationGraph.track as ProtvistaVariationGraph));
+                    this.emitOnHighlightChange.emit(this.getFragments(this.variationGraph.track));
                 }
             }
         });
         protvistaFilter.addEventListener("change", (e) => {
             if (e instanceof CustomEvent && (e as CustomEvent).detail.type === 'filters' && e.detail.for === 'protvista-variation') {
                 if (this.arrowMarked) {
-                    this.emitOnHighlightChange.emit(this.getFragments(this.variationGraph.track as ProtvistaVariationGraph));
+                    this.emitOnHighlightChange.emit(this.getFragments(this.variationGraph.track));
                 }
             }
         });
+        this.variation.track.onRefreshed.on(() => {
+            this.markedVariants.forEach(fragmnetWithElement => {
+                fragmnetWithElement.element.classList.add('clicked');
+            });
+        });
+        this.variation.track.onDataUpdated.on(() => {
+            this.markedVariants.clear();
+            this.highlightedVariants.clear();
+            this.emitOnHighlightChange([]);
+        });
+
         this.variation.track.addEventListener("change", (e) => {
             const event = e as CustomEvent;
             if (event.detail.eventtype == 'click' && event.detail.feature) {
@@ -56,13 +68,21 @@ export default class VariationCategoryContainer implements CategoryContainer {
                 const tokens = variant.color.split(/[,()]+/);
                 const color = '#' + ColorConvert.rgb.hex([parseInt(tokens[1]), parseInt(tokens[2]), parseInt(tokens[3])])
                 const trackFragment: TrackFragment = { start: parseInt(variant.begin), end: parseInt(variant.end), color: color };
-                const key = `${variant.begin}:${variant.end}:${color}`;
-                if (this.markedVariants.has(key)) {
-                    this.highlightedVariants.delete(key);
-                    this.markedVariants.delete(key)
+                const key = `${variant.begin}:${variant.end}:${color}:${variant.alternativeSequence}`;
+                const target = event.detail.target;
+                const classList = target.classList;
+                if (classList.contains('clicked')) {
+                    classList.remove('clicked');
                 }
                 else {
-                    this.markedVariants.set(key, trackFragment);
+                    classList.add('clicked');
+                }
+                if (this.markedVariants.has(key)) {
+                    this.highlightedVariants.delete(key);
+                    this.markedVariants.delete(key);
+                }
+                else {
+                    this.markedVariants.set(key, { trackFragment: trackFragment, element: target });
                     if (d3.event.shiftKey) {
                         this.highlightedVariants.set(key, trackFragment);
                     }
@@ -88,10 +108,10 @@ export default class VariationCategoryContainer implements CategoryContainer {
     }
     public getMarkedTrackFragments(): TrackFragment[] {
         if (this.arrowMarked) {
-            return this.getFragments(this.variationGraph.track as ProtvistaVariationGraph).concat(Array.from(this.markedVariants.values()));
+            return this.getFragments(this.variationGraph.track).concat(Array.from(this.markedVariants.values()).map(t => t.trackFragment));
         }
         else {
-            return Array.from(this.markedVariants.values());
+            return Array.from(this.markedVariants.values()).map(fragmentWithElement => fragmentWithElement.trackFragment);
         }
     }
     public getHighlightedTrackFragments(): TrackFragment[] {
@@ -114,4 +134,8 @@ export default class VariationCategoryContainer implements CategoryContainer {
             });
         return fragments;
     }
+}
+type TrackFragmentWithElement = {
+    trackFragment: TrackFragment,
+    element: HTMLElement
 }

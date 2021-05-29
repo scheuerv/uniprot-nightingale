@@ -1,7 +1,6 @@
 import CategoryContainer from "../manager/category-container";
 import TrackRenderer from "./track-renderer";
 import ProtvistaVariationGraph from "protvista-variation-graph";
-import ProtvistaVariation from "protvista-variation";
 import VariationFilter, { FilterCase, filterDataVariation, filterDataVariationGraph, FilterVariationData } from "../protvista/variation-filter";
 import VariationTrackContainer from "../manager/variation-track-container";
 import { createRow, variantsFill } from "../utils";
@@ -10,8 +9,10 @@ import { OtherSourceData, VariantWithSources, VariationData } from "../parsers/v
 import { filterCases } from "../protvista/variation-filter";
 import VariationCategoryContainer from "../manager/variation-category-container";
 import { createVariantTooltip } from "../tooltip-content";
+import FixedProtvistaVariation from "../protvista/variation";
+import VariationGraphTrackContainer from "../manager/variation-graph-track-container";
 export default class VariationRenderer implements TrackRenderer {
-    private variationGraph: VariationTrackContainer;
+    private variationGraph: VariationGraphTrackContainer;
     private variation: VariationTrackContainer;
     private subtracksDiv: HTMLDivElement;
     private mainTrackRow: d3.Selection<HTMLDivElement, undefined, null, undefined>;
@@ -22,7 +23,6 @@ export default class VariationRenderer implements TrackRenderer {
         public readonly categoryName: string,
         private readonly uniprotId: string,
         private readonly overwritePredictions?: boolean) {
-
     }
     public combine(other: TrackRenderer): TrackRenderer {
         if (other instanceof VariationRenderer) {
@@ -44,11 +44,11 @@ export default class VariationRenderer implements TrackRenderer {
             .attr("id", "protvista-variation-graph")
             .attr("length", sequence.length)
             .attr("height", 40).node() as ProtvistaVariationGraph;
-        this.variationGraph = new VariationTrackContainer(variationGraph, this.data);
+        this.variationGraph = new VariationGraphTrackContainer(variationGraph, this.data);
         const variationTrack = d3.create("protvista-variation")
             .attr("id", "protvista-variation")
             .attr("length", sequence.length)
-            .attr("highlight-event", "none").node() as ProtvistaVariation;
+            .attr("highlight-event", "none").node() as FixedProtvistaVariation;
         variationTrack.colorConfig = function (e: any) {
             return "black";
         }
@@ -154,7 +154,7 @@ export default class VariationRenderer implements TrackRenderer {
         protvistaFilter.multiFor = new Map();
         protvistaFilter.multiFor.set('protvista-variation-graph', (filterCase: FilterCase) => filterCase.filterDataVariationGraph);
         protvistaFilter.multiFor.set('protvista-variation', (filterCase: FilterCase) => filterCase.filterDataVariation);
-        return new VariationCategoryContainer(this.variationGraph, this.variation, protvistaFilter, this.mainTrackRow, categoryDiv!);
+        return new VariationCategoryContainer(this.variationGraph, this.variation, categoryDiv!, protvistaFilter, this.mainTrackRow);
     }
     private combineVariants(variants1: VariationData, variants2: VariationData): VariationData {
         const map: Map<string, VariantWithSources> = new Map();
