@@ -3,7 +3,7 @@ import CategoryContainer from './category-container';
 import TrackParser, { Mapping } from '../parsers/track-parser';
 import { createRow, fetchWithTimeout } from '../utils';
 import { ElementWithData } from '../renderers/basic-track-renderer';
-import PdbParser from '../parsers/pdb-parser';
+import PdbParser, { PDBParserItem } from '../parsers/pdb-parser';
 import AntigenParser from '../parsers/antigen-parser';
 import FeatureParser from '../parsers/feature-parser';
 import ProteomicsParser from '../parsers/proteomics-parser';

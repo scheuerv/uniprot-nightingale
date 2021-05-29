@@ -25,28 +25,28 @@ export default class BasicTrackRenderer implements TrackRenderer {
     public combine(other: TrackRenderer): TrackRenderer {
         if (other instanceof BasicTrackRenderer) {
             const combined: Map<string, TrackRow> = new Map();
-            this.rows.forEach((row, type) => {
-                combined.set(type, row)
-            })
             let maxId = Math.max.apply(Math, Array.from(other.rows.values())
                 .flatMap(trackRow => trackRow.rowData)
                 .flatMap(typeRowDatum => typeRowDatum.locations[0].fragments)
                 .map(fragment => fragment.id));
+            this.rows.forEach((thisTypeRow, type) => {
+                const accessionsWithFixedId = thisTypeRow.rowData.map(accession => {
+                    const fragmentsWithFixedId = accession.locations[0].fragments.map(fragment => {
+                        if (fragment.id <= maxId) {
+                            return new Fragment(++maxId, fragment.start, fragment.end, fragment.color, fragment.fill, fragment.shape, fragment.tooltipContent, fragment.output);
+                        }
+                        else {
+                            return fragment;
+                        }
+                    });
+                    return new Accession(accession.color, [new Location(fragmentsWithFixedId)], accession.type, accession.experimentalMethod);
+                })
+                combined.set(type, new TrackRow(accessionsWithFixedId, thisTypeRow.label, thisTypeRow.output));
+            });
             other.rows.forEach((otherTypeRow, type) => {
                 const thisTypeRow = combined.get(type);
                 if (thisTypeRow) {
-                    const accessionsWithFixedId = thisTypeRow.rowData.map(accession => {
-                        const fragmentsWithFixedId = accession.locations[0].fragments.map(fragment => {
-                            if (fragment.id <= maxId) {
-                                return new Fragment(++maxId, fragment.start, fragment.end, fragment.color, fragment.fill, fragment.shape, fragment.tooltipContent, fragment.output)
-                            }
-                            else {
-                                return fragment
-                            }
-                        });
-                        return new Accession(accession.color, [new Location(fragmentsWithFixedId)], accession.type, accession.experimentalMethod);
-                    })
-                    const combinedTrackRow = new TrackRow(otherTypeRow.rowData.concat(accessionsWithFixedId), otherTypeRow.label, otherTypeRow.output);
+                    const combinedTrackRow = new TrackRow(otherTypeRow.rowData.concat(thisTypeRow.rowData), otherTypeRow.label, otherTypeRow.output);
                     combined.set(type, combinedTrackRow);
                 }
                 else {
