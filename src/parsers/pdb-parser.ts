@@ -5,12 +5,10 @@ import TrackParser, { FragmentMapping } from './track-parser';
 import { Output } from '../manager/track-manager';
 
 export default class PdbParser implements TrackParser {
-    private readonly categoryLabel = "Experimental structures";
-    public readonly categoryName = "EXPERIMENTAL_STRUCTURES";
     private readonly observedColor = '#2e86c1';
     private readonly unobservedColor = '#bdbfc1';
     private id = 1;
-    constructor(private readonly pdbIds?: string[]) {
+    constructor(private readonly pdbIds?: string[], private readonly categoryLabel = "Experimental structures", public readonly categoryName = "EXPERIMENTAL_STRUCTURES") {
 
     }
     public async parse(uniprotId: string, data: PDBParserData): Promise<BasicTrackRenderer[] | null> {
@@ -37,16 +35,20 @@ export default class PdbParser implements TrackParser {
                     (record) => {
                         const chain_id = record.chain_id;
                         const pdb_id = record.pdb_id;
-
-                        return fetchWithTimeout(this.urlGenerator(pdb_id, chain_id), { timeout: 8000 })
-                            .then(
-                                data => data.json().then(data => {
-                                    return { source: record, data: data };
-                                }), err => {
-                                    console.log(`API unavailable!`, err);
-                                    return Promise.reject();
-                                }
-                            )
+                        if (record.structure) {
+                            return Promise.resolve({ source: record, data: record.coverage });
+                        }
+                        else {
+                            return fetchWithTimeout(this.urlGenerator(pdb_id, chain_id), { timeout: 8000 })
+                                .then(
+                                    data => data.json().then(data => {
+                                        return { source: record, data: data };
+                                    }), err => {
+                                        console.log(`API unavailable!`, err);
+                                        return Promise.reject();
+                                    }
+                                )
+                        }
                     })
             ).then(
                 results => {
@@ -82,13 +84,23 @@ export default class PdbParser implements TrackParser {
                                             });
                                         }
                                     });
+
+                                    const structure = result.source.structure;
+                                    if (structure?.uri && structure?.data) {
+                                        console.warn('Structure parameter provides information about both uri and data. Uri will be used.')
+                                    }
+                                    else if (!structure?.uri && !structure?.data) {
+                                        throw Error('Structure parameter requires information about uri or data.')
+                                    }
                                     const output: Output = {
                                         pdbId: pdbId,
                                         chain: chainId,
                                         mapping: { uniprotStart: uniprotStart, uniprotEnd: uniprotEnd, fragmentMappings: mappings },
-                                        url: `https://www.ebi.ac.uk/pdbe/static/entry/${pdbId}_updated.cif`,
-                                        format: "mmcif"
+                                        url: structure ? (structure.uri ?? undefined) : `https://www.ebi.ac.uk/pdbe/static/entry/${pdbId}_updated.cif`,
+                                        data: (structure && !structure?.uri) ? structure?.data : undefined,
+                                        format: structure ? structure.format : "mmcif"
                                     };
+
                                     const observedFragments = chain.observed.map(fragment => {
                                         const start: number = Math.max(fragment.start.residue_number + uniprotStart - pdbStart, uniprotStart);
                                         const end: number = Math.min(fragment.end.residue_number + uniprotStart - pdbStart, uniprotEnd);
@@ -178,28 +190,24 @@ export default class PdbParser implements TrackParser {
 
 type PDBParserData = Record<string, readonly PDBParserItem[]>;
 
-type PDBParserItem = {
+export type PDBParserItem = {
     readonly end: number,
     readonly chain_id: string,
     readonly pdb_id: string,
     readonly start: number,
     readonly unp_end: number,
-    readonly coverage: number,
+    readonly coverage: number | ChainData,
     readonly unp_start: number,
     readonly resolution?: number,
     readonly experimental_method?: string,
-    readonly tax_id: number
+    readonly tax_id: number,
+    readonly structure?: {
+        format: "mmcif" | "pdb",
+        data?: string,
+        uri?: string,
+    }
 };
-type PDBParserItemAgg = {
-    readonly end: number,
-    readonly chain_id: string,
-    readonly pdb_id: string,
-    readonly start: number,
-    readonly unp_end: number,
-    readonly coverage: number,
-    readonly unp_start: number,
-    readonly resolution?: number,
-    readonly experimental_method?: string,
+type PDBParserItemAgg = PDBParserItem & {
     readonly tax_ids: number[]
 };
 

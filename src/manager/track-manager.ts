@@ -45,11 +45,48 @@ export default class TrackManager {
     private publicHighlights: string = "";
     private readonly categoryContainers: CategoryContainer[] = [];
     private activeStructure?: TrackContainer = undefined;
-    constructor(private readonly sequenceUrlGenerator: (url: string) => string, private readonly config?: Config) {
-
+    private readonly uniprotId: string;
+    constructor(private readonly sequenceUrlGenerator: (url: string) => Promise<{ sequence: string, startRow: number }>, private readonly config?: Config) {
+        if (config?.uniprotId) {
+            if (config?.sequence) {
+                throw new Error('UniProt ID and sequence are mutually exclusive!');
+            }
+            this.uniprotId = config.uniprotId;
+        }
+        else if (!config?.sequence) {
+            throw new Error('UniProt ID or sequence is missing!');
+        }
+        if (config?.sequence && !config.sequenceStructureMapping) {
+            throw new Error('Sequence-structure mapping is missing!');
+        }
     }
     public static createDefault(config?: Config) {
-        const trackManager = new TrackManager(uniProtId => `https://www.uniprot.org/uniprot/${uniProtId}.fasta`, config)
+        const trackManager = new TrackManager(
+            uniProtId => config?.sequence ?
+                Promise.resolve({ sequence: config?.sequence, startRow: 0 }) :
+                fetchWithTimeout(
+                    `https://www.uniprot.org/uniprot/${uniProtId}.fasta`,
+                    { timeout: 8000 }
+                )
+                    .then(data => data.text())
+                    .then(sequence => {
+                        return {
+                            sequence: sequence,
+                            startRow: 1
+                        }
+                    }),
+            config
+        );
+        if (config?.sequenceStructureMapping) {
+            trackManager.addTrack(uniProtId => {
+                const record: Record<string, PDBParserItem> = {};
+                record[uniProtId] = config.sequenceStructureMapping!;
+                return Promise.resolve(
+                    record
+                );
+            }, new PdbParser(config?.pdbIds, "User provided structures", "USER_PROVIDED_STRUCTURES"));
+        }
+
         trackManager.addFetchTrack(uniProtId => `https://www.ebi.ac.uk/pdbe/api/mappings/best_structures/${uniProtId}`, new PdbParser(config?.pdbIds));
         trackManager.addFetchTrack(uniProtId => `https://swissmodel.expasy.org/repository/uniprot/${uniProtId}.json?provider=swissmodel`, new SMRParser(config?.smrIds));
         trackManager.addFetchTrack(uniProtId => `https://www.ebi.ac.uk/proteins/api/features/${uniProtId}`, new FeatureParser(config?.exclusions));
@@ -84,12 +121,12 @@ export default class TrackManager {
             .map(parser => parser as T);
     }
 
-    public async render(uniprotId: string, element: HTMLElement) {
+    public async render(element: HTMLElement) {
         this.activeStructure = undefined;
-        await fetchWithTimeout(this.sequenceUrlGenerator(uniprotId), { timeout: 8000 }).then(data => data.text())
+        await this.sequenceUrlGenerator(this.uniprotId)
             .then(data => {
-                const tokens = data.split(/\r?\n/);
-                for (let i = 1; i < tokens.length; i++) {
+                const tokens = data.sequence.split(/\r?\n/);
+                for (let i = data.startRow; i < tokens.length; i++) {
                     this.sequence += tokens[i];
                 }
                 const navigationElement = d3.create('protvista-navigation').attr("length", this.sequence.length);
@@ -108,9 +145,9 @@ export default class TrackManager {
 
         Promise.allSettled(
             this.tracks.map(
-                track => track.dataFetcher(uniprotId)
+                track => track.dataFetcher(this.uniprotId)
                     .then(data => {
-                        return track.parser.parse(uniprotId, data);
+                        return track.parser.parse(this.uniprotId, data);
                     }, err => {
                         console.log(`DATA unavailable!`, err);
                         return Promise.reject();
@@ -383,16 +420,24 @@ export type TrackFragment = {
     readonly color: string;
 }
 export type Output = {
-    readonly pdbId: string, readonly chain: string, readonly mapping: Mapping, readonly url: string, readonly format: "mmcif" | "cifCore" | "pdb" | "pdbqt" | "gro" | "xyz" | "mol" | "sdf" | "mol2"
+    readonly pdbId: string,
+    readonly chain: string,
+    readonly mapping: Mapping,
+    readonly url?: string,
+    readonly format: "mmcif" | "cifCore" | "pdb" | "pdbqt" | "gro" | "xyz" | "mol" | "sdf" | "mol2",
+    readonly data?: string
 }
 
 export type Config = {
+    uniprotId?: string,
     pdbIds?: string[],
     smrIds?: string[],
     categoryOrder?: string[],
     exclusions?: string[],
     customDataSources?: CustomDataSource[],
-    overwritePredictions?: boolean
+    overwritePredictions?: boolean,
+    sequence?: string,
+    sequenceStructureMapping?: PDBParserItem
 }
 
 type CustomDataSource = {
