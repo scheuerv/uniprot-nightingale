@@ -89,7 +89,7 @@ export default class PdbParser implements TrackParser {
                                     if (structure?.uri && structure?.data) {
                                         console.warn('Structure parameter provides information about both uri and data. Uri will be used.')
                                     }
-                                    else if (!structure?.uri && !structure?.data) {
+                                    else if (structure && !structure?.uri && !structure?.data) {
                                         throw Error('Structure parameter requires information about uri or data.')
                                     }
                                     const output: Output = {

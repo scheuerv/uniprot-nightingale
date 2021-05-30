@@ -156,7 +156,8 @@ export default class TrackManager {
                 .map(promiseSettled => {
                     if (promiseSettled.status == "fulfilled") {
                         return promiseSettled.value;
-                    }
+                    }                   
+                    console.warn(promiseSettled.reason);
                     return null;
                 })
                 .flatMap(renderer => renderer)
