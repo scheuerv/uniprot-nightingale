@@ -74,6 +74,12 @@ export default class FeatureParser implements TrackParser {
                 type: newType
             }
         }
+        else if (feature.type == 'ANTIGEN') {
+            return {
+                ...feature,
+                category: 'ANTIGEN'
+            }
+        }
         return feature;
     }
 
@@ -99,6 +105,10 @@ const categoriesConfig: Record<string, { readonly label: string }> = {
     },
     "VARIANTS": {
         "label": "Variants"
+    },
+    "ANTIGEN":
+    {
+        "label": "Antigenic sequences"
     }
 }
 

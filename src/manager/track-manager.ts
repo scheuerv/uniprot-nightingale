@@ -4,7 +4,6 @@ import TrackParser, { Mapping } from '../parsers/track-parser';
 import { createRow, fetchWithTimeout } from '../utils';
 import { ElementWithData } from '../renderers/basic-track-renderer';
 import PdbParser, { PDBParserItem } from '../parsers/pdb-parser';
-import AntigenParser from '../parsers/antigen-parser';
 import FeatureParser from '../parsers/feature-parser';
 import SMRParser from '../parsers/SMR-parser';
 import VariationParser from '../parsers/variation-parser';
@@ -59,7 +58,7 @@ export default class TrackManager {
             throw new Error('Sequence-structure mapping is missing!');
         }
     }
-    public static createDefault(config?: Config) {
+    public static createDefault(config: Config) {
         const trackManager = new TrackManager(
             uniProtId => config?.sequence ?
                 Promise.resolve({ sequence: config?.sequence, startRow: 0 }) :
@@ -90,7 +89,7 @@ export default class TrackManager {
         trackManager.addFetchTrack(uniProtId => `https://swissmodel.expasy.org/repository/uniprot/${uniProtId}.json?provider=swissmodel`, new SMRParser(config?.smrIds));
         trackManager.addFetchTrack(uniProtId => `https://www.ebi.ac.uk/proteins/api/features/${uniProtId}`, new FeatureParser(config?.exclusions));
         trackManager.addFetchTrack(uniProtId => `https://www.ebi.ac.uk/proteins/api/proteomics/${uniProtId}`, new FeatureParser(config?.exclusions));
-        trackManager.addFetchTrack(uniProtId => `https://www.ebi.ac.uk/proteins/api/antigen/${uniProtId}`, new AntigenParser());
+        trackManager.addFetchTrack(uniProtId => `https://www.ebi.ac.uk/proteins/api/antigen/${uniProtId}`, new FeatureParser(config?.exclusions));
         trackManager.addFetchTrack(uniProtId => `https://www.ebi.ac.uk/proteins/api/variation/${uniProtId}`, new VariationParser(config?.overwritePredictions), (data: ProteinsAPIVariation) => data?.features ?? data);
         config?.customDataSources?.forEach(customDataSource => {
             if (customDataSource.url) {
