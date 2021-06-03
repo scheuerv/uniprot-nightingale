@@ -106,8 +106,8 @@ export default class TrackManager {
                         otherFeatures.push(feature);
                     }
                 });
-                trackManager.addTrack(uniProtId => Promise.resolve({ sequence: customDataSource.data.sequence, features: variationFeatures }), new VariationParser(config?.overwritePredictions, customDataSource.source));
-                trackManager.addTrack(uniProtId => Promise.resolve({ sequence: customDataSource.data.sequence, features: otherFeatures }), new FeatureParser(config?.exclusions, customDataSource.source));
+                trackManager.addTrack(uniProtId => Promise.resolve({ features: variationFeatures }), new VariationParser(config?.overwritePredictions, customDataSource.source));
+                trackManager.addTrack(uniProtId => Promise.resolve({ features: otherFeatures }), new FeatureParser(config?.exclusions, customDataSource.source));
             }
         });
         return trackManager;
