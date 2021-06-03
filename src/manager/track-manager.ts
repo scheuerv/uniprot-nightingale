@@ -42,7 +42,7 @@ export default class TrackManager {
     private clickedHighlights: string = "";
     private publicHighlights: string = "";
     private readonly categoryContainers: CategoryContainer[] = [];
-    private activeStructure?: TrackContainer = undefined;
+    private activeStructure?: ActiveStructure = undefined;
     private readonly uniprotId: string;
     constructor(private readonly sequenceUrlGenerator: (url: string) => Promise<{ sequence: string, startRow: number }>, private readonly config?: Config) {
         if (config?.uniprotId) {
@@ -156,7 +156,7 @@ export default class TrackManager {
                 .map(promiseSettled => {
                     if (promiseSettled.status == "fulfilled") {
                         return promiseSettled.value;
-                    }                   
+                    }
                     console.warn(promiseSettled.reason);
                     return null;
                 })
@@ -168,9 +168,9 @@ export default class TrackManager {
                     const categoryContainer = renderer.getCategoryContainer(this.sequence);
                     const trackContainer = categoryContainer.getFirstTrackContainerWithOutput();
                     if (trackContainer && !this.activeStructure) {
-                        this.activeStructure = trackContainer;
-                        this.activeStructure.activate();
-                        const output = this.activeStructure.getOutput()!;
+                        const output = trackContainer.getOutput()!;
+                        this.activeStructure = { trackContainer, output };
+                        this.activeStructure?.trackContainer.activate();
                         this.setFixedHighlights([{ start: output.mapping.uniprotStart, end: output.mapping.uniprotEnd, color: '#0000001A' }]);
                         this.emitOnSelectedStructure(output);
                     }
@@ -182,9 +182,12 @@ export default class TrackManager {
             this.categoryContainers.forEach(categoryContainer => {
                 categoryContainer.trackContainers.forEach(trackContainer => {
                     trackContainer.onLabelClick.on(output => {
-                        this.activeStructure?.deactivate();
-                        this.activeStructure = trackContainer;
-                        this.activeStructure.activate()
+                        if (this.activeStructure?.trackContainer == trackContainer && this.activeStructure.output == output) {
+                            return;
+                        }
+                        this.activeStructure?.trackContainer.deactivate();
+                        this.activeStructure = { trackContainer, output };
+                        this.activeStructure.trackContainer.activate()
                         this.setFixedHighlights([{ start: output.mapping.uniprotStart, end: output.mapping.uniprotEnd, color: '#0000001A' }]);
                         this.emitOnSelectedStructure(output);
                     });
@@ -202,9 +205,12 @@ export default class TrackManager {
                         if (detail?.eventtype == 'click') {
                             const output = detail.target?.__data__?.output;
                             if (output) {
-                                this.activeStructure?.deactivate();
-                                this.activeStructure = trackContainer;
-                                this.activeStructure.activate()
+                                if (this.activeStructure?.trackContainer == trackContainer && this.activeStructure.output == output) {
+                                    return;
+                                }
+                                this.activeStructure?.trackContainer.deactivate();
+                                this.activeStructure = { trackContainer, output };
+                                this.activeStructure.trackContainer.activate()
                                 this.setFixedHighlights([{ start: output.mapping.uniprotStart, end: output.mapping.uniprotEnd, color: '#0000001A' }]);
                                 this.emitOnSelectedStructure(output);
                             }
@@ -431,29 +437,32 @@ export type Output = {
 }
 
 export type Config = {
-    uniprotId?: string,
-    pdbIds?: string[],
-    smrIds?: string[],
-    categoryOrder?: string[],
-    exclusions?: string[],
-    customDataSources?: CustomDataSource[],
-    overwritePredictions?: boolean,
-    sequence?: string,
-    sequenceStructureMapping?: PDBParserItem
+    readonly uniprotId?: string,
+    readonly pdbIds?: string[],
+    readonly smrIds?: string[],
+    readonly categoryOrder?: string[],
+    readonly exclusions?: string[],
+    readonly customDataSources?: CustomDataSource[],
+    readonly overwritePredictions?: boolean,
+    readonly sequence?: string,
+    readonly sequenceStructureMapping?: PDBParserItem
 }
 
 type CustomDataSource = {
-    source: string,
-    useExtension?: boolean,
-    url?: string,
-    data: CustomDataSourceData
+    readonly source: string,
+    readonly useExtension?: boolean,
+    readonly url?: string,
+    readonly data: CustomDataSourceData
 }
 type CustomDataSourceData = {
-    sequence: string,
-    features: CustomDataSourceFeature[]
+    readonly features: CustomDataSourceFeature[]
 }
 type CustomDataSourceFeature = Feature & {
-    type: string,
-    category: string,
-    color?: string
+    readonly type: string,
+    readonly category: string,
+    readonly color?: string
+}
+type ActiveStructure = {
+    readonly trackContainer: TrackContainer,
+    readonly output: Output
 }
