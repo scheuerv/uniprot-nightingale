@@ -65,8 +65,18 @@ export default class VariationCategoryContainer implements CategoryContainer {
             const event = e as CustomEvent;
             if (event.detail.eventtype == 'click' && event.detail.feature) {
                 const variant = event.detail.feature as VariantWithSources;
-                const tokens = variant.color.split(/[,()]+/);
-                const color = '#' + ColorConvert.rgb.hex([parseInt(tokens[1]), parseInt(tokens[2]), parseInt(tokens[3])])
+                let match = variant.color.match(/^#[0-9a-f]{3,6}$/i);
+                let color: string = "";
+                if (match) {
+                    color = match[0];
+                }
+                else {
+                    match = variant.color.match(/rgb\((\d{1,3}), (\d{1,3}), (\d{1,3})\)/);
+                    if (match) {
+                        color = '#' + ColorConvert.rgb.hex([parseInt(match[1]), parseInt(match[2]), parseInt(match[3])]);
+                    }
+                }
+
                 const trackFragment: TrackFragment = { start: parseInt(variant.begin), end: parseInt(variant.end), color: color };
                 const key = `${variant.begin}:${variant.end}:${color}:${variant.alternativeSequence}`;
                 const target = event.detail.target;
