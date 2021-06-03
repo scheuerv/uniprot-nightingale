@@ -322,6 +322,9 @@ export default class TrackManager {
             this.tracks.push({ dataFetcher: dataFetcher, parser });
         }
     }
+    public getMarkedFragments(): TrackFragment[] {
+        return this.categoryContainers.flatMap(categoryContainer => categoryContainer.getMarkedTrackFragments());
+    }
     public addFetchTrack(urlGenerator: (uniprotId: string) => string, parser: TrackParser, mapper?: (data: any) => any) {
         this.addTrack(uniprodId => fetchWithTimeout(urlGenerator(uniprodId), { timeout: 8000 }).then(
             data => {
