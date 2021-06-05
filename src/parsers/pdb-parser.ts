@@ -69,16 +69,28 @@ export default class PdbParser implements TrackParser {
                                     const chainId = result.source.chain_id;
                                     const uniprotStart = result.source.unp_start;
                                     const uniprotEnd = result.source.unp_end;
-                                    const pdbStart = result.source.start;
+                                    let pdbStart = result.source.start;
                                     const mappings: FragmentMapping[] = [];
+                                    let firstStart: number | undefined;
                                     chain.observed.forEach(fragment => {
                                         const useMapping = fragment.start.author_residue_number == fragment.start.residue_number;
                                         const start: number = Math.max(fragment.start.residue_number + uniprotStart - pdbStart, uniprotStart);
                                         const end: number = Math.min(fragment.end.residue_number + uniprotStart - pdbStart, uniprotEnd);
+                                        if (!firstStart) {
+                                            firstStart = start;
+                                        }
                                         if (start <= end) {
+                                            let pdbStartMapped = start;
+                                            if (!useMapping) {
+                                                pdbStartMapped = fragment.start.author_residue_number;
+                                            }
+                                            else if (uniprotStart != pdbStart) {
+                                                pdbStartMapped = pdbStart + (start - firstStart)
+                                            }
+                                            const pdbEndMapped = pdbStartMapped + (end - start);
                                             mappings.push({
-                                                pdbStart: useMapping ? pdbStart : fragment.start.author_residue_number,
-                                                pdbEnd: useMapping ? result.source.end : fragment.end.author_residue_number,
+                                                pdbStart: pdbStartMapped,
+                                                pdbEnd: pdbEndMapped,
                                                 from: start,
                                                 to: end
                                             });
