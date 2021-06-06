@@ -56,11 +56,13 @@ export default class VariationCategoryContainer implements CategoryContainer {
             });
         });
         this.variation.track.onDataUpdated.on(() => {
-            this.markedVariants.clear();
-            this.highlightedVariants.clear();
+            this.unmarkVariants();
             this.emitOnHighlightChange([]);
         });
-
+        d3.select(protvistaFilter.parentElement?.parentElement!).select(".fas.fa-redo").on("click", () => {
+            this.unmarkVariants();
+            this.emitOnHighlightChange([]);
+        })
         this.variation.track.addEventListener("change", (e) => {
             const event = e as CustomEvent;
             if (event.detail.eventtype == 'click' && event.detail.feature) {
@@ -100,6 +102,13 @@ export default class VariationCategoryContainer implements CategoryContainer {
                 this.emitOnHighlightChange([trackFragment]);
             }
         })
+    }
+    private unmarkVariants() {
+        this.markedVariants.forEach(trackFragmentWithElement => {
+            trackFragmentWithElement.element.classList.remove('clicked');
+        })
+        this.markedVariants.clear();
+        this.clearHighlightedTrackFragments();
     }
     public getFirstTrackContainerWithOutput(): TrackContainer | undefined {
         return undefined;

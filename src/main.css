@@ -100,6 +100,10 @@ div.track-label .fas.fa-arrow-circle-right {
 div.track-label .fas.fa-arrow-circle-right.clicked {
     color: rgb(0, 0, 0);
 }
+div.track-label .fas.fa-redo {
+    cursor: pointer;
+    float: right;
+}
 
 div.track-label div {
     overflow: hidden;
