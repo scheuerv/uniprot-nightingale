@@ -256,6 +256,20 @@ export default class TrackManager {
             resizeObserver.observe(element);
             const protvistaNavigation = this.protvistaManagerD3.select("protvista-navigation").node() as ProtvistaNavigation;
             let lastFocusedResidue: number | undefined;
+            this.protvistaManagerD3.selectAll("protvista-variation").on("change", () => {
+                const detail = d3.event.detail;
+                if (detail.eventtype == 'mouseover') {
+                    const feature = detail.feature as { start: number, end: number };
+                    const residueNumber = feature.start;
+                    if (lastFocusedResidue != residueNumber) {
+                        lastFocusedResidue = residueNumber;
+                        this.emitOnResidueMouseOver.emit(residueNumber);
+                    }
+                }
+            }).on("mouseout", () => {
+                lastFocusedResidue = undefined;
+                this.emitOnFragmentMouseOut.emit();
+            });
             this.protvistaManagerD3.selectAll("protvista-track g.fragment-group").on("mousemove", f => {
                 const feature = f as { start: number, end: number };
                 const xScale = d3.scaleLinear<number>()
