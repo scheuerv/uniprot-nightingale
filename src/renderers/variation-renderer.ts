@@ -74,7 +74,7 @@ export default class VariationRenderer implements TrackRenderer {
             this.variation.track,
             "sub"
         );
-        trackRowDiv.select(".track-label").insert("i",":first-child").attr("class", "fas fa-redo");
+        trackRowDiv.select(".track-label").insert("i", ":first-child").attr("class", "fas fa-redo");
         this.subtracksDiv.appendChild(trackRowDiv.node()!);
         categoryDiv.append(this.subtracksDiv!);
         const customSources: Map<string, FilterCase> = new Map();

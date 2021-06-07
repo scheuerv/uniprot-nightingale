@@ -6,7 +6,7 @@ import { ElementWithData } from '../renderers/basic-track-renderer';
 import PdbParser, { PDBParserItem } from '../parsers/pdb-parser';
 import FeatureParser from '../parsers/feature-parser';
 import SMRParser from '../parsers/SMR-parser';
-import VariationParser from '../parsers/variation-parser';
+import VariationParser, { ProteinsAPIVariation } from '../parsers/variation-parser';
 import ProtvistaManager from 'protvista-manager';
 import { createEmitter } from "ts-typed-events";
 import ProtvistaNavigation from 'protvista-navigation';
@@ -15,7 +15,6 @@ import 'overlayscrollbars/css/OverlayScrollbars.min.css'
 import { TrackContainer } from './track-container';
 import TrackRenderer from '../renderers/track-renderer';
 import { Feature } from 'protvista-feature-adapter/src/BasicHelper';
-import { ProteinsAPIVariation } from 'protvista-variation-adapter/dist/es/variants';
 
 type Constructor<T> = new (...args: any[]) => T;
 export default class TrackManager {
@@ -106,8 +105,8 @@ export default class TrackManager {
                         otherFeatures.push(feature);
                     }
                 });
-                trackManager.addTrack(uniProtId => Promise.resolve({ features: variationFeatures }), new VariationParser(config?.overwritePredictions, customDataSource.source));
-                trackManager.addTrack(uniProtId => Promise.resolve({ features: otherFeatures }), new FeatureParser(config?.exclusions, customDataSource.source));
+                trackManager.addTrack(uniProtId => Promise.resolve({ sequence: customDataSource.data.sequence, features: variationFeatures }), new VariationParser(config?.overwritePredictions, customDataSource.source));
+                trackManager.addTrack(uniProtId => Promise.resolve({ sequence: customDataSource.data.sequence, features: otherFeatures }), new FeatureParser(config?.exclusions, customDataSource.source));
             }
         });
         return trackManager;
@@ -469,6 +468,7 @@ type CustomDataSource = {
     readonly data: CustomDataSourceData
 }
 type CustomDataSourceData = {
+    readonly sequence: string,
     readonly features: CustomDataSourceFeature[]
 }
 type CustomDataSourceFeature = Feature & {

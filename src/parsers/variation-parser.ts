@@ -38,14 +38,14 @@ export default class VariationParser implements TrackParser {
                 end: variant.end,
                 customSource: this.customSource
             }
-            const otherSources: Record<string, OtherSourceData> = variant.otherSources??{};
+            const otherSources: Record<string, OtherSourceData> = variant.otherSources ?? {};
             if (this.customSource) {
                 otherSources[this.customSource] = variantWithoutTooltip;
             }
             return {
                 ...variantWithoutTooltip,
                 tooltipContent: createVariantTooltip(variantWithoutTooltip, uniprotId, undefined, overwritePredictions, this.customSource),
-                color: variantsFill(variantWithoutTooltip,otherSources, overwritePredictions),
+                color: variantsFill(variantWithoutTooltip, otherSources, overwritePredictions),
                 otherSources: otherSources
             }
         });
