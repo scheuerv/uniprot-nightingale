@@ -450,7 +450,7 @@ export type Output = {
 }
 
 export type Config = {
-    readonly uniprotId?: string,
+    readonly uniprotId: string,
     readonly pdbIds?: string[],
     readonly smrIds?: string[],
     readonly categoryOrder?: string[],
