@@ -1,20 +1,20 @@
 import ProtvistaVariationGraph from "protvista-variation-graph";
 import { VariationData } from "../parsers/variation-parser";
-import d3 = require('d3');
+import d3 = require("d3");
 export default class FixedVariationGraph extends ProtvistaVariationGraph {
     public set data(data: VariationData) {
         this._originalData = data;
         super.data = data;
     }
 
-    public connectedCallback() {
+    public connectedCallback(): void {
         super.connectedCallback();
         this.zoom.filter(function () {
             return !d3.event.button && d3.event.type != "dblclick";
         });
     }
 
-    public _applyFilters() {
+    public _applyFilters(): void {
         super._applyFilters();
         const data = this.getCurrentData();
         const totalsArray = {
@@ -27,9 +27,7 @@ export default class FixedVariationGraph extends ProtvistaVariationGraph {
             if (index < 1 || index > data.sequence.length) continue;
             totalsArray.total[index]++;
             if (!association) continue;
-            const hasDisease = association.find(
-                association => association.disease === true
-            );
+            const hasDisease = association.find((association) => association.disease === true);
             if (hasDisease) totalsArray.diseaseTotal[index]++;
         }
         this._totalsArray = totalsArray;

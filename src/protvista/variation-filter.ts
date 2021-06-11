@@ -2,63 +2,63 @@ import { SourceType } from "protvista-variation-adapter/dist/es/variants";
 
 import ProtvistaFilter from "protvista-filter";
 import d3 = require("d3");
-import { html, css } from "lit-element";
+import { html, css, CSSResultOrNative, CSSResultArray } from "lit-element";
+import { TemplateResult } from "lit-html";
 import { VariantWithSources, VariationData } from "../parsers/variation-parser";
 export default class VariationFilter extends ProtvistaFilter {
-    public multiFor: Map<string, (
-        ((filterCase: FilterCase) => (variants: FilterVariationData[]) => FilterVariationData[])
+    public multiFor: Map<
+        string,
+        | ((filterCase: FilterCase) => (variants: FilterVariationData[]) => FilterVariationData[])
         | ((filterCase: FilterCase) => (variants: VariationData) => VariantWithSources[])
-    )>;
-    public getCheckBox(filterItem: FilterCase) {
+    >;
+
+    public getCheckBox(filterItem: FilterCase): TemplateResult {
         const { name, options } = filterItem;
         const { labels } = options;
         const isCompound = options.colors.length > 1;
         const result = html`
-        <label
-          class="protvista_checkbox ${isCompound ? "compound" : ""}"
-          tabindex="0"
-        >
-          <input
-            type="checkbox"
-            class="protvista_checkbox_input"
-            ?checked="true"
-            .value="${name}"
-            @change="${() => this.toggleFilter(name)}"
-          />
-          <span
-            class="checkmark"
-            style=${`background: ${isCompound
-                ? `
+            <label class="protvista_checkbox ${isCompound ? "compound" : ""}" tabindex="0">
+                <input
+                    type="checkbox"
+                    class="protvista_checkbox_input"
+                    ?checked="true"
+                    .value="${name}"
+                    @change="${() => this.toggleFilter(name)}"
+                />
+                <span
+                    class="checkmark"
+                    style=${`background: ${
+                        isCompound
+                            ? `
               linear-gradient(${options.colors[0]},
               ${options.colors[1]})
             `
-                : options.colors[0]
-            };`}
-          ></span><div>
-          ${labels.map((label: string) => {
-                return html`<div class="protvista_checkbox_label">
-              ${label}
-            </div>`
-            })}
-            </div>
-        </label>
-      `;
+                            : options.colors[0]
+                    };`}
+                ></span>
+                <div>
+                    ${labels.map((label: string) => {
+                        return html`<div class="protvista_checkbox_label">${label}</div>`;
+                    })}
+                </div>
+            </label>
+        `;
         return result;
     }
 
-    public static get styles() {
+    public static get styles(): (CSSResultOrNative | CSSResultArray)[] {
         return [
             ProtvistaFilter.styles,
-            css` .protvista_checkbox.compound .checkmark
-        {
-        align-self: stretch;
-        height: auto;
-        }`
+            css`
+                .protvista_checkbox.compound .checkmark {
+                    align-self: stretch;
+                    height: auto;
+                }
+            `
         ];
-
     }
 
-    public toggleFilter(name: string) {
+    public toggleFilter(name: string): void {
         if (!this.selectedFilters.has(name)) {
             this.selectedFilters.add(name);
         } else {
@@ -86,70 +86,70 @@ export default class VariationFilter extends ProtvistaFilter {
     }
 }
 
-function getFilterByName(name: string) {
+function getFilterByName(name: string): FilterCase | undefined {
     for (let i = 0; i < filterCases.length; i++) {
-        if (filterCases[i].name === name)
-            return filterCases[i];
+        if (filterCases[i].name === name) return filterCases[i];
     }
 }
 
-export function filterDataVariation(filter: FilterCase, data: FilterVariationData[]): FilterVariationData[] {
-    var newData: FilterVariationData[] = [];
+export function filterDataVariation(
+    filter: FilterCase,
+    data: FilterVariationData[]
+): FilterVariationData[] {
+    const newData: FilterVariationData[] = [];
     if (!filter) {
         return data;
     }
-    data.forEach(feature => {
+    data.forEach((feature) => {
         const clonedVariants = Object.assign({}, feature);
         clonedVariants.variants = feature.variants.filter((variant: VariantWithSources) => {
-            return filter.properties.every(property => {
+            return filter.properties.every((property) => {
                 return property(variant);
             });
         });
         newData.push(clonedVariants);
     });
     return newData;
-};
-export function filterDataVariationGraph(filter: FilterCase, data: VariationData): VariantWithSources[] {
+}
+
+export function filterDataVariationGraph(
+    filter: FilterCase,
+    data: VariationData
+): VariantWithSources[] {
     if (!filter) {
         return data.variants;
     }
     return data.variants.filter((variant: VariantWithSources) => {
-        return filter.properties.every(property => {
+        return filter.properties.every((property) => {
             return property(variant);
         });
     });
 }
 
 export const VariantColors = {
-    UPDiseaseColor: '#990000',
-    deleteriousColor: '#002594',
-    benignColor: '#8FE3FF',
-    UPNonDiseaseColor: '#99cc00',
-    othersColor: '#FFCC00',
-    unknownColor: '#808080',
-    consequenceColors: ["#66c2a5", "#8da0cb", "#e78ac3", "#e5c494", "#fc8d62", "#ffd92f", "#a6d854", "#b3b3b3"],
+    UPDiseaseColor: "#990000",
+    deleteriousColor: "#002594",
+    benignColor: "#8FE3FF",
+    UPNonDiseaseColor: "#99cc00",
+    othersColor: "#FFCC00",
+    unknownColor: "#808080",
+    consequenceColors: [
+        "#66c2a5",
+        "#8da0cb",
+        "#e78ac3",
+        "#e5c494",
+        "#fc8d62",
+        "#ffd92f",
+        "#a6d854",
+        "#b3b3b3"
+    ],
 
-    getPredictionColor: d3.scaleLinear<string>()
-        .domain([0, 1])
-        .range(['#002594', '#8FE3FF'])
-}
-export type FilterCase = {
-    readonly name: string,
-    readonly type: {
-        readonly name: string,
-        readonly text: string
-    },
-    readonly options: {
-        readonly labels: string[],
-        readonly colors: string[]
-    },
-    readonly properties: ((variant: VariantWithSources) => boolean)[],
-    readonly filterDataVariation: (variants: FilterVariationData[]) => FilterVariationData[]
-    readonly filterDataVariationGraph: (variants: VariationData) => VariantWithSources[];
-}
+    getPredictionColor: d3.scaleLinear<string>().domain([0, 1]).range(["#002594", "#8FE3FF"])
+};
+
 export const filterCases: FilterCase[] = [
     {
-        name: 'disease',
+        name: "disease",
         type: {
             name: "consequence",
             text: "Filter Consequence"
@@ -159,34 +159,36 @@ export const filterCases: FilterCase[] = [
             colors: [VariantColors.UPDiseaseColor]
         },
         properties: [
-            function (variant: VariantWithSources) {
-                if (variant.association) { return variant.association?.some(association => association.disease === true); }
+            function (variant: VariantWithSources): boolean {
+                if (variant.association) {
+                    return variant.association?.some((association) => association.disease === true);
+                }
                 return false;
             }
         ],
-        filterDataVariation: function (variants: FilterVariationData[]) {
+        filterDataVariation: function (variants: FilterVariationData[]): FilterVariationData[] {
             return filterDataVariation(getFilterByName("disease")!, variants);
         },
-        filterDataVariationGraph: function (variants: VariationData) {
+        filterDataVariationGraph: function (variants: VariationData): VariantWithSources[] {
             return filterDataVariationGraph(getFilterByName("disease")!, variants);
         }
     },
     {
-        name: 'prediction',
+        name: "prediction",
         type: {
             name: "consequence",
             text: "Filter Consequence"
         },
         options: {
-            labels: ['Predicted deleterious', 'Predicted benign'],
+            labels: ["Predicted deleterious", "Predicted benign"],
             colors: [VariantColors.deleteriousColor, VariantColors.benignColor]
         },
         properties: [
-            function (variant: VariantWithSources) {
+            function (variant: VariantWithSources): boolean {
                 if (variant.alternativeSequence) return /[^*]/.test(variant.alternativeSequence);
                 return false;
             },
-            function (variant: VariantWithSources) {
+            function (variant: VariantWithSources): boolean {
                 return [SourceType.LargeScaleStudy, null].some((orProp) => {
                     return variant.sourceType == orProp;
                 });
@@ -203,10 +205,10 @@ export const filterCases: FilterCase[] = [
             }*/
         ],
 
-        filterDataVariation: function (variants: FilterVariationData[]) {
+        filterDataVariation: function (variants: FilterVariationData[]): FilterVariationData[] {
             return filterDataVariation(getFilterByName("prediction")!, variants);
         },
-        filterDataVariationGraph: function (variants: VariationData) {
+        filterDataVariationGraph: function (variants: VariationData): VariantWithSources[] {
             return filterDataVariationGraph(getFilterByName("prediction")!, variants);
         }
     },
@@ -221,25 +223,24 @@ export const filterCases: FilterCase[] = [
             colors: [VariantColors.UPNonDiseaseColor]
         },
         properties: [
-            function (variant: VariantWithSources) {
-                return variant.association?.every(association => {
-                    return association.disease !== true;
-                }) || (!variant.association);
+            function (variant: VariantWithSources): boolean {
+                return (
+                    variant.association?.every((association) => {
+                        return association.disease !== true;
+                    }) || !variant.association
+                );
             },
-            function (variant: VariantWithSources) {
-                return [
-                    SourceType.UniProt,
-                    SourceType.Mixed
-                ].some((orProp) => {
+            function (variant: VariantWithSources): boolean {
+                return [SourceType.UniProt, SourceType.Mixed].some((orProp) => {
                     return variant.sourceType == orProp;
                 });
             }
         ],
 
-        filterDataVariation: function (variants: FilterVariationData[]) {
+        filterDataVariation: function (variants: FilterVariationData[]): FilterVariationData[] {
             return filterDataVariation(getFilterByName("nonDisease")!, variants);
         },
-        filterDataVariationGraph: function (variants: VariationData) {
+        filterDataVariationGraph: function (variants: VariationData): VariantWithSources[] {
             return filterDataVariationGraph(getFilterByName("nonDisease")!, variants);
         }
     },
@@ -254,14 +255,14 @@ export const filterCases: FilterCase[] = [
             colors: [VariantColors.othersColor]
         },
         properties: [
-            function (variant: VariantWithSources) {
-                return variant.alternativeSequence === '*';
+            function (variant: VariantWithSources): boolean {
+                return variant.alternativeSequence === "*";
             }
         ],
-        filterDataVariation: function (variants: FilterVariationData[]) {
+        filterDataVariation: function (variants: FilterVariationData[]): FilterVariationData[] {
             return filterDataVariation(getFilterByName("uncertain")!, variants);
         },
-        filterDataVariationGraph: function (variants: VariationData) {
+        filterDataVariationGraph: function (variants: VariationData): VariantWithSources[] {
             return filterDataVariationGraph(getFilterByName("uncertain")!, variants);
         }
     },
@@ -276,23 +277,23 @@ export const filterCases: FilterCase[] = [
             colors: [VariantColors.unknownColor]
         },
         properties: [
-            function (variant) {
+            function (variant: VariantWithSources): boolean {
                 return !variant.association && !variant.predictions;
             },
-            function (variant: VariantWithSources) {
+            function (variant: VariantWithSources): boolean {
                 if (variant.alternativeSequence) return /[^*]/.test(variant.alternativeSequence);
                 return false;
             },
-            function (variant: VariantWithSources) {
+            function (variant: VariantWithSources): boolean {
                 return [SourceType.LargeScaleStudy].some((orProp) => {
                     return variant.sourceType == orProp;
                 });
             }
         ],
-        filterDataVariation: function (variants: FilterVariationData[]) {
+        filterDataVariation: function (variants: FilterVariationData[]): FilterVariationData[] {
             return filterDataVariation(getFilterByName("unknown")!, variants);
         },
-        filterDataVariationGraph: function (variants: VariationData) {
+        filterDataVariationGraph: function (variants: VariationData): VariantWithSources[] {
             return filterDataVariationGraph(getFilterByName("unknown")!, variants);
         }
     },
@@ -307,17 +308,17 @@ export const filterCases: FilterCase[] = [
             colors: ["grey"]
         },
         properties: [
-            function (variant: VariantWithSources) {
+            function (variant: VariantWithSources): boolean {
                 return [SourceType.UniProt, SourceType.Mixed].some((orProp) => {
                     return variant.sourceType == orProp;
                 });
             }
         ],
 
-        filterDataVariation: function (variants: FilterVariationData[]) {
+        filterDataVariation: function (variants: FilterVariationData[]): FilterVariationData[] {
             return filterDataVariation(getFilterByName("uniprot")!, variants);
         },
-        filterDataVariationGraph: function (variants: VariationData) {
+        filterDataVariationGraph: function (variants: VariationData): VariantWithSources[] {
             return filterDataVariationGraph(getFilterByName("uniprot")!, variants);
         }
     },
@@ -332,28 +333,40 @@ export const filterCases: FilterCase[] = [
             colors: ["grey"]
         },
         properties: [
-            function (variant: VariantWithSources) {
+            function (variant: VariantWithSources): boolean {
                 return [SourceType.LargeScaleStudy, SourceType.Mixed].some((orProp) => {
                     return variant.sourceType == orProp;
                 });
             }
         ],
 
-        filterDataVariation: function (variants: FilterVariationData[]) {
+        filterDataVariation: function (variants: FilterVariationData[]): FilterVariationData[] {
             return filterDataVariation(getFilterByName("lss")!, variants);
         },
-        filterDataVariationGraph: function (variants: VariationData) {
+        filterDataVariationGraph: function (variants: VariationData): VariantWithSources[] {
             return filterDataVariationGraph(getFilterByName("lss")!, variants);
         }
-    },
+    }
 ];
 
 export type FilterVariationData = {
-    readonly type: string,
-    readonly normal: string,
-    readonly pos: number,
-    variants: VariantWithSources[]
-}
+    readonly type: string;
+    readonly normal: string;
+    readonly pos: number;
+    variants: VariantWithSources[];
+};
 
-
-
+export type FilterCase = {
+    readonly name: string;
+    readonly type: {
+        readonly name: string;
+        readonly text: string;
+    };
+    readonly options: {
+        readonly labels: string[];
+        readonly colors: string[];
+    };
+    readonly properties: ((variant: VariantWithSources) => boolean)[];
+    readonly filterDataVariation: (variants: FilterVariationData[]) => FilterVariationData[];
+    readonly filterDataVariationGraph: (variants: VariationData) => VariantWithSources[];
+};

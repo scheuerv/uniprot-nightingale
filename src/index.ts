@@ -10,11 +10,10 @@ import LimitedTrack from "./protvista/limited-track";
 import { loadComponent } from "./utils";
 
 import TrackManager from "./manager/track-manager";
-import './main.css';
+import "./main.css";
 import FixedVariationGraph from "./protvista/variation-graph";
 import FixedProtvistaVariation from "./protvista/variation";
-import '@fortawesome/fontawesome-free/css/all.css';
-
+import "@fortawesome/fontawesome-free/css/all.css";
 
 const registerWebComponents = function () {
     loadComponent("protvista-manager", ProtvistaManager);
@@ -25,17 +24,15 @@ const registerWebComponents = function () {
     loadComponent("protvista-tooltip", ProtvistaTooltip);
     loadComponent("protvista-variation-graph", FixedVariationGraph);
     loadComponent("protvista-variation", FixedProtvistaVariation);
-}
+};
 
 // Conditional loading of polyfill
 if (window.customElements) {
     registerWebComponents();
 } else {
-    document.addEventListener('WebComponentsReady', function () {
+    document.addEventListener("WebComponentsReady", function () {
         registerWebComponents();
     });
 }
 
-export {
-    TrackManager
-}
+export { TrackManager };

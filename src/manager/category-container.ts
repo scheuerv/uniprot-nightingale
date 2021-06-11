@@ -1,5 +1,5 @@
 import { SealedEvent } from "ts-typed-events";
-import { TrackContainer } from "./track-container";
+import TrackContainer from "./track-container";
 import { TrackFragment } from "./track-manager";
 
 export default interface CategoryContainer {
@@ -11,5 +11,4 @@ export default interface CategoryContainer {
     getHighlightedTrackFragments(): TrackFragment[];
     clearHighlightedTrackFragments(): void;
     getFirstTrackContainerWithOutput(): TrackContainer | undefined;
-
 }

@@ -1,16 +1,16 @@
+import ProtvistaTrack from "protvista-track";
 import { createEmitter } from "ts-typed-events";
-import { VariationData } from "../parsers/variation-parser";
 import TrackContainer from "./track-container";
 import { Output } from "./track-manager";
-import ProtvistaVariationGraph from "protvista-variation-graph";
 
-export default class VariationGraphTrackContainer implements TrackContainer {
+export default class MainTrackContainer<T> implements TrackContainer {
     private readonly emitOnLabelClick = createEmitter<Output>();
     public readonly onLabelClick = this.emitOnLabelClick.event;
 
     constructor(
-        public readonly track: ProtvistaVariationGraph,
-        private readonly rowData: VariationData
+        public readonly track: ProtvistaTrack,
+        public readonly emptyTrack: ProtvistaTrack,
+        private readonly data: T
     ) {}
 
     public getOutput(): undefined {
@@ -26,6 +26,7 @@ export default class VariationGraphTrackContainer implements TrackContainer {
     }
 
     public addData(): void {
-        this.track.data = this.rowData;
+        this.track.data = this.data;
+        this.emptyTrack.data = [];
     }
 }

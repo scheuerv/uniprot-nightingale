@@ -1,13 +1,15 @@
-import TrackRenderer from './track-renderer';
-import d3 = require('d3');
-import { createRow } from '../utils';
-import ProtvistaTrack from 'protvista-track';
-import BasicTrackContainer, { MainTrackContainer, TrackContainer } from '../manager/track-container';
-import BasicCategoryContainer from '../manager/basic-category-container';
-import TooltipContent from '../tooltip-content';
-import { createEmitter } from 'ts-typed-events';
-import { Output, TrackFragment } from '../manager/track-manager';
-import FragmentAligner from '../parsers/fragment-aligner';
+import TrackRenderer from "./track-renderer";
+import d3 = require("d3");
+import { createRow } from "../utils";
+import ProtvistaTrack from "protvista-track";
+import TrackContainer from "../manager/track-container";
+import BasicCategoryContainer from "../manager/basic-category-container";
+import TooltipContent from "../tooltip-content";
+import { createEmitter } from "ts-typed-events";
+import { Output, TrackFragment } from "../manager/track-manager";
+import FragmentAligner from "../parsers/fragment-aligner";
+import BasicTrackContainer from "../manager/basic-track-container";
+import MainTrackContainer from "../manager/main-track-container";
 
 export default class BasicTrackRenderer implements TrackRenderer {
     private mainTrack: MainTrackContainer<Accession[]>;
@@ -19,84 +21,121 @@ export default class BasicTrackRenderer implements TrackRenderer {
         private readonly mainTrackLabel: string,
         private readonly displayArrow: boolean,
         public readonly categoryName: string
-    ) {
-
-    }
+    ) {}
     public combine(other: TrackRenderer): TrackRenderer {
         if (other instanceof BasicTrackRenderer) {
             const combined: Map<string, TrackRow> = new Map();
-            let maxId = Math.max.apply(Math, Array.from(other.rows.values())
-                .flatMap(trackRow => trackRow.rowData)
-                .flatMap(typeRowDatum => typeRowDatum.locations[0].fragments)
-                .map(fragment => fragment.id));
+            let maxId = Math.max(
+                ...Array.from(other.rows.values())
+                    .flatMap((trackRow) => trackRow.rowData)
+                    .flatMap((typeRowDatum) => typeRowDatum.locations[0].fragments)
+                    .map((fragment) => fragment.id)
+            );
             this.rows.forEach((thisTypeRow, type) => {
-                const accessionsWithFixedId = thisTypeRow.rowData.map(accession => {
-                    const fragmentsWithFixedId = accession.locations[0].fragments.map(fragment => {
-                        if (fragment.id <= maxId) {
-                            return new Fragment(++maxId, fragment.start, fragment.end, fragment.color, fragment.fill, fragment.shape, fragment.tooltipContent, fragment.output);
+                const accessionsWithFixedId = thisTypeRow.rowData.map((accession) => {
+                    const fragmentsWithFixedId = accession.locations[0].fragments.map(
+                        (fragment) => {
+                            if (fragment.id <= maxId) {
+                                return new Fragment(
+                                    ++maxId,
+                                    fragment.start,
+                                    fragment.end,
+                                    fragment.color,
+                                    fragment.fill,
+                                    fragment.shape,
+                                    fragment.tooltipContent,
+                                    fragment.output
+                                );
+                            } else {
+                                return fragment;
+                            }
                         }
-                        else {
-                            return fragment;
-                        }
-                    });
-                    return new Accession(accession.color, [new Location(fragmentsWithFixedId)], accession.type, accession.experimentalMethod);
-                })
-                combined.set(type, new TrackRow(accessionsWithFixedId, thisTypeRow.label, thisTypeRow.output));
+                    );
+                    return new Accession(
+                        accession.color,
+                        [new Location(fragmentsWithFixedId)],
+                        accession.type,
+                        accession.experimentalMethod
+                    );
+                });
+                combined.set(
+                    type,
+                    new TrackRow(accessionsWithFixedId, thisTypeRow.label, thisTypeRow.output)
+                );
             });
             other.rows.forEach((otherTypeRow, type) => {
                 const thisTypeRow = combined.get(type);
                 if (thisTypeRow) {
-                    const combinedTrackRow = new TrackRow(otherTypeRow.rowData.concat(thisTypeRow.rowData), otherTypeRow.label, otherTypeRow.output);
+                    const combinedTrackRow = new TrackRow(
+                        otherTypeRow.rowData.concat(thisTypeRow.rowData),
+                        otherTypeRow.label,
+                        otherTypeRow.output
+                    );
                     combined.set(type, combinedTrackRow);
-                }
-                else {
+                } else {
                     combined.set(type, otherTypeRow);
                 }
-            })
-            return new BasicTrackRenderer(combined, other.mainTrackLabel, other.displayArrow, other.categoryName)
+            });
+            return new BasicTrackRenderer(
+                combined,
+                other.mainTrackLabel,
+                other.displayArrow,
+                other.categoryName
+            );
         } else {
-            throw new Error("Can't combine BasicTrackRenderer with: " + (typeof other));
+            throw new Error("Can't combine BasicTrackRenderer with: " + typeof other);
         }
     }
     public getCategoryContainer(sequence: string): BasicCategoryContainer {
-
         [this.mainTrack, this.mainTrackRow] = this.getMainTrack(sequence);
         [this.subtracks, this.subtracksDiv] = this.getSubtracks(sequence);
         const trackContainers: TrackContainer[] = [];
-        const categoryDiv = d3.create("div").node();
-        categoryDiv!.appendChild(this.mainTrackRow.node()!);
+        const categoryDiv = d3.create("div").node()!;
+        categoryDiv.appendChild(this.mainTrackRow.node()!);
         trackContainers.push(this.mainTrack);
-        this.subtracks.forEach((subtrack, i) => {
+        this.subtracks.forEach((subtrack) => {
             trackContainers.push(subtrack);
         });
-        categoryDiv!.append(this.subtracksDiv!);
-        return new BasicCategoryContainer(trackContainers, categoryDiv!);
+        categoryDiv.append(this.subtracksDiv);
+        return new BasicCategoryContainer(trackContainers, categoryDiv);
     }
     private toggle() {
         const classList = d3.select(this.mainTrack.track).node()?.parentElement!.classList;
-        if (this.subtracksDiv.style.display === 'none') {
-            this.subtracksDiv.style.display = 'block';
+        if (this.subtracksDiv.style.display === "none") {
+            this.subtracksDiv.style.display = "block";
             classList?.remove("main");
             classList?.add("empty");
-            this.mainTrackRow.select('.track-label.main').attr("class", "track-label main arrow-down");
+            this.mainTrackRow
+                .select(".track-label.main")
+                .attr("class", "track-label main arrow-down");
         } else {
-            this.subtracksDiv.style.display = 'none';
+            this.subtracksDiv.style.display = "none";
             classList?.remove("empty");
             classList?.add("main");
-            this.mainTrackRow.select('.track-label.main').attr('class', 'track-label main arrow-right');
+            this.mainTrackRow
+                .select(".track-label.main")
+                .attr("class", "track-label main arrow-right");
         }
     }
-    private getMainTrack(sequence: string): [MainTrackContainer<Accession[]>, d3.Selection<HTMLDivElement, undefined, null, undefined>] {
-        const mainTrackData = Array.from(this.rows.values()).flatMap(row => row.rowData);
+    private getMainTrack(
+        sequence: string
+    ): [MainTrackContainer<Accession[]>, d3.Selection<HTMLDivElement, undefined, null, undefined>] {
+        const mainTrackData = Array.from(this.rows.values()).flatMap((row) => row.rowData);
         const fragmentAligner = new FragmentAligner();
-        mainTrackData.forEach(accession => accession.locations[0].fragments.forEach(fragment => fragmentAligner.addFragment(fragment)))
+        mainTrackData.forEach((accession) =>
+            accession.locations[0].fragments.forEach((fragment) =>
+                fragmentAligner.addFragment(fragment)
+            )
+        );
         const mainTrackDataAligned = fragmentAligner.getAccessions();
-        const track = d3.create("protvista-track")
+        const track = d3
+            .create("protvista-track")
             .attr("highlight-event", "none")
             .attr("height", 44)
             .attr("class", "main")
             .attr("layout", "non-overlapping")
-            .attr("length", sequence.length).node() as ProtvistaTrack;
+            .attr("length", sequence.length)
+            .node() as ProtvistaTrack;
 
         const mainTrackRow = createRow(
             document.createTextNode(this.mainTrackLabel),
@@ -104,28 +143,38 @@ export default class BasicTrackRenderer implements TrackRenderer {
             "main",
             this.displayArrow
         );
-        const emptyTrack = d3.create("protvista-track")
+        const emptyTrack = d3
+            .create("protvista-track")
             .attr("height", 44)
             .attr("length", sequence.length)
             .attr("class", "empty")
             .node() as ProtvistaTrack;
         track.parentElement!.appendChild(emptyTrack);
-        mainTrackRow.attr("class", mainTrackRow.attr("class") + " main")
-        mainTrackRow.select(".track-label").attr("class", "track-label main arrow-right").on('click', () =>
-            this.toggle()
-        );
-        return [new MainTrackContainer<Accession[]>(track, emptyTrack, mainTrackDataAligned), mainTrackRow];
+        mainTrackRow.attr("class", mainTrackRow.attr("class") + " main");
+        mainTrackRow
+            .select(".track-label")
+            .attr("class", "track-label main arrow-right")
+            .on("click", () => this.toggle());
+        return [
+            new MainTrackContainer<Accession[]>(track, emptyTrack, mainTrackDataAligned),
+            mainTrackRow
+        ];
     }
 
     private getSubtracks(sequence: string): [BasicTrackContainer[], HTMLDivElement] {
         const subtrackContainers: BasicTrackContainer[] = [];
-        const subtracksDiv = d3.create("div").attr("class", "subtracks-container").style("display", "none").node()!;
+        const subtracksDiv = d3
+            .create("div")
+            .attr("class", "subtracks-container")
+            .style("display", "none")
+            .node()!;
         if (this.rows.size >= 5) {
-            subtracksDiv.classList.add('scrollable');
-            subtracksDiv.style.maxHeight = this.rows.size * 43 + 'px';
+            subtracksDiv.classList.add("scrollable");
+            subtracksDiv.style.maxHeight = this.rows.size * 43 + "px";
         }
-        this.rows.forEach(subtrackData => {
-            const d3Track = d3.create("protvista-track")
+        this.rows.forEach((subtrackData) => {
+            const d3Track = d3
+                .create("protvista-track")
                 .attr("highlight-event", "none")
                 .attr("height", 44)
                 .attr("layout", "non-overlapping");
@@ -144,28 +193,24 @@ export default class BasicTrackRenderer implements TrackRenderer {
         });
         return [subtrackContainers, subtracksDiv];
     }
-
 }
 export class TrackRow {
-    constructor(public readonly rowData: Accession[], public readonly label: string, public readonly output?: Output) {
-
-    }
+    constructor(
+        public readonly rowData: Accession[],
+        public readonly label: string,
+        public readonly output?: Output
+    ) {}
 }
 export class Accession {
-    constructor
-        (
-            public readonly color: string | null,
-            public readonly locations: Location[],
-            public readonly type?: string,
-            public readonly experimentalMethod?: string
-        ) { }
+    constructor(
+        public readonly color: string | null,
+        public readonly locations: Location[],
+        public readonly type?: string,
+        public readonly experimentalMethod?: string
+    ) {}
 }
 export class Location {
-    constructor
-        (
-            public readonly fragments: Fragment[]
-        ) { }
-
+    constructor(public readonly fragments: Fragment[]) {}
 }
 
 export class Fragment {
@@ -178,7 +223,7 @@ export class Fragment {
         public readonly shape?: string,
         public readonly tooltipContent?: TooltipContent,
         public readonly output?: Output
-    ) { }
+    ) {}
 }
 
 export class FragmentWrapper {
@@ -189,34 +234,33 @@ export class FragmentWrapper {
     private isMarked = false;
     constructor(
         public readonly fragmentElements: ElementWithData[] = [],
-        public readonly fragmentData: Fragment,
+        public readonly fragmentData: Fragment
     ) {
-        fragmentElements.forEach((fragmentElement, i) => {
+        fragmentElements.forEach((fragmentElement) => {
             d3.select(fragmentElement).on("click", () => {
                 if (this.isMarked) {
                     this.unmark();
-                }
-                else {
+                } else {
                     this.mark();
                 }
                 this.emitOnClick(this.isMarked);
             });
-        })
+        });
     }
-    public mark() {
+    public mark(): void {
         if (!this.isMarked) {
-            this.fragmentElements.forEach(fragmentElement => {
-                fragmentElement.classList.add('clicked');
-            })
+            this.fragmentElements.forEach((fragmentElement) => {
+                fragmentElement.classList.add("clicked");
+            });
             this.isMarked = true;
             this.emitOnMarkedChange(this.isMarked);
         }
     }
-    public unmark() {
+    public unmark(): void {
         if (this.isMarked) {
-            this.fragmentElements.forEach(fragmentElement => {
-                fragmentElement.classList.remove('clicked');
-            })
+            this.fragmentElements.forEach((fragmentElement) => {
+                fragmentElement.classList.remove("clicked");
+            });
             this.isMarked = false;
             this.emitOnMarkedChange(this.isMarked);
         }
@@ -224,79 +268,84 @@ export class FragmentWrapper {
 }
 
 export class RowWrapper {
-    private readonly markedFragments = new Set<FragmentWrapper>();
-    private readonly higlightedFragments = new Set<FragmentWrapper>();
     private readonly emitOnHighlightChange = createEmitter<TrackFragment[]>();
     public readonly onHighlightChange = this.emitOnHighlightChange.event;
-    constructor(
-        readonly arrowElement: Element,
-        readonly fragmentWrappers: FragmentWrapper[]
-    ) {
+    private readonly markedFragments = new Set<FragmentWrapper>();
+    private readonly higlightedFragments = new Set<FragmentWrapper>();
+    constructor(readonly arrowElement: Element, readonly fragmentWrappers: FragmentWrapper[]) {
         d3.select(arrowElement).on("click", this.arrowClick());
-        fragmentWrappers.forEach(fragmentWrapper => {
-            fragmentWrapper.onClick.on(isMarked => {
+        fragmentWrappers.forEach((fragmentWrapper) => {
+            fragmentWrapper.onClick.on(() => {
                 this.emitOnHighlightChange.emit(this.getMarkedTrackFragments());
             });
-            fragmentWrapper.onMarkedChange.on(isMarked => {
+            fragmentWrapper.onMarkedChange.on((isMarked) => {
                 if (isMarked) {
                     if (d3.event.shiftKey) {
                         this.higlightedFragments.add(fragmentWrapper);
                     }
                     this.markedFragments.add(fragmentWrapper);
                     if (this.markedFragments.size == this.fragmentWrappers.length) {
-                        this.arrowElement.classList.add('clicked');
+                        this.arrowElement.classList.add("clicked");
                     }
-                }
-                else {
+                } else {
                     this.higlightedFragments.delete(fragmentWrapper);
                     this.markedFragments.delete(fragmentWrapper);
-                    this.arrowElement.classList.remove('clicked');
+                    this.arrowElement.classList.remove("clicked");
                 }
-            })
+            });
         });
+    }
+
+    public getMarkedTrackFragments(): TrackFragment[] {
+        return Array.from(this.markedFragments).map((fragmentWrapper) => {
+            return {
+                start: fragmentWrapper.fragmentData.start,
+                end: fragmentWrapper.fragmentData.end,
+                color: fragmentWrapper.fragmentData.color
+            };
+        });
+    }
+
+    public getHighlightedTrackFragments(): TrackFragment[] {
+        return Array.from(this.higlightedFragments).map((fragmentWrapper) => {
+            return {
+                start: fragmentWrapper.fragmentData.start,
+                end: fragmentWrapper.fragmentData.end,
+                color: fragmentWrapper.fragmentData.color
+            };
+        });
+    }
+
+    public clearHighlightedTrackFragments(): void {
+        this.higlightedFragments.clear();
     }
     private arrowClick() {
         return () => {
             d3.event.stopPropagation();
             if (this.arrowElement.classList.contains("clicked")) {
-                this.fragmentWrappers.forEach(fragment => {
+                this.fragmentWrappers.forEach((fragment) => {
                     fragment.unmark();
                 });
             } else {
-                this.fragmentWrappers.forEach(fragment => {
+                this.fragmentWrappers.forEach((fragment) => {
                     fragment.mark();
                 });
             }
             this.emitOnHighlightChange.emit(this.getMarkedTrackFragments());
-        }
-    }
-    public getMarkedTrackFragments() {
-        return Array.from(this.markedFragments).map(fragmentWrapper => {
-            return { start: fragmentWrapper.fragmentData.start, end: fragmentWrapper.fragmentData.end, color: fragmentWrapper.fragmentData.color };
-        });
-    }
-    public getHighlightedTrackFragments() {
-        return Array.from(this.higlightedFragments).map(fragmentWrapper => {
-            return { start: fragmentWrapper.fragmentData.start, end: fragmentWrapper.fragmentData.end, color: fragmentWrapper.fragmentData.color };
-        });
-    }
-    public clearHighlightedTrackFragments() {
-        this.higlightedFragments.clear();
+        };
     }
 }
 
 export class RowWrapperBuilder {
     private readonly fragmentWrappers: FragmentWrapper[] = [];
-    constructor(
-        public readonly arrowElement: Element
-    ) { }
+    constructor(public readonly arrowElement: Element) {}
 
-    public addFragmentWrapper(fragmentWrapper: FragmentWrapper) {
+    public addFragmentWrapper(fragmentWrapper: FragmentWrapper): void {
         this.fragmentWrappers.push(fragmentWrapper);
     }
 
-    public build() {
-        return new RowWrapper(this.arrowElement, this.fragmentWrappers)
+    public build(): RowWrapper {
+        return new RowWrapper(this.arrowElement, this.fragmentWrappers);
     }
 }
 
