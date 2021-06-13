@@ -1,10 +1,9 @@
 import { SourceType } from "protvista-variation-adapter/dist/es/variants";
-
 import ProtvistaFilter from "protvista-filter";
-import d3 = require("d3");
 import { html, css, CSSResultOrNative, CSSResultArray } from "lit-element";
 import { TemplateResult } from "lit-html";
-import { VariantWithSources, VariationData } from "../parsers/variation-parser";
+import { VariantColors } from "../variants-utils";
+import { VariantWithSources, VariationData } from "../types/variants";
 export default class VariationFilter extends ProtvistaFilter {
     public multiFor: Map<
         string,
@@ -125,27 +124,6 @@ export function filterDataVariationGraph(
         });
     });
 }
-
-export const VariantColors = {
-    UPDiseaseColor: "#990000",
-    deleteriousColor: "#002594",
-    benignColor: "#8FE3FF",
-    UPNonDiseaseColor: "#99cc00",
-    othersColor: "#FFCC00",
-    unknownColor: "#808080",
-    consequenceColors: [
-        "#66c2a5",
-        "#8da0cb",
-        "#e78ac3",
-        "#e5c494",
-        "#fc8d62",
-        "#ffd92f",
-        "#a6d854",
-        "#b3b3b3"
-    ],
-
-    getPredictionColor: d3.scaleLinear<string>().domain([0, 1]).range(["#002594", "#8FE3FF"])
-};
 
 export const filterCases: FilterCase[] = [
     {

@@ -1,6 +1,6 @@
 import ProtvistaVariationGraph from "protvista-variation-graph";
-import { VariationData } from "../parsers/variation-parser";
-import d3 = require("d3");
+import * as d3 from "d3";
+import { VariationData } from "../types/variants";
 export default class FixedVariationGraph extends ProtvistaVariationGraph {
     public set data(data: VariationData) {
         this._originalData = data;

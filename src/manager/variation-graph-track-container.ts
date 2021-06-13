@@ -1,8 +1,8 @@
 import { createEmitter } from "ts-typed-events";
-import { VariationData } from "../parsers/variation-parser";
 import TrackContainer from "./track-container";
-import { Output } from "./track-manager";
 import ProtvistaVariationGraph from "protvista-variation-graph";
+import { Output } from "../types/accession";
+import { VariationData } from "../types/variants";
 
 export default class VariationGraphTrackContainer implements TrackContainer {
     private readonly emitOnLabelClick = createEmitter<Output>();

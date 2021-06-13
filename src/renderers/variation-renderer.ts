@@ -8,14 +8,15 @@ import VariationFilter, {
     FilterVariationData
 } from "../protvista/variation-filter";
 import VariationTrackContainer from "../manager/variation-track-container";
-import { createRow, variantsFill } from "../utils";
-import d3 = require("d3");
-import { OtherSourceData, VariantWithSources, VariationData } from "../parsers/variation-parser";
+import { createRow } from "../utils";
+import * as d3 from "d3";
 import { filterCases } from "../protvista/variation-filter";
 import VariationCategoryContainer from "../manager/variation-category-container";
 import { createVariantTooltip } from "../tooltip-content";
 import FixedProtvistaVariation from "../protvista/variation";
 import VariationGraphTrackContainer from "../manager/variation-graph-track-container";
+import { variantsFill } from "../variants-utils";
+import { VariationData, VariantWithSources, OtherSourceData } from "../types/variants";
 export default class VariationRenderer implements TrackRenderer {
     private variationGraph: VariationGraphTrackContainer;
     private variation: VariationTrackContainer;

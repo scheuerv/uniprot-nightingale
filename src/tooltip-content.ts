@@ -1,6 +1,6 @@
 import { config } from "protvista-track/src/config";
 import ecoMap from "protvista-feature-adapter/src/evidences";
-import { existAssociation, groupBy } from "./utils";
+import { groupBy } from "./utils";
 import { Association, Prediction, SourceType } from "protvista-variation-adapter/dist/es/variants";
 import {
     formatTooltip as featureFormatTooltip,
@@ -8,9 +8,11 @@ import {
     Feature,
     Evidence
 } from "protvista-feature-adapter/src/BasicHelper";
-import { OtherSourceData, VariantWithSources } from "./parsers/variation-parser";
+import { existAssociation } from "./variants-utils";
+import { TooltipContent } from "./types/tooltip-content";
+import { OtherSourceData, VariantWithSources } from "./types/variants";
 
-interface TooltipData {
+export interface TooltipData {
     render(): string;
 }
 class TooltipGeneral implements TooltipData {
@@ -157,7 +159,8 @@ class TooltipDataTable implements TooltipData {
         return this;
     }
 }
-export default class TooltipContent {
+
+export default class TooltipContentBuilder {
     private readonly _title: string;
     private readonly data: TooltipData[] = [];
     constructor(label: string) {
@@ -176,16 +179,19 @@ export default class TooltipContent {
         return general;
     }
 
-    public render(): string {
+    public build(): TooltipContent {
+        return {
+            title: this._title,
+            content: this.render()
+        };
+    }
+    private render(): string {
         let content = "";
         this.data.forEach((d) => (content += d.render()));
         return content;
     }
-
-    public get title(): string {
-        return this._title;
-    }
 }
+
 class Row {
     constructor(public readonly label: string, public readonly content: string) {}
 }
@@ -206,7 +212,7 @@ export function createFeatureTooltip(
     dataSource?: string,
     type?: string
 ): TooltipContent {
-    const tooltipContent = new TooltipContent(
+    const tooltipContent = new TooltipContentBuilder(
         type ??
             feature.type +
                 " " +
@@ -232,7 +238,7 @@ export function createFeatureTooltip(
         .addEvidenceIfDefined(feature.evidences, uniprotId)
         .addXRefsIfDefined(feature.xrefs)
         .addRowIfContentDefined("Tools", getFeatureBlast(uniprotId, feature, type));
-    return tooltipContent;
+    return tooltipContent.build();
 }
 
 export function createVariantTooltip(
@@ -242,7 +248,7 @@ export function createVariantTooltip(
     overwritePredictions?: boolean,
     customSource?: string
 ): TooltipContent {
-    const tooltipContent = new TooltipContent(
+    const tooltipContent = new TooltipContentBuilder(
         variant.type +
             " " +
             variant.begin +
@@ -345,7 +351,7 @@ export function createVariantTooltip(
             .addXRefsIfDefined(variant.xrefs);
     }
 
-    return tooltipContent;
+    return tooltipContent.build();
 }
 
 function convertSources(
@@ -372,10 +378,10 @@ function convertSources(
     return sources;
 }
 
+const noBlastTypes = new Set(["helix", "strand", "turn", "disulfid", "crosslnk", "variant"]);
 function getFeatureBlast(accession: string, feature: Feature, key?: string) {
-    const noBlastTypes = ["helix", "strand", "turn", "disulfid", "crosslnk", "variant"];
     const type = feature.type.toLowerCase();
-    if (parseInt(feature.end) - parseInt(feature.begin) >= 3 && !noBlastTypes.includes(type)) {
+    if (parseInt(feature.end) - parseInt(feature.begin) >= 3 && !noBlastTypes.has(type)) {
         const featureConfig = key ? config[key] : config[feature.type];
         return createBlast(
             accession,

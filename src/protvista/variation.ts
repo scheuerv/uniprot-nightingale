@@ -1,5 +1,5 @@
 import ProtvistaVariation from "protvista-variation";
-import d3 = require("d3");
+import * as d3 from "d3";
 import { createEmitter } from "ts-typed-events";
 import { Variant } from "protvista-variation-adapter/dist/es/variants";
 

@@ -1,16 +1,15 @@
 import TrackRenderer from "../renderers/track-renderer";
 import VariationRenderer from "../renderers/variation-renderer";
 import TrackParser, { ErrorResponse, isErrorResponse } from "./track-parser";
+import { createVariantTooltip } from "../tooltip-content";
+import { AminoAcid } from "protvista-variation-adapter/dist/es/variants";
+import { variantsFill } from "../variants-utils";
 import {
-    AminoAcid,
-    Variant,
-    Xref,
-    Prediction,
-    Evidence,
-    ConsequenceType
-} from "protvista-variation-adapter/dist/es/variants";
-import TooltipContent, { createVariantTooltip } from "../tooltip-content";
-import { variantsFill } from "../utils";
+    OtherSourceData,
+    ProteinsAPIVariation,
+    VariantWithSources,
+    VariationData
+} from "../types/variants";
 export default class VariationParser implements TrackParser {
     private readonly categoryLabel = "Variation";
     public readonly categoryName = "VARIATION";
@@ -94,30 +93,3 @@ export default class VariationParser implements TrackParser {
         };
     }
 }
-
-export type VariationData = {
-    readonly sequence: string;
-    readonly customSources: string[];
-    readonly variants: VariantWithSources[];
-};
-
-export type VariantWithSources = Variant & {
-    readonly otherSources?: Record<string, OtherSourceData>;
-    readonly tooltipContent?: TooltipContent;
-    readonly description?: string;
-    readonly customSource?: string;
-    readonly color: string;
-    readonly variant: string;
-};
-
-export type OtherSourceData = {
-    readonly predictions?: Prediction[];
-    readonly description?: string;
-    readonly evidences?: Evidence[];
-    readonly consequenceType?: ConsequenceType;
-    readonly xrefs?: Xref[];
-};
-export type ProteinsAPIVariation = {
-    sequence: string;
-    features: VariantWithSources[];
-};

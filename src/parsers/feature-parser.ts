@@ -1,17 +1,20 @@
-import BasicTrackRenderer, { Fragment, TrackRow } from "../renderers/basic-track-renderer";
+import BasicTrackRenderer from "../renderers/basic-track-renderer";
 import FragmentAligner from "./fragment-aligner";
 import TrackParser, { ErrorResponse, isErrorResponse, ProteinFeatureInfo } from "./track-parser";
 import TrackRenderer from "../renderers/track-renderer";
 import { config as trackConfig } from "protvista-track/src/config";
-import { getDarkerColor } from "../utils";
-import { createFeatureTooltip } from "../tooltip-content";
 import { Feature } from "protvista-feature-adapter/src/BasicHelper";
+import { TrackRow } from "../types/accession";
+import { FeatureFragmentConverter } from "./feature-fragment-converter";
 export default class FeatureParser implements TrackParser {
     public readonly categoryName = "FEATURES";
     private readonly unique = "UNIQUE";
     private readonly nonUnique = "NON_UNIQUE";
+    private readonly featureFragmentConverter: FeatureFragmentConverter;
 
-    constructor(private readonly exclusions?: string[], private readonly dataSource?: string) {}
+    constructor(private readonly exclusions?: string[], dataSource?: string) {
+        this.featureFragmentConverter = new FeatureFragmentConverter(dataSource);
+    }
 
     public async parse(
         uniprotId: string,
@@ -22,7 +25,7 @@ export default class FeatureParser implements TrackParser {
         }
         const categories: Map<string, Map<string, FragmentAligner>> = new Map();
         const features: Feature[] = data.features;
-        let id = 1;
+        let id = 0;
         features.forEach((feature) => {
             const processedFeature: Feature = this.prepareFeature(feature);
             if (
@@ -43,24 +46,12 @@ export default class FeatureParser implements TrackParser {
                     typeFeatureFragmentAligner = new FragmentAligner();
                     category.set(processedFeature.type, typeFeatureFragmentAligner);
                 }
-                const fillColor: string =
-                    processedFeature.color ?? trackConfig[processedFeature.type]?.color;
-                const borderColor: string = getDarkerColor(fillColor);
                 typeFeatureFragmentAligner.addFragment(
-                    new Fragment(
-                        id++,
-                        parseInt(processedFeature.begin),
-                        parseInt(processedFeature.end),
-                        borderColor,
-                        fillColor,
-                        trackConfig[processedFeature.type]?.shape,
-                        createFeatureTooltip(
-                            processedFeature,
-                            uniprotId,
-                            data.sequence,
-                            this.dataSource,
-                            undefined
-                        )
+                    this.featureFragmentConverter.convert(
+                        ++id,
+                        data.sequence,
+                        uniprotId,
+                        processedFeature
                     )
                 );
             }

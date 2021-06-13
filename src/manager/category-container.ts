@@ -1,6 +1,6 @@
+import { TrackFragment } from "../types/accession";
 import { SealedEvent } from "ts-typed-events";
 import TrackContainer from "./track-container";
-import { TrackFragment } from "./track-manager";
 
 export default interface CategoryContainer {
     readonly content: HTMLElement;

@@ -1,12 +1,11 @@
-import d3 = require("d3");
+import * as d3 from "d3";
 import CategoryContainer from "./category-container";
-import TrackParser, { Mapping } from "../parsers/track-parser";
+import TrackParser from "../parsers/track-parser";
 import { createRow, fetchWithTimeout } from "../utils";
-import { ElementWithData, Fragment } from "../renderers/basic-track-renderer";
 import PdbParser, { PDBParserItem } from "../parsers/pdb-parser";
 import FeatureParser from "../parsers/feature-parser";
 import SMRParser from "../parsers/SMR-parser";
-import VariationParser, { ProteinsAPIVariation } from "../parsers/variation-parser";
+import VariationParser from "../parsers/variation-parser";
 import ProtvistaManager from "protvista-manager";
 import { createEmitter } from "ts-typed-events";
 import ProtvistaNavigation from "protvista-navigation";
@@ -15,8 +14,9 @@ import "overlayscrollbars/css/OverlayScrollbars.min.css";
 import TrackContainer from "./track-container";
 import TrackRenderer from "../renderers/track-renderer";
 import { Feature } from "protvista-feature-adapter/src/BasicHelper";
-
-type Constructor<T> = new (...args: any[]) => T;
+import { Fragment, Output, TrackFragment } from "../types/accession";
+import { ElementWithData } from "./fragment-wrapper";
+import { ProteinsAPIVariation } from "../types/variants";
 export default class TrackManager {
     private readonly emitOnResidueMouseOver = createEmitter<number>();
     public readonly onResidueMouseOver = this.emitOnResidueMouseOver.event;
@@ -164,13 +164,6 @@ export default class TrackManager {
             }
         });
         return trackManager;
-    }
-
-    public getParsersByType<T extends TrackParser>(filterType: Constructor<T>): T[] {
-        return this.tracks
-            .map((t) => t.parser)
-            .filter((parser) => parser instanceof filterType)
-            .map((parser) => parser as T);
     }
 
     public async render(element: HTMLElement): Promise<void> {
@@ -432,7 +425,7 @@ export default class TrackManager {
         this.applyHighlights();
     }
 
-    public addTrack(dataFetcher: (uniprotId: string) => Promise<any>, parser: TrackParser): void {
+    public addTrack<T>(dataFetcher: (uniprotId: string) => Promise<T>, parser: TrackParser): void {
         if (!this.config?.exclusions?.includes(parser.categoryName)) {
             this.tracks.push({ dataFetcher: dataFetcher, parser });
         }
@@ -565,7 +558,7 @@ export default class TrackManager {
                 .attr("y", detail.coords[1])
                 .attr("title", fragment.tooltipContent?.title ?? "")
                 .attr("visible", true)
-                .html(fragment.tooltipContent?.render() ?? "");
+                .html(fragment.tooltipContent?.content ?? "");
             if (closeable) {
                 const fragment: ElementWithData = detail.target;
                 const boundingRect: DOMRect = fragment.getBoundingClientRect();
@@ -625,21 +618,6 @@ export type Highlight = {
     readonly start: number;
     readonly end: number;
     readonly color?: string;
-};
-
-export type TrackFragment = {
-    readonly start: number;
-    readonly end: number;
-    readonly color: string;
-};
-
-export type Output = {
-    readonly pdbId: string;
-    readonly chain: string;
-    readonly mapping: Mapping;
-    readonly url?: string;
-    readonly format: "mmcif" | "cifCore" | "pdb" | "pdbqt" | "gro" | "xyz" | "mol" | "sdf" | "mol2";
-    readonly data?: string;
 };
 
 export type Config = {

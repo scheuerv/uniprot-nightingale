@@ -1,14 +1,10 @@
-import {
-    ElementWithData,
-    FragmentWrapper,
-    RowWrapper,
-    RowWrapperBuilder
-} from "../renderers/basic-track-renderer";
-import d3 = require("d3");
+import * as d3 from "d3";
 import CategoryContainer from "./category-container";
 import TrackContainer from "./track-container";
-import { TrackFragment } from "./track-manager";
 import { createEmitter } from "ts-typed-events";
+import { TrackFragment } from "../types/accession";
+import { ElementWithData, FragmentWrapper } from "./fragment-wrapper";
+import { RowWrapper, RowWrapperBuilder } from "./row-wrapper";
 
 export default class BasicCategoryContainer implements CategoryContainer {
     private _rowWrappers: RowWrapper[];

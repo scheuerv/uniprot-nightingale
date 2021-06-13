@@ -1,13 +1,10 @@
-import BasicTrackRenderer, {
-    Fragment,
-    Location,
-    Accession,
-    TrackRow
-} from "../renderers/basic-track-renderer";
-import TooltipContent, { createBlast } from "../tooltip-content";
+import BasicTrackRenderer from "../renderers/basic-track-renderer";
+import TooltipContentBuilder, { createBlast } from "../tooltip-content";
 import { fetchWithTimeout } from "../utils";
-import TrackParser, { FragmentMapping } from "./track-parser";
-import { Output } from "../manager/track-manager";
+import TrackParser from "./track-parser";
+import { Accession, Fragment, Location, Output, TrackRow } from "../types/accession";
+import { TooltipContent } from "../types/tooltip-content";
+import { FragmentMapping } from "../types/mapping";
 
 export default class PdbParser implements TrackParser {
     private readonly observedColor = "#2e86c1";
@@ -190,7 +187,7 @@ export default class PdbParser implements TrackParser {
                                 const fragments: Fragment[] =
                                     observedFragments.concat(unobservedFragments);
                                 const accessions: Accession[] = [
-                                    new Accession(null, [new Location(fragments)], "PDB")
+                                    new Accession([new Location(fragments)])
                                 ];
                                 trackRows.set(
                                     pdbId + " " + chainId.toLowerCase(),
@@ -312,7 +309,7 @@ export default class PdbParser implements TrackParser {
         end: string | number,
         experimentalMethod?: string
     ): TooltipContent {
-        const tooltipContent = new TooltipContent(
+        const tooltipContent = new TooltipContentBuilder(
             `${pdbId.toUpperCase()}_${chainId} ${start}${start === end ? "" : "-" + end}`
         );
         tooltipContent
@@ -325,7 +322,7 @@ export default class PdbParser implements TrackParser {
                 "BLAST",
                 createBlast(uniprotId, start, end, `${pdbId}" "${chainId.toLowerCase()}`)
             );
-        return tooltipContent;
+        return tooltipContent.build();
     }
 }
 

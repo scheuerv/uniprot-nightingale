@@ -1,7 +1,7 @@
 import ProtvistaTrack from "protvista-track";
+import { Output } from "../types/accession";
 import { createEmitter } from "ts-typed-events";
 import TrackContainer from "./track-container";
-import { Output } from "./track-manager";
 
 export default class MainTrackContainer<T> implements TrackContainer {
     private readonly emitOnLabelClick = createEmitter<Output>();

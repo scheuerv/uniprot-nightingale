@@ -1,15 +1,13 @@
 import TrackRenderer from "./track-renderer";
-import d3 = require("d3");
+import * as d3 from "d3";
 import { createRow } from "../utils";
 import ProtvistaTrack from "protvista-track";
 import TrackContainer from "../manager/track-container";
 import BasicCategoryContainer from "../manager/basic-category-container";
-import TooltipContent from "../tooltip-content";
-import { createEmitter } from "ts-typed-events";
-import { Output, TrackFragment } from "../manager/track-manager";
 import FragmentAligner from "../parsers/fragment-aligner";
 import BasicTrackContainer from "../manager/basic-track-container";
 import MainTrackContainer from "../manager/main-track-container";
+import { Accession, Fragment, Location, TrackRow } from "../types/accession";
 
 export default class BasicTrackRenderer implements TrackRenderer {
     private mainTrack: MainTrackContainer<Accession[]>;
@@ -51,12 +49,7 @@ export default class BasicTrackRenderer implements TrackRenderer {
                             }
                         }
                     );
-                    return new Accession(
-                        accession.color,
-                        [new Location(fragmentsWithFixedId)],
-                        accession.type,
-                        accession.experimentalMethod
-                    );
+                    return new Accession([new Location(fragmentsWithFixedId)]);
                 });
                 combined.set(
                     type,
@@ -193,162 +186,4 @@ export default class BasicTrackRenderer implements TrackRenderer {
         });
         return [subtrackContainers, subtracksDiv];
     }
-}
-export class TrackRow {
-    constructor(
-        public readonly rowData: Accession[],
-        public readonly label: string,
-        public readonly output?: Output
-    ) {}
-}
-export class Accession {
-    constructor(
-        public readonly color: string | null,
-        public readonly locations: Location[],
-        public readonly type?: string,
-        public readonly experimentalMethod?: string
-    ) {}
-}
-export class Location {
-    constructor(public readonly fragments: Fragment[]) {}
-}
-
-export class Fragment {
-    constructor(
-        public readonly id: number,
-        public readonly start: number,
-        public readonly end: number,
-        public readonly color: string,
-        public readonly fill?: string,
-        public readonly shape?: string,
-        public readonly tooltipContent?: TooltipContent,
-        public readonly output?: Output
-    ) {}
-}
-
-export class FragmentWrapper {
-    private readonly emitOnClick = createEmitter<boolean>();
-    public readonly onClick = this.emitOnClick.event;
-    private readonly emitOnMarkedChange = createEmitter<boolean>();
-    public readonly onMarkedChange = this.emitOnMarkedChange.event;
-    private isMarked = false;
-    constructor(
-        public readonly fragmentElements: ElementWithData[] = [],
-        public readonly fragmentData: Fragment
-    ) {
-        fragmentElements.forEach((fragmentElement) => {
-            d3.select(fragmentElement).on("click", () => {
-                if (this.isMarked) {
-                    this.unmark();
-                } else {
-                    this.mark();
-                }
-                this.emitOnClick(this.isMarked);
-            });
-        });
-    }
-    public mark(): void {
-        if (!this.isMarked) {
-            this.fragmentElements.forEach((fragmentElement) => {
-                fragmentElement.classList.add("clicked");
-            });
-            this.isMarked = true;
-            this.emitOnMarkedChange(this.isMarked);
-        }
-    }
-    public unmark(): void {
-        if (this.isMarked) {
-            this.fragmentElements.forEach((fragmentElement) => {
-                fragmentElement.classList.remove("clicked");
-            });
-            this.isMarked = false;
-            this.emitOnMarkedChange(this.isMarked);
-        }
-    }
-}
-
-export class RowWrapper {
-    private readonly emitOnHighlightChange = createEmitter<TrackFragment[]>();
-    public readonly onHighlightChange = this.emitOnHighlightChange.event;
-    private readonly markedFragments = new Set<FragmentWrapper>();
-    private readonly higlightedFragments = new Set<FragmentWrapper>();
-    constructor(readonly arrowElement: Element, readonly fragmentWrappers: FragmentWrapper[]) {
-        d3.select(arrowElement).on("click", this.arrowClick());
-        fragmentWrappers.forEach((fragmentWrapper) => {
-            fragmentWrapper.onClick.on(() => {
-                this.emitOnHighlightChange.emit(this.getMarkedTrackFragments());
-            });
-            fragmentWrapper.onMarkedChange.on((isMarked) => {
-                if (isMarked) {
-                    if (d3.event.shiftKey) {
-                        this.higlightedFragments.add(fragmentWrapper);
-                    }
-                    this.markedFragments.add(fragmentWrapper);
-                    if (this.markedFragments.size == this.fragmentWrappers.length) {
-                        this.arrowElement.classList.add("clicked");
-                    }
-                } else {
-                    this.higlightedFragments.delete(fragmentWrapper);
-                    this.markedFragments.delete(fragmentWrapper);
-                    this.arrowElement.classList.remove("clicked");
-                }
-            });
-        });
-    }
-
-    public getMarkedTrackFragments(): TrackFragment[] {
-        return Array.from(this.markedFragments).map((fragmentWrapper) => {
-            return {
-                start: fragmentWrapper.fragmentData.start,
-                end: fragmentWrapper.fragmentData.end,
-                color: fragmentWrapper.fragmentData.color
-            };
-        });
-    }
-
-    public getHighlightedTrackFragments(): TrackFragment[] {
-        return Array.from(this.higlightedFragments).map((fragmentWrapper) => {
-            return {
-                start: fragmentWrapper.fragmentData.start,
-                end: fragmentWrapper.fragmentData.end,
-                color: fragmentWrapper.fragmentData.color
-            };
-        });
-    }
-
-    public clearHighlightedTrackFragments(): void {
-        this.higlightedFragments.clear();
-    }
-    private arrowClick() {
-        return () => {
-            d3.event.stopPropagation();
-            if (this.arrowElement.classList.contains("clicked")) {
-                this.fragmentWrappers.forEach((fragment) => {
-                    fragment.unmark();
-                });
-            } else {
-                this.fragmentWrappers.forEach((fragment) => {
-                    fragment.mark();
-                });
-            }
-            this.emitOnHighlightChange.emit(this.getMarkedTrackFragments());
-        };
-    }
-}
-
-export class RowWrapperBuilder {
-    private readonly fragmentWrappers: FragmentWrapper[] = [];
-    constructor(public readonly arrowElement: Element) {}
-
-    public addFragmentWrapper(fragmentWrapper: FragmentWrapper): void {
-        this.fragmentWrappers.push(fragmentWrapper);
-    }
-
-    public build(): RowWrapper {
-        return new RowWrapper(this.arrowElement, this.fragmentWrappers);
-    }
-}
-
-export class ElementWithData extends Element {
-    public readonly __data__: Fragment;
 }

@@ -1,7 +1,7 @@
 import ProtvistaTrack from "protvista-track";
 import LimitedNonOverlappingLayout from "./limited-non-overlapping-layout";
 import DefaultLayout from "protvista-track/src/DefaultLayout";
-import d3 = require("d3");
+import * as d3 from "d3";
 
 export default class LimitedTrack extends ProtvistaTrack {
     public getLayout(): DefaultLayout {

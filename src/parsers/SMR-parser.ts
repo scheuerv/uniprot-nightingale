@@ -1,9 +1,9 @@
-import BasicTrackRenderer, { Fragment, TrackRow } from "../renderers/basic-track-renderer";
+import BasicTrackRenderer from "../renderers/basic-track-renderer";
 import { getDarkerColor } from "../utils";
-import TooltipContent, { createBlast } from "../tooltip-content";
+import TooltipContentBuilder, { createBlast } from "../tooltip-content";
 import TrackParser from "./track-parser";
 import FragmentAligner from "./fragment-aligner";
-import { Output } from "../manager/track-manager";
+import { Fragment, Output, TrackRow } from "../types/accession";
 export default class SMRParser implements TrackParser {
     private readonly categorylabel = "Predicted structures";
     public readonly categoryName = "PREDICTED_STRUCTURES";
@@ -51,7 +51,7 @@ export default class SMRParser implements TrackParser {
                         };
                     }
                     chain.segments.map((segment: SMRSegment) => {
-                        const tooltipContent: TooltipContent = new TooltipContent(
+                        const tooltipContent: TooltipContentBuilder = new TooltipContentBuilder(
                             `${smrId.toUpperCase()}_${chain.id} ${segment.uniprot.from}${
                                 segment.uniprot.from === segment.uniprot.to
                                     ? ""
@@ -87,7 +87,7 @@ export default class SMRParser implements TrackParser {
                                 getDarkerColor(this.color),
                                 this.color,
                                 undefined,
-                                tooltipContent,
+                                tooltipContent.build(),
                                 output
                             )
                         );

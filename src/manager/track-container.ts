@@ -1,6 +1,6 @@
 import ProtvistaTrack from "protvista-track";
+import { Output } from "../types/accession";
 import { SealedEvent } from "ts-typed-events";
-import { Output } from "./track-manager";
 
 export default interface TrackContainer {
     readonly track: ProtvistaTrack;

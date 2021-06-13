@@ -1,4 +1,4 @@
-import { Accession, Fragment, Location } from "../renderers/basic-track-renderer";
+import { Fragment, Accession, Location } from "../types/accession";
 
 export default class FragmentAligner {
     private fragments: Fragment[] = [];
@@ -17,7 +17,7 @@ export default class FragmentAligner {
                 }
             }
             if (!fragmentAdded) {
-                accessions.push(new Accession(null, [new Location([fragment])]));
+                accessions.push(new Accession([new Location([fragment])]));
             }
         });
         return accessions;
