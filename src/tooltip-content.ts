@@ -158,6 +158,10 @@ class TooltipDataTable implements TooltipData {
         });
         return this;
     }
+
+    public isEmpty(): boolean {
+        return this.contentRows.length == 0;
+    }
 }
 
 export default class TooltipContentBuilder {
@@ -167,16 +171,19 @@ export default class TooltipContentBuilder {
         this._title = label;
     }
 
+    public addData<T extends TooltipData>(data: T): T {
+        this.data.push(data);
+        return data;
+    }
+
     public addDataTable(title?: string): TooltipDataTable {
         const table = new TooltipDataTable(title);
-        this.data.push(table);
-        return table;
+        return this.addData(table);
     }
 
     public addFeature(feature: Feature): TooltipGeneral {
         const general = new TooltipGeneral(featureFormatTooltip(feature));
-        this.data.push(general);
-        return general;
+        return this.addData(general);
     }
 
     public build(): TooltipContent {
@@ -287,11 +294,11 @@ export function createVariantTooltip(
         uniprotEvidences = undefined;
         isLss = true;
         sourceText =
-            "Large scale studies" + `${customSources ? ` custom source (${customSources})` : ""}`;
+            "Large scale studies" + `${customSources ? `, custom source (${customSources})` : ""}`;
     } else if (variant.sourceType == SourceType.UniProt) {
         isUniprot = true;
         lssEvidences = undefined;
-        sourceText = "UniProt" + `${customSources ? ` custom source (${customSources})` : ""}`;
+        sourceText = "UniProt" + `${customSources ? `, custom source (${customSources})` : ""}`;
     } else if (customSources) {
         sourceText = `Custom data (${customSources})`;
     }
@@ -307,28 +314,33 @@ export function createVariantTooltip(
             }`
         );
     if (isUniprot) {
-        tooltipContent
-            .addDataTable("Uniprot")
+        const uniprotTable = new TooltipDataTable("Uniprot")
             .addRowIfContentDefined("Feature ID", variant.ftId)
             .addEvidenceIfDefined(uniprotEvidences, uniprotId)
             .addRowIfContentDefined("Disease Association", variant.association ? "" : undefined)
             .addDiseaseAssociationIfDefined(variant.association);
+        if (!uniprotTable.isEmpty()) {
+            tooltipContent.addData(uniprotTable);
+        }
     }
     if (isLss) {
-        const lssDataTable = tooltipContent
-            .addDataTable("Large Scale Studies")
-            .addRowIfContentDefined("Consequence", variant.consequenceType);
+        const lssDataTable = new TooltipDataTable("Large Scale Studies").addRowIfContentDefined(
+            "Consequence",
+            variant.consequenceType
+        );
         if (!overwritePredictions || !existsPrediciton(otherSources)) {
             lssDataTable.addVariantPredictionsIfDefined(variant.predictions);
         }
         lssDataTable.addEvidenceIfDefined(lssEvidences, uniprotId).addXRefsIfDefined(variant.xrefs);
+        if (!lssDataTable.isEmpty()) {
+            tooltipContent.addData(lssDataTable);
+        }
     }
     if (otherSources) {
         let predictionsAdded = false;
         for (const source in otherSources) {
             const data = otherSources[source];
-            const customSourceDataTable = tooltipContent
-                .addDataTable(source)
+            const customSourceDataTable = new TooltipDataTable(source)
                 .addRowIfContentDefined("Description", data.description)
                 .addRowIfContentDefined("Consequence", data.consequenceType);
             if (overwritePredictions && !predictionsAdded) {
@@ -340,15 +352,21 @@ export function createVariantTooltip(
             customSourceDataTable
                 .addEvidenceIfDefined(data.evidences, uniprotId)
                 .addXRefsIfDefined(data.xrefs);
+
+            if (!customSourceDataTable.isEmpty()) {
+                tooltipContent.addData(customSourceDataTable);
+            }
         }
     } else if (customSource) {
-        tooltipContent
-            .addDataTable(customSource)
+        const customSourceDataTable = new TooltipDataTable(customSource)
             .addRowIfContentDefined("Description", variant.description)
             .addRowIfContentDefined("Consequence", variant.consequenceType)
             .addVariantPredictionsIfDefined(variant.predictions)
             .addEvidenceIfDefined(variant.evidences, uniprotId)
             .addXRefsIfDefined(variant.xrefs);
+        if (!customSourceDataTable.isEmpty()) {
+            tooltipContent.addData(customSourceDataTable);
+        }
     }
 
     return tooltipContent.build();

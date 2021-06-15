@@ -1,22 +1,22 @@
 import CategoryContainer from "../manager/category-container";
 import TrackRenderer from "./track-renderer";
 import ProtvistaVariationGraph from "protvista-variation-graph";
-import VariationFilter, {
-    FilterCase,
-    filterDataVariation,
-    filterDataVariationGraph,
-    FilterVariationData
-} from "../protvista/variation-filter";
 import VariationTrackContainer from "../manager/variation-track-container";
 import { createRow } from "../utils";
 import * as d3 from "d3";
-import { filterCases } from "../protvista/variation-filter";
+import VariationFilter from "../protvista/variation-filter";
 import VariationCategoryContainer from "../manager/variation-category-container";
 import { createVariantTooltip } from "../tooltip-content";
 import FixedProtvistaVariation from "../protvista/variation";
 import VariationGraphTrackContainer from "../manager/variation-graph-track-container";
-import { variantsFill } from "../variants-utils";
+import {
+    filterCases,
+    filterDataVariation,
+    filterDataVariationGraph,
+    variantsFill
+} from "../variants-utils";
 import { VariationData, VariantWithSources, OtherSourceData } from "../types/variants";
+import { FilterCase, FilterVariationData } from "../types/variation-filter";
 export default class VariationRenderer implements TrackRenderer {
     private variationGraph: VariationGraphTrackContainer;
     private variation: VariationTrackContainer;

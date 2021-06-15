@@ -1,8 +1,8 @@
+import { Variant } from "protvista-variation-adapter/src/variants";
 import {
     ConsequenceType,
     Evidence,
     Prediction,
-    Variant,
     Xref
 } from "protvista-variation-adapter/dist/es/variants";
 import { TooltipContent } from "./tooltip-content";
@@ -12,8 +12,9 @@ export type VariantWithSources = Variant & {
     readonly tooltipContent?: TooltipContent;
     readonly description?: string;
     readonly customSource?: string;
-    readonly color: string;
+    readonly color?: string;
     readonly variant: string;
+    readonly start: string;
 };
 
 export type OtherSourceData = {

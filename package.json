@@ -21,6 +21,7 @@
         "@types/chai-as-promised": "^7.1.4",
         "chai-as-promised": "^7.1.1",
         "d3": "^5.16.0",
+        "jest-mock-console": "^1.1.0",
         "overlayscrollbars": "^1.13.1",
         "protvista-feature-adapter": "^ 3.2.14",
         "protvista-filter": "^3.1.2",

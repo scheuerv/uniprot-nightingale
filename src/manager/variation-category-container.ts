@@ -72,12 +72,12 @@ export default class VariationCategoryContainer implements CategoryContainer {
             const event = e as CustomEvent;
             if (event.detail.eventtype == "click" && event.detail.feature) {
                 const variant = event.detail.feature as VariantWithSources;
-                let match = variant.color.match(/^#[0-9a-f]{3,6}$/i);
+                let match = variant.color?.match(/^#[0-9a-f]{3,6}$/i);
                 let color = "";
                 if (match) {
                     color = match[0];
                 } else {
-                    match = variant.color.match(/rgb\((\d{1,3}), (\d{1,3}), (\d{1,3})\)/);
+                    match = variant.color?.match(/rgb\((\d{1,3}), (\d{1,3}), (\d{1,3})\)/);
                     if (match) {
                         color =
                             "#" +

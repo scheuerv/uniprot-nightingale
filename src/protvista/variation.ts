@@ -1,7 +1,7 @@
 import ProtvistaVariation from "protvista-variation";
 import * as d3 from "d3";
 import { createEmitter } from "ts-typed-events";
-import { Variant } from "protvista-variation-adapter/dist/es/variants";
+import { Variant } from "protvista-variation-adapter/src/variants";
 
 export default class FixedProtvistaVariation extends ProtvistaVariation {
     private readonly emitOnRefreshed = createEmitter<void>();

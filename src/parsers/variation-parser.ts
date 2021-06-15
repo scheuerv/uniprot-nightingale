@@ -2,7 +2,6 @@ import TrackRenderer from "../renderers/track-renderer";
 import VariationRenderer from "../renderers/variation-renderer";
 import TrackParser, { ErrorResponse, isErrorResponse } from "./track-parser";
 import { createVariantTooltip } from "../tooltip-content";
-import { AminoAcid } from "protvista-variation-adapter/dist/es/variants";
 import { variantsFill } from "../variants-utils";
 import {
     OtherSourceData,
@@ -10,6 +9,7 @@ import {
     VariantWithSources,
     VariationData
 } from "../types/variants";
+import { AminoAcid } from "protvista-variation-adapter/dist/es/variants";
 export default class VariationParser implements TrackParser {
     private readonly categoryLabel = "Variation";
     public readonly categoryName = "VARIATION";
@@ -26,12 +26,12 @@ export default class VariationParser implements TrackParser {
         if (isErrorResponse(data)) {
             return null;
         }
-        const transformedData: VariationData | null = this.transformData(
-            data,
-            uniprotId,
-            this.overwritePredictions
-        );
-        if (data.features.length > 0 && transformedData != null) {
+        if (data.features.length > 0) {
+            const transformedData: VariationData = this.transformData(
+                data,
+                uniprotId,
+                this.overwritePredictions
+            );
             return [
                 new VariationRenderer(
                     transformedData,
@@ -50,7 +50,7 @@ export default class VariationParser implements TrackParser {
         data: ProteinsAPIVariation,
         uniprotId: string,
         overwritePredictions?: boolean
-    ): VariationData | null {
+    ): VariationData {
         const { sequence, features } = data;
         const variants = features.map((variant: VariantWithSources) => {
             if (variant.alternativeSequence === undefined) {
@@ -60,7 +60,7 @@ export default class VariationParser implements TrackParser {
                 );
             }
             const alternativeSequence = variant.alternativeSequence ?? AminoAcid.Empty;
-            const variantWithoutTooltip = {
+            const variantWithoutTooltip: VariantWithSources = {
                 ...variant,
                 variant: alternativeSequence,
                 alternativeSequence: alternativeSequence,
@@ -70,7 +70,13 @@ export default class VariationParser implements TrackParser {
             };
             const otherSources: Record<string, OtherSourceData> = variant.otherSources ?? {};
             if (this.customSource) {
-                otherSources[this.customSource] = variantWithoutTooltip;
+                otherSources[this.customSource] = {
+                    predictions: variantWithoutTooltip.predictions,
+                    description: variantWithoutTooltip.description,
+                    evidences: variantWithoutTooltip.evidences,
+                    consequenceType: variantWithoutTooltip.consequenceType,
+                    xrefs: variantWithoutTooltip.xrefs
+                };
             }
             return {
                 ...variantWithoutTooltip,
@@ -85,7 +91,6 @@ export default class VariationParser implements TrackParser {
                 otherSources: otherSources
             };
         });
-        if (!variants) return null;
         return {
             sequence,
             customSources: this.customSource ? [this.customSource] : [],
