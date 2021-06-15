@@ -48,6 +48,7 @@ export default class TrackManager {
     private fixedHighlights = "";
     private clickedHighlights = "";
     private publicHighlights = "";
+    private mouseoverHighlights = "";
     private readonly categoryContainers: CategoryContainer[] = [];
     private activeStructure?: ActiveStructure = undefined;
     private readonly uniprotId: string;
@@ -361,12 +362,16 @@ export default class TrackManager {
                             const residueNumber = feature.start;
                             if (lastFocusedResidue != residueNumber) {
                                 lastFocusedResidue = residueNumber;
+                                this.mouseoverHighlights = `${residueNumber}:${residueNumber}`;
+                                this.applyHighlights();
                                 this.emitOnResidueMouseOver.emit(residueNumber);
                             }
                         }
                     })
                     .on("mouseout", () => {
                         lastFocusedResidue = undefined;
+                        this.mouseoverHighlights = "";
+                        this.applyHighlights();
                         this.emitOnFragmentMouseOut.emit();
                     });
                 this.protvistaManagerD3
@@ -395,11 +400,15 @@ export default class TrackManager {
                         );
                         if (lastFocusedResidue != residueNumber) {
                             lastFocusedResidue = residueNumber;
+                            this.mouseoverHighlights = `${residueNumber}:${residueNumber}`;
+                            this.applyHighlights();
                             this.emitOnResidueMouseOver.emit(residueNumber);
                         }
                     })
                     .on("mouseout", () => {
                         lastFocusedResidue = undefined;
+                        this.mouseoverHighlights = "";
+                        this.applyHighlights();
                         this.emitOnFragmentMouseOut.emit();
                     });
                 this.emitOnRendered.emit();
@@ -510,7 +519,9 @@ export default class TrackManager {
     private applyHighlights(): void {
         this.protvistaManager.highlight = `${this.fixedHighlights ?? ""}${
             this.clickedHighlights ? "," + this.clickedHighlights : ""
-        }${this.publicHighlights ? "," + this.publicHighlights : ""}`;
+        }${this.publicHighlights ? "," + this.publicHighlights : ""}${
+            this.mouseoverHighlights ? "," + this.mouseoverHighlights : ""
+        }`;
         this.protvistaManager.applyAttributes();
     }
 
