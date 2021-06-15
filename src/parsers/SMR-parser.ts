@@ -15,6 +15,7 @@ export default class SMRParser implements TrackParser {
         const result: SMRResult = data.result;
         const trackRows: Map<string, TrackRow> = new Map();
         const fragmentForTemplate: Record<string, Fragment[]> = {};
+        let id = 1;
         result.structures.forEach((structure) => {
             const sTemplate: RegExpMatchArray | null =
                 structure.template.match(/(.+)\.(.+)+\.(.+)/);
@@ -25,74 +26,71 @@ export default class SMRParser implements TrackParser {
             if (sTemplate !== null) {
                 smrId = sTemplate[1] + "." + sTemplate[2];
                 templateChain = sTemplate[3];
-            }
-            if (this.smrIds?.includes(smrId) || !this.smrIds) {
-                let id = 1;
-                structure.chains.forEach((chain: SMRChain) => {
-                    let output: Output | undefined = undefined;
-                    if (sTemplate !== null) {
-                        output = {
-                            pdbId: sTemplate[1],
-                            chain: chain.id,
-                            url: coordinatesFile,
-                            format: "pdb",
-                            mapping: {
-                                uniprotStart: structure.from,
-                                uniprotEnd: structure.to,
-                                fragmentMappings: [
-                                    {
-                                        pdbStart: structure.from,
-                                        pdbEnd: structure.to,
-                                        from: structure.from,
-                                        to: structure.to
-                                    }
-                                ]
+                if (this.smrIds?.includes(smrId) || !this.smrIds) {
+                    structure.chains.forEach((chain: SMRChain) => {
+                        chain.segments.map((segment: SMRSegment) => {
+                            let output: Output | undefined = undefined;
+                            output = {
+                                pdbId: sTemplate[1],
+                                chain: chain.id,
+                                url: coordinatesFile,
+                                format: "pdb",
+                                mapping: {
+                                    uniprotStart: structure.from,
+                                    uniprotEnd: structure.to,
+                                    fragmentMappings: [
+                                        {
+                                            pdbStart: segment.uniprot.from,
+                                            pdbEnd: segment.uniprot.to,
+                                            from: segment.uniprot.from,
+                                            to: segment.uniprot.to
+                                        }
+                                    ]
+                                }
+                            };
+                            const tooltipContent: TooltipContentBuilder = new TooltipContentBuilder(
+                                `${smrId.toUpperCase()}_${chain.id} ${segment.uniprot.from}${
+                                    segment.uniprot.from === segment.uniprot.to
+                                        ? ""
+                                        : "-" + segment.uniprot.to
+                                }`
+                            );
+                            const key = `${smrId} ${templateChain.toLowerCase()}`;
+                            tooltipContent
+                                .addDataTable()
+                                .addRowIfContentDefined(
+                                    "Description",
+                                    structure.method
+                                        ? "Experimental method: " + experimentalMethod
+                                        : undefined
+                                )
+                                .addRowIfContentDefined(
+                                    "BLAST",
+                                    createBlast(
+                                        uniprotId,
+                                        segment.uniprot.from,
+                                        segment.uniprot.to,
+                                        key
+                                    )
+                                );
+                            if (!fragmentForTemplate[key]) {
+                                fragmentForTemplate[key] = [];
                             }
-                        };
-                    }
-                    chain.segments.map((segment: SMRSegment) => {
-                        const tooltipContent: TooltipContentBuilder = new TooltipContentBuilder(
-                            `${smrId.toUpperCase()}_${chain.id} ${segment.uniprot.from}${
-                                segment.uniprot.from === segment.uniprot.to
-                                    ? ""
-                                    : "-" + segment.uniprot.to
-                            }`
-                        );
-                        const key = `${smrId} ${templateChain.toLowerCase()}`;
-                        tooltipContent
-                            .addDataTable()
-                            .addRowIfContentDefined(
-                                "Description",
-                                structure.method
-                                    ? "Experimental method: " + experimentalMethod
-                                    : undefined
-                            )
-                            .addRowIfContentDefined(
-                                "BLAST",
-                                createBlast(
-                                    uniprotId,
+                            fragmentForTemplate[key].push(
+                                new Fragment(
+                                    id++,
                                     segment.uniprot.from,
                                     segment.uniprot.to,
-                                    key
+                                    getDarkerColor(this.color),
+                                    this.color,
+                                    undefined,
+                                    tooltipContent.build(),
+                                    output
                                 )
                             );
-                        if (!fragmentForTemplate[key]) {
-                            fragmentForTemplate[key] = [];
-                        }
-                        fragmentForTemplate[key].push(
-                            new Fragment(
-                                id++,
-                                segment.uniprot.from,
-                                segment.uniprot.to,
-                                getDarkerColor(this.color),
-                                this.color,
-                                undefined,
-                                tooltipContent.build(),
-                                output
-                            )
-                        );
+                        });
                     });
-                });
+                }
             }
         });
         for (const key in fragmentForTemplate) {
@@ -117,25 +115,15 @@ export default class SMRParser implements TrackParser {
 }
 
 type SMRResult = {
-    readonly sequence: string;
-    readonly sequence_length: number;
     readonly structures: SMRStructure[];
-    readonly uniprot_entries?: {
-        readonly ac?: string;
-        readonly id?: string;
-        readonly isoid?: number;
-    }[];
 };
 
 type SMRStructure = {
     readonly chains: SMRChain[];
     readonly coordinates: string;
-    readonly coverage: number;
     readonly from: number;
-    readonly identity?: number;
-    readonly method: string;
+    readonly method?: string;
     readonly provider: string;
-    readonly similarity?: number;
     readonly template: string;
     readonly to: number;
 };
@@ -144,14 +132,7 @@ type SMRChain = {
     readonly segments: SMRSegment[];
 };
 type SMRSegment = {
-    readonly smtl: {
-        readonly aligned_sequence: string;
-        readonly description: string;
-        readonly from: number;
-        readonly to: number;
-    };
     readonly uniprot: {
-        readonly aligned_sequence: string;
         readonly from: number;
         readonly to: number;
     };
