@@ -35,18 +35,18 @@ export default class SMRParser implements TrackParser {
                                 chain: chain.id,
                                 url: coordinatesFile,
                                 format: "pdb",
-                                mapping: {
-                                    uniprotStart: structure.from,
-                                    uniprotEnd: structure.to,
-                                    fragmentMappings: [
-                                        {
-                                            pdbStart: segment.uniprot.from,
-                                            pdbEnd: segment.uniprot.to,
-                                            from: segment.uniprot.from,
-                                            to: segment.uniprot.to
+                                mapping: [
+                                    {
+                                        unp_start: segment.uniprot.from,
+                                        unp_end: segment.uniprot.to,
+                                        start: {
+                                            residue_number: segment.uniprot.from
+                                        },
+                                        end: {
+                                            residue_number: segment.uniprot.to
                                         }
-                                    ]
-                                }
+                                    }
+                                ]
                             };
                             const tooltipContent: TooltipContentBuilder = new TooltipContentBuilder(
                                 `${smrId.toUpperCase()}_${chain.id} ${segment.uniprot.from}${

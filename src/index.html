@@ -1,25 +1,529 @@
-<!doctype html>
+<!DOCTYPE html>
 <html class="no-js" lang="">
+    <head>
+        <meta charset="utf-8" />
+        <meta http-equiv="x-ua-compatible" content="ie=edge" />
+        <title></title>
+        <meta name="description" content="" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <!-- Icon fonts stylesheet -->
+        <link
+            rel="stylesheet"
+            href="https://ebi.emblstatic.net/web_guidelines/EBI-Icon-fonts/v1.2/fonts.css"
+            type="text/css"
+            media="all"
+        />
+        <link rel="stylesheet" href="./main.css" />
+        <script type="text/javascript" src="./index.js"></script>
+    </head>
 
-<head>
-    <meta charset="utf-8">
-    <meta http-equiv="x-ua-compatible" content="ie=edge">
-    <title></title>
-    <meta name="description" content="">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <!-- Icon fonts stylesheet -->
-    <link rel="stylesheet" href="https://ebi.emblstatic.net/web_guidelines/EBI-Icon-fonts/v1.2/fonts.css" type="text/css" media="all" />
-    <link rel="stylesheet" href="./main.css">
-    <script type="text/javascript" src="./index.js"></script>
-</head>
+    <body>
+        <div id="root"></div>
+        <script>
+            const sequenceStructureMapping = [
+                {
+                    pdb_id: "5uig",
+                    chain_id: "A",
+                    structure: {
+                        format: "mmcif", //valid parameters are PDB and mmcif
+                        //data: //window.uig_a, //the structure in the PDB or mmcif format
+                        uri: "https://www.ebi.ac.uk/pdbe/static/entry/5uig_updated.cif" //data and uri parameters are mutually exclusive
+                    },
+                    start: 27, // where the structure begins with respect to the full molecule sequence
+                    end: 438, // where the structure ends with respect to the full molecule sequence
+                    unp_start: 1, // where the structure begins with respect to the sequence (the sequence does not have to covert the full molecule, therefore seqStart does not have to be 1)
+                    unp_end: 316, // where the structure ends with respect to the sequence
+                    coverage: {
+                        "5uig": {
+                            molecules: [
+                                {
+                                    chains: [
+                                        {
+                                            observed: [
+                                                {
+                                                    start: {
+                                                        residue_number: 30, // position of the region with respect to the full molecule sequence
+                                                        author_residue_number: 4, // position with respect to the beginning of the structure (in this case first three residues are not observed, i.e. residues 27, 28, 29 with respect to the full molecule)
+                                                        author_insertion_code: undefined
+                                                    },
+                                                    end: {
+                                                        residue_number: 148,
+                                                        author_residue_number: 174,
+                                                        author_insertion_code: undefined
+                                                    }
+                                                },
+                                                {
+                                                    start: {
+                                                        author_residue_number: 159,
+                                                        author_insertion_code: undefined,
+                                                        residue_number: 185
+                                                    },
+                                                    end: {
+                                                        author_residue_number: 1048,
+                                                        author_insertion_code: undefined,
+                                                        residue_number: 282
+                                                    }
+                                                },
+                                                {
+                                                    start: {
+                                                        author_residue_number: 1056,
+                                                        author_insertion_code: undefined,
+                                                        residue_number: 290
+                                                    },
+                                                    end: {
+                                                        author_residue_number: 311,
+                                                        author_insertion_code: undefined,
+                                                        residue_number: 433
+                                                    }
+                                                }
+                                            ]
+                                        }
+                                    ]
+                                }
+                            ]
+                        }
+                    }
+                }
+            ];
+            const customFeatures = {
+                sequence:
+                    "MLPGLALLLLAAWTARALEVPTDGNAGLLAEPQIAMFCGRLNMHMNVQNGKWDSDPSGTKTCIDTKEGILQYCQEVYPELQITNVVEANQPVTIQNWCKRGRKQCKTHPHFVIPYRCLVGEFVSDALLVPDKCKFLHQERMDVCETHLHWHTVAKETCSEKSTNLHDYGMLLPCGIDKFRGVEFVCCPLAEESDNVDSADAEEDDSDVWWGGADTDYADGSEDKVVEVAEEEEVAEVEEEEADDDEDDEDGDEVEEEAEEPYEEATERTTSIATTTTTTTESVEEVVREVCSEQAETGPCRAMISRWYFDVTEGKCAPFFYGGCGGNRNNFDTEEYCMAVCGSAMSQSLLKTTQEPLARDPVKLPTTAASTPDAVDKYLETPGDENEHAHFQKAKERLEAKHRERMSQVMREWEEAERQAKNLPKADKKAVIQHFQEKVESLEQEAANERQQLVETHMARVEAMLNDRRRLALENYITALQAVPPRPRHVFNMLKKYVRAEQKDRQHTLKHFEHVRMVDPKKAAQIRSQVMTHLRVIYERMNQSLSLLYNVPAVAEEIQDEVDELLQKEQNYSDDVLANMISEPRISYGNDALMPSLTETKTTVELLPVNGEFSLDDLQPWHSFGADSVPANTENEVEPVDARPAADRGLTTRPGSGLTNIKTEEISEVKMDAEFRHDSGYEVHHQKLVFFAEDVGSNKGAIIGLMVGGVVIATVIVITLVMLKKKQYTSIHHGVVEVDAAVTPEERHLSKMQQNGYENPTYKFFEQMQN",
+                features: [
+                    {
+                        type: "UNIQUE_MAXQ",
+                        ftId: "this is my id",
+                        category: "PROTEOMICS",
+                        description: "MaxQuant",
+                        begin: "17",
+                        end: "27",
+                        color: "#00B88A"
+                    },
+                    {
+                        type: "UNIQUE_MAXQ",
+                        category: "PROTEOMICS",
+                        description: "MaxQuant",
+                        begin: "18",
+                        end: "29",
+                        color: "#00B88A"
+                    },
+                    {
+                        type: "UNIQUE_MAXQ",
+                        category: "PROTEOMICS",
+                        description: "MaxQuant",
+                        begin: "28",
+                        end: "33",
+                        color: "#00B88A"
+                    },
+                    {
+                        type: "UNIQUE_MAXQ",
+                        category: "PROTEOMICS",
+                        description: "MaxQuant",
+                        begin: "47",
+                        end: "59",
+                        color: "#00B88A"
+                    },
+                    {
+                        type: "UNIQUE_MAXQ",
+                        category: "PROTEOMICS",
+                        description: "N-APP",
+                        begin: "86",
+                        end: "97",
+                        color: "#00B88A"
+                    },
+                    {
+                        type: "UNIQUE_MAXQ",
+                        category: "PROTEOMICS",
+                        description: "MaxQuant",
+                        begin: "672",
+                        end: "678",
+                        color: "#00B88A"
+                    },
+                    {
+                        type: "UNIQUE_MAXQ",
+                        category: "PROTEOMICS",
+                        description: "MaxQuant",
+                        begin: "72",
+                        end: "83",
+                        color: "#00B88A"
+                    },
+                    {
+                        type: "UNIQUE_MAXQ",
+                        category: "PROTEOMICS",
+                        description: "MaxQuant",
+                        begin: "52",
+                        end: "61",
+                        color: "#00B88A"
+                    },
+                    {
+                        type: "UNIQUE_MAXQ",
+                        category: "PROTEOMICS",
+                        description: "MaxQuant",
+                        begin: "688",
+                        end: "697",
+                        color: "#00B88A"
+                    },
+                    {
+                        type: "NON_UNIQUE_MAXQ",
+                        category: "PROTEOMICS",
+                        description: "MaxQuant",
+                        begin: "96",
+                        end: "110",
+                        color: "#FFCC33"
+                    },
+                    {
+                        type: "NON_UNIQUE_MAXQ",
+                        category: "PROTEOMICS",
+                        description: "MaxQuant",
+                        begin: "181",
+                        end: "188",
+                        color: "#FFCC33"
+                    },
+                    {
+                        type: "NON_UNIQUE_MAXQ",
+                        category: "PROTEOMICS",
+                        description: "MaxQuant",
+                        begin: "417",
+                        end: "423",
+                        color: "#FFCC33"
+                    },
+                    {
+                        type: "NON_UNIQUE_MAXQ",
+                        category: "PROTEOMICS",
+                        description: "MaxQuant",
+                        begin: "391",
+                        end: "402",
+                        color: "#FFCC33"
+                    },
+                    {
+                        type: "NON_UNIQUE_MAXQ",
+                        category: "PROTEOMICS",
+                        description: "MaxQuant",
+                        begin: "523",
+                        end: "530",
+                        color: "#FFCC33"
+                    },
+                    {
+                        type: "NON_UNIQUE_MAXQ",
+                        category: "PROTEOMICS",
+                        description: "MaxQuant",
+                        begin: "732",
+                        end: "741",
+                        color: "#FFCC33"
+                    },
+                    {
+                        type: "CATALYTIC_SITE",
+                        category: "DOMAINS_AND_SITES",
+                        description: "Inherited through a sequence alignment",
+                        begin: "147",
+                        end: "147"
+                    },
+                    {
+                        type: "CATALYTIC_SITE",
+                        category: "DOMAINS_AND_SITES",
+                        description: "Inherited through a sequence alignment",
+                        begin: "151",
+                        end: "151"
+                    },
+                    {
+                        type: "CATALYTIC_SITE",
+                        category: "DOMAINS_AND_SITES",
+                        description: "Inherited through a sequence alignment",
+                        begin: "168",
+                        end: "168"
+                    },
+                    {
+                        type: "CATALYTIC_SITE",
+                        category: "DOMAINS_AND_SITES",
+                        description: "Inherited through a sequence alignment",
+                        begin: "677",
+                        end: "677"
+                    },
+                    {
+                        type: "CATALYTIC_SITE",
+                        category: "DOMAINS_AND_SITES",
+                        description: "Inherited through a sequence alignment",
+                        begin: "681",
+                        end: "681"
+                    },
+                    {
+                        type: "CATALYTIC_SITE",
+                        category: "DOMAINS_AND_SITES",
+                        description: "Inherited through a sequence alignment",
+                        begin: "684",
+                        end: "684"
+                    },
+                    {
+                        type: "CATALYTIC_SITE",
+                        category: "DOMAINS_AND_SITES",
+                        description: "Inherited through a sequence alignment",
+                        begin: "685",
+                        end: "685"
+                    },
+                    {
+                        type: "NOVEL_FEATURE",
+                        category: "NOVELTIES",
+                        begin: "43",
+                        end: "45"
+                    },
+                    {
+                        type: "TURN",
+                        category: "STRUCTURAL",
+                        begin: "47",
+                        end: "49",
+                        color: "#00CCCC"
+                    },
+                    {
+                        type: "STRAND",
+                        category: "STRUCTURAL",
+                        begin: "52",
+                        end: "54",
+                        color: "#70E000"
+                    },
+                    {
+                        type: "STRAND",
+                        category: "STRUCTURAL",
+                        begin: "56",
+                        end: "58",
+                        color: "#70E000"
+                    },
+                    {
+                        type: "HELIX",
+                        category: "STRUCTURAL",
+                        begin: "66",
+                        end: "76",
+                        color: "#FF66FF"
+                    },
 
-<body>
-    <div id="root"></div>
-    <script>
-       // const accession = 'P37840'; // 'P12345'; 
-       const accession = 'P37840';
-       UniprotNightingale.TrackManager.createDefault().render(accession, document.getElementById("root"));
-    </script>
-</body>
+                    {
+                        type: "VARIANT",
+                        category: "VARIATION",
+                        description: "Same mutation, opposite predictions, same xrefs",
+                        alternativeSequence: "S",
+                        begin: "91",
+                        end: "91",
+                        xrefs: [
+                            {
+                                name: "ExAC",
+                                id: "rs747355134",
+                                url: "http://exac.broadinstitute.org/dbsnp/rs747355134"
+                            }
+                        ],
+                        wildType: "P",
+                        predictions: [
+                            {
+                                predictionValType: "looking good",
+                                score: 0.001,
+                                predAlgorithmNameType: "PolyPhen"
+                            },
+                            {
+                                predictionValType: "looking still good",
+                                score: 0.93,
+                                predAlgorithmNameType: "SIFT"
+                            }
+                        ]
+                    },
+                    {
+                        type: "VARIANT",
+                        category: "VARIATION",
+                        description:
+                            "different position, originally in 8, less evidences, different made-up xref",
+                        alternativeSequence: "I",
+                        begin: "18",
+                        end: "18",
+                        xrefs: [
+                            {
+                                name: "ExAC",
+                                id: "rs1234567",
+                                url: "http://exac.broadinstitute.org/dbsnp/rs1234567"
+                            },
+                            {
+                                name: "OtherXRef",
+                                id: "oxr:1234"
+                            }
+                        ],
+                        evidences: [
+                            {
+                                code: "ECO:0000313",
+                                source: {
+                                    name: "PubMed",
+                                    id: "23292937",
+                                    url: "http://www.ncbi.nlm.nih.gov/pubmed/23292937",
+                                    alternativeUrl: "http://europepmc.org/abstract/MED/23292937"
+                                }
+                            }
+                        ],
+                        wildType: "L",
+                        predictions: [
+                            {
+                                predictionValType: "unknown",
+                                score: 0.0,
+                                predAlgorithmNameType: "PolyPhen"
+                            },
+                            {
+                                predictionValType: "not tolerated, low value",
+                                score: 0.13,
+                                predAlgorithmNameType: "SIFT"
+                            }
+                        ]
+                    },
+                    {
+                        type: "VARIANT",
+                        category: "VARIATION",
+                        description: "Same mutation, no predictions, no xref",
+                        alternativeSequence: "I",
+                        begin: "86",
+                        end: "86",
+                        wildType: "V",
+                        consequenceType: "mutation"
+                    },
+                    {
+                        type: "VARIANT",
+                        category: "VARIATION",
+                        alternativeSequence: "S",
+                        begin: "184",
+                        end: "184",
+                        wildType: "F",
+                        predictions: [
+                            {
+                                predictionValType: "unknown",
+                                score: 0.0,
+                                predAlgorithmNameType: "PolyPhen"
+                            },
+                            {
+                                predictionValType: "deleterious",
+                                score: 0.04,
+                                predAlgorithmNameType: "SIFT"
+                            }
+                        ]
+                    },
+                    {
+                        type: "VARIANT",
+                        category: "VARIATION",
+                        alternativeSequence: "T",
+                        begin: "17",
+                        end: "17",
+                        wildType: "A",
+                        predictions: [
+                            {
+                                predictionValType: "benign",
+                                score: 0.11111,
+                                predAlgorithmNameType: "PolyPhen"
+                            },
+                            {
+                                predictionValType: "tolerated",
+                                score: 0.99999,
+                                predAlgorithmNameType: "SIFT"
+                            }
+                        ]
+                    },
+                    {
+                        type: "VARIANT",
+                        category: "VARIATION",
+                        alternativeSequence: "V",
+                        begin: "17",
+                        end: "17",
+                        wildType: "A",
+                        consequenceType: "missense"
+                    },
+                    {
+                        type: "VARIANT",
+                        category: "VARIATION",
+                        alternativeSequence: "KKK",
+                        begin: "17",
+                        end: "18",
+                        wildType: "AL",
+                        predictions: [
+                            {
+                                predictionValType: "deleterious",
+                                score: 0.98,
+                                predAlgorithmNameType: "PolyPhen"
+                            },
+                            {
+                                predictionValType: "tolerated",
+                                score: 0.89,
+                                predAlgorithmNameType: "SIFT"
+                            }
+                        ]
+                    },
+                    {
+                        type: "VARIANT",
+                        category: "VARIATION",
+                        description: "same UP mutation, additional ftid",
+                        ftId: "XYZ_010109",
+                        alternativeSequence: "P",
+                        begin: "723",
+                        end: "723",
+                        wildType: "L",
+                        predictions: [
+                            {
+                                predictionValType: "looking bad",
+                                score: 0.0301,
+                                predAlgorithmNameType: "PolyPhen"
+                            },
+                            {
+                                predictionValType: "tolerated",
+                                score: 0.67,
+                                predAlgorithmNameType: "SIFT"
+                            }
+                        ]
+                    },
+                    {
+                        type: "VARIANT",
+                        category: "VARIATION",
+                        alternativeSequence: "G",
+                        begin: "717",
+                        end: "717",
+                        wildType: "V",
+                        consequenceType: "missense"
+                    },
+                    {
+                        type: "VARIANT",
+                        category: "VARIATION",
+                        alternativeSequence: "G",
+                        begin: "737",
+                        end: "737",
+                        wildType: "V"
+                    }
+                ]
+            };
+            // const accession = 'P37840'; // 'P12345';
+            const accession = "P29274";
+            //"P37840"; //'O00330';//'P29274';//P37840';//"P05067";
+            const config = {
+                uniprotId: accession
+                /* pdbIds: ["6cu7", "2m55"],
+                        smrIds: ["3q27.1", "2n0a.1"],
+                        categoryOrder: [
+                            "PREDICT_PROTEIN",
+                            "VARIATION",
+                            "STRUCTURAL",
+                        ],*/
+                // exclusions: [
+                //     "PREDICT_PROTEIN",
+                //     "SEQUENCE_INFORMATION",
+                //     "STRUCTURAL",
+                //     "TOPOLOGY",
+                //     "MUTAGENESIS",
+                //     "MOLECULE_PROCESSING"
+                //     //"ANTIGEN",
+                //     //"PROTEOMICS",
+                // ],
+                // customDataSources: [
+                //     {
+                //         source: "CUSTOM",
+                //         useExtension: false,
+                //         data: customFeatures
+                //     }
+                // ],
+                // sequenceStructureMapping: sequenceStructureMapping
+            };
+            // let trackManger = UniprotNightingale.TrackManager.createDefault(config);
+            // trackManger.render(document.getElementById("root"));
+            UniprotNightingale.TrackManager.createDefault(config).render(
+                document.getElementById("root")
+            );
 
+            //trackManger.setHighlights([{ start: 10, end: 60 }]);
+        </script>
+    </body>
 </html>

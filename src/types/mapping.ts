@@ -1,12 +1,12 @@
-export type Mapping = {
-    uniprotStart: number;
-    uniprotEnd: number;
-    fragmentMappings: FragmentMapping[];
-};
+export type Mapping = FragmentMapping[];
 
 export type FragmentMapping = {
-    pdbEnd: number;
-    pdbStart: number;
-    from: number;
-    to: number;
+    readonly start: {
+        readonly residue_number: number;
+    };
+    readonly end: {
+        readonly residue_number: number;
+    };
+    readonly unp_start: number;
+    readonly unp_end: number;
 };

@@ -225,8 +225,12 @@ export default class TrackManager {
                             this.activeStructure?.trackContainer.activate();
                             this.setFixedHighlights([
                                 {
-                                    start: output.mapping.uniprotStart,
-                                    end: output.mapping.uniprotEnd,
+                                    start: Math.min(
+                                        ...output.mapping.map((mapping) => mapping.unp_start)
+                                    ),
+                                    end: Math.max(
+                                        ...output.mapping.map((mapping) => mapping.unp_end)
+                                    ),
                                     color: "#0000001A"
                                 }
                             ]);
@@ -255,8 +259,12 @@ export default class TrackManager {
                             this.activeStructure.trackContainer.activate();
                             this.setFixedHighlights([
                                 {
-                                    start: output.mapping.uniprotStart,
-                                    end: output.mapping.uniprotEnd,
+                                    start: Math.min(
+                                        ...output.mapping.map((mapping) => mapping.unp_start)
+                                    ),
+                                    end: Math.max(
+                                        ...output.mapping.map((mapping) => mapping.unp_end)
+                                    ),
                                     color: "#0000001A"
                                 }
                             ]);
@@ -290,8 +298,14 @@ export default class TrackManager {
                                     this.activeStructure.trackContainer.activate();
                                     this.setFixedHighlights([
                                         {
-                                            start: output.mapping.uniprotStart,
-                                            end: output.mapping.uniprotEnd,
+                                            start: Math.min(
+                                                ...output.mapping.map(
+                                                    (mapping) => mapping.unp_start
+                                                )
+                                            ),
+                                            end: Math.max(
+                                                ...output.mapping.map((mapping) => mapping.unp_end)
+                                            ),
                                             color: "#0000001A"
                                         }
                                     ]);

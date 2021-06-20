@@ -49,11 +49,14 @@ describe("SMRParser tests", function () {
         const output: Output = {
             chain: "I",
             format: "pdb",
-            mapping: {
-                fragmentMappings: [{ from: 14, pdbEnd: 96, pdbStart: 14, to: 96 }],
-                uniprotEnd: 96,
-                uniprotStart: 14
-            },
+            mapping: [
+                {
+                    start: { residue_number: 14 },
+                    end: { residue_number: 96 },
+                    unp_end: 96,
+                    unp_start: 14
+                }
+            ],
             pdbId: "6ssx",
             url: "https://swissmodel.expasy.org/repository/uniprot/P37840.pdb?range=14-96&template=6ssx.1.I&provider=swissmodel"
         };
@@ -137,22 +140,28 @@ describe("SMRParser tests", function () {
         const output1: Output = {
             chain: "I",
             format: "pdb",
-            mapping: {
-                fragmentMappings: [{ from: 14, pdbEnd: 96, pdbStart: 14, to: 96 }],
-                uniprotEnd: 125,
-                uniprotStart: 14
-            },
+            mapping: [
+                {
+                    start: { residue_number: 14 },
+                    end: { residue_number: 96 },
+                    unp_end: 96,
+                    unp_start: 14
+                }
+            ],
             pdbId: "6ssx",
             url: "https://swissmodel.expasy.org/repository/uniprot/P37840.pdb?range=14-125&template=6ssx.1.I&provider=swissmodel"
         };
         const output2: Output = {
             chain: "I",
             format: "pdb",
-            mapping: {
-                fragmentMappings: [{ from: 114, pdbEnd: 125, pdbStart: 114, to: 125 }],
-                uniprotEnd: 125,
-                uniprotStart: 14
-            },
+            mapping: [
+                {
+                    start: { residue_number: 114 },
+                    end: { residue_number: 125 },
+                    unp_end: 125,
+                    unp_start: 114
+                }
+            ],
             pdbId: "6ssx",
             url: "https://swissmodel.expasy.org/repository/uniprot/P37840.pdb?range=14-125&template=6ssx.1.I&provider=swissmodel"
         };
@@ -250,22 +259,28 @@ describe("SMRParser tests", function () {
         const output1: Output = {
             chain: "I",
             format: "pdb",
-            mapping: {
-                fragmentMappings: [{ from: 14, pdbEnd: 96, pdbStart: 14, to: 96 }],
-                uniprotEnd: 96,
-                uniprotStart: 14
-            },
+            mapping: [
+                {
+                    start: { residue_number: 14 },
+                    end: { residue_number: 96 },
+                    unp_end: 96,
+                    unp_start: 14
+                }
+            ],
             pdbId: "6ssx",
             url: "https://swissmodel.expasy.org/repository/uniprot/P37840.pdb?range=14-96&template=6ssx.1.I&provider=swissmodel"
         };
         const output2: Output = {
             chain: "I",
             format: "pdb",
-            mapping: {
-                fragmentMappings: [{ from: 20, pdbEnd: 50, pdbStart: 20, to: 50 }],
-                uniprotEnd: 96,
-                uniprotStart: 14
-            },
+            mapping: [
+                {
+                    start: { residue_number: 20 },
+                    end: { residue_number: 50 },
+                    unp_end: 50,
+                    unp_start: 20
+                }
+            ],
             pdbId: "6ssx",
             url: "https://swissmodel.expasy.org/repository/uniprot/P37840.pdb?range=14-96&template=6ssx.1.I&provider=swissmodel"
         };
@@ -372,22 +387,28 @@ describe("SMRParser tests", function () {
         const output1: Output = {
             chain: "I",
             format: "pdb",
-            mapping: {
-                fragmentMappings: [{ from: 14, pdbEnd: 96, pdbStart: 14, to: 96 }],
-                uniprotEnd: 100,
-                uniprotStart: 14
-            },
+            mapping: [
+                {
+                    start: { residue_number: 14 },
+                    end: { residue_number: 96 },
+                    unp_end: 96,
+                    unp_start: 14
+                }
+            ],
             pdbId: "6ssx",
             url: "https://swissmodel.expasy.org/repository/uniprot/P37840.pdb?range=14-100&template=6ssx.1.I&provider=swissmodel"
         };
         const output2: Output = {
             chain: "J",
             format: "pdb",
-            mapping: {
-                fragmentMappings: [{ from: 80, pdbEnd: 100, pdbStart: 80, to: 100 }],
-                uniprotEnd: 100,
-                uniprotStart: 14
-            },
+            mapping: [
+                {
+                    start: { residue_number: 80 },
+                    end: { residue_number: 100 },
+                    unp_end: 100,
+                    unp_start: 80
+                }
+            ],
             pdbId: "6ssx",
             url: "https://swissmodel.expasy.org/repository/uniprot/P37840.pdb?range=14-100&template=6ssx.1.I&provider=swissmodel"
         };
@@ -494,22 +515,28 @@ describe("SMRParser tests", function () {
         const output1: Output = {
             chain: "I",
             format: "pdb",
-            mapping: {
-                fragmentMappings: [{ from: 14, pdbEnd: 96, pdbStart: 14, to: 96 }],
-                uniprotEnd: 120,
-                uniprotStart: 14
-            },
+            mapping: [
+                {
+                    start: { residue_number: 14 },
+                    end: { residue_number: 96 },
+                    unp_end: 96,
+                    unp_start: 14
+                }
+            ],
             pdbId: "6ssx",
             url: "https://swissmodel.expasy.org/repository/uniprot/P37840.pdb?range=14-120&template=6ssx.1.I&provider=swissmodel"
         };
         const output2: Output = {
             chain: "J",
             format: "pdb",
-            mapping: {
-                fragmentMappings: [{ from: 100, pdbEnd: 120, pdbStart: 100, to: 120 }],
-                uniprotEnd: 120,
-                uniprotStart: 14
-            },
+            mapping: [
+                {
+                    start: { residue_number: 100 },
+                    end: { residue_number: 120 },
+                    unp_end: 120,
+                    unp_start: 100
+                }
+            ],
             pdbId: "6ssx",
             url: "https://swissmodel.expasy.org/repository/uniprot/P37840.pdb?range=14-120&template=6ssx.1.I&provider=swissmodel"
         };
@@ -623,22 +650,28 @@ describe("SMRParser tests", function () {
         const output1: Output = {
             chain: "I",
             format: "pdb",
-            mapping: {
-                fragmentMappings: [{ from: 14, pdbEnd: 96, pdbStart: 14, to: 96 }],
-                uniprotEnd: 96,
-                uniprotStart: 14
-            },
+            mapping: [
+                {
+                    start: { residue_number: 14 },
+                    end: { residue_number: 96 },
+                    unp_end: 96,
+                    unp_start: 14
+                }
+            ],
             pdbId: "6ssx",
             url: "https://swissmodel.expasy.org/repository/uniprot/P37840.pdb?range=14-96&template=6ssx.1.I&provider=swissmodel"
         };
         const output2: Output = {
             chain: "I",
             format: "pdb",
-            mapping: {
-                fragmentMappings: [{ from: 80, pdbEnd: 150, pdbStart: 80, to: 150 }],
-                uniprotEnd: 150,
-                uniprotStart: 80
-            },
+            mapping: [
+                {
+                    start: { residue_number: 80 },
+                    end: { residue_number: 150 },
+                    unp_end: 150,
+                    unp_start: 80
+                }
+            ],
             pdbId: "6ssx",
             url: "https://swissmodel.expasy.org/repository/uniprot/P37840.pdb?range=80-150&template=6ssx.1.I&provider=swissmodel"
         };
@@ -756,22 +789,28 @@ describe("SMRParser tests", function () {
         const output1: Output = {
             chain: "I",
             format: "pdb",
-            mapping: {
-                fragmentMappings: [{ from: 14, pdbEnd: 96, pdbStart: 14, to: 96 }],
-                uniprotEnd: 96,
-                uniprotStart: 14
-            },
+            mapping: [
+                {
+                    start: { residue_number: 14 },
+                    end: { residue_number: 96 },
+                    unp_end: 96,
+                    unp_start: 14
+                }
+            ],
             pdbId: "6ssx",
             url: "https://swissmodel.expasy.org/repository/uniprot/P37840.pdb?range=14-96&template=6ssx.1.I&provider=swissmodel"
         };
         const output2: Output = {
             chain: "J",
             format: "pdb",
-            mapping: {
-                fragmentMappings: [{ from: 80, pdbEnd: 150, pdbStart: 80, to: 150 }],
-                uniprotEnd: 150,
-                uniprotStart: 80
-            },
+            mapping: [
+                {
+                    start: { residue_number: 80 },
+                    end: { residue_number: 150 },
+                    unp_end: 150,
+                    unp_start: 80
+                }
+            ],
             pdbId: "6ssx",
             url: "https://swissmodel.expasy.org/repository/uniprot/P37840.pdb?range=80-150&template=6ssx.1.J&provider=swissmodel"
         };
@@ -897,11 +936,16 @@ describe("SMRParser tests", function () {
         const output1: Output = {
             chain: "I",
             format: "pdb",
-            mapping: {
-                fragmentMappings: [{ from: 1, pdbEnd: 1, pdbStart: 1, to: 1 }],
-                uniprotEnd: 1,
-                uniprotStart: 1
-            },
+            mapping: [
+                {
+                    start: { residue_number: 1 },
+                    end: {
+                        residue_number: 1
+                    },
+                    unp_start: 1,
+                    unp_end: 1
+                }
+            ],
             pdbId: "6ssx",
             url: "https://swissmodel.expasy.org/repository/uniprot/P37840.pdb?range=1-1&template=6ssx.1.I&provider=swissmodel"
         };
