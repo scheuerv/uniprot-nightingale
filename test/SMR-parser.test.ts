@@ -1,19 +1,16 @@
 /**
  * @jest-environment jest-environment-jsdom
  */
-import { use, expect } from "chai";
-import chaiAsPromised from "chai-as-promised";
 import BasicTrackRenderer from "../src/renderers/basic-track-renderer";
 import SMRParser from "../src/parsers/SMR-parser";
 import { Accession, Fragment, Location, Output, TrackRow } from "../src/types/accession";
-use(chaiAsPromised);
 describe("SMRParser tests", function () {
     let instance: SMRParser;
 
     it("no structures", async () => {
         instance = new SMRParser();
         const loadedData = { result: { structures: [] } };
-        return expect(instance.parse("P12345", loadedData)).to.eventually.equal(null);
+        await expect(instance.parse("P12345", loadedData)).resolves.toEqual(null);
     });
 
     it("one segment, one chain, one structure", async () => {
@@ -96,9 +93,7 @@ describe("SMRParser tests", function () {
                 "PREDICTED_STRUCTURES"
             )
         ];
-        return expect(instance.parse("P37840", loadedData)).to.eventually.deep.equal(
-            expectedResult
-        );
+        await expect(instance.parse("P37840", loadedData)).resolves.toEqual(expectedResult);
     });
 
     it("two segments non overlapping, one chain, one structure", async () => {
@@ -215,9 +210,7 @@ describe("SMRParser tests", function () {
                 "PREDICTED_STRUCTURES"
             )
         ];
-        return expect(instance.parse("P37840", loadedData)).to.eventually.deep.equal(
-            expectedResult
-        );
+        await expect(instance.parse("P37840", loadedData)).resolves.toEqual(expectedResult);
     });
 
     it("two segments overlapping, one chain, one structure", async () => {
@@ -338,9 +331,7 @@ describe("SMRParser tests", function () {
                 "PREDICTED_STRUCTURES"
             )
         ];
-        return expect(instance.parse("P37840", loadedData)).to.eventually.deep.equal(
-            expectedResult
-        );
+        await expect(instance.parse("P37840", loadedData)).resolves.toEqual(expectedResult);
     });
 
     it("two chains overlapping, one structure", async () => {
@@ -466,9 +457,7 @@ describe("SMRParser tests", function () {
                 "PREDICTED_STRUCTURES"
             )
         ];
-        return expect(instance.parse("P37840", loadedData)).to.eventually.deep.equal(
-            expectedResult
-        );
+        await expect(instance.parse("P37840", loadedData)).resolves.toEqual(expectedResult);
     });
 
     it("two chains non overlapping, one structure", async () => {
@@ -590,9 +579,7 @@ describe("SMRParser tests", function () {
                 "PREDICTED_STRUCTURES"
             )
         ];
-        return expect(instance.parse("P37840", loadedData)).to.eventually.deep.equal(
-            expectedResult
-        );
+        await expect(instance.parse("P37840", loadedData)).resolves.toEqual(expectedResult);
     });
 
     it("two structures, same template", async () => {
@@ -729,9 +716,7 @@ describe("SMRParser tests", function () {
                 "PREDICTED_STRUCTURES"
             )
         ];
-        return expect(instance.parse("P37840", loadedData)).to.eventually.deep.equal(
-            expectedResult
-        );
+        return expect(instance.parse("P37840", loadedData)).resolves.toEqual(expectedResult);
     });
 
     it("two structures, different template", async () => {
@@ -877,9 +862,7 @@ describe("SMRParser tests", function () {
                 "PREDICTED_STRUCTURES"
             )
         ];
-        return expect(instance.parse("P37840", loadedData)).to.eventually.deep.equal(
-            expectedResult
-        );
+        await expect(instance.parse("P37840", loadedData)).resolves.toEqual(expectedResult);
     });
 
     it("smrIds config", async () => {
@@ -985,9 +968,7 @@ describe("SMRParser tests", function () {
                 "PREDICTED_STRUCTURES"
             )
         ];
-        return expect(instance.parse("P37840", loadedData)).to.eventually.deep.equal(
-            expectedResult
-        );
+        await expect(instance.parse("P37840", loadedData)).resolves.toEqual(expectedResult);
     });
 
     it("no template", async () => {
@@ -1021,7 +1002,7 @@ describe("SMRParser tests", function () {
             }
         };
 
-        return expect(instance.parse("P37840", loadedData)).to.eventually.equal(null);
+        await expect(instance.parse("P37840", loadedData)).resolves.toEqual(null);
     });
 
     it("wrong template format", async () => {
@@ -1055,6 +1036,6 @@ describe("SMRParser tests", function () {
             }
         };
 
-        return expect(instance.parse("P37840", loadedData)).to.eventually.equal(null);
+        await expect(instance.parse("P37840", loadedData)).resolves.toEqual(null);
     });
 });

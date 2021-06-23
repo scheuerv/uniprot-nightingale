@@ -1,8 +1,9 @@
 import { fetchWithTimeout } from "../utils/utils";
 import { PolymerCoverage, PDBParserItem, Molecule, ChainData } from "../parsers/pdb-parser";
 import { FragmentMapping } from "../types/mapping";
+import Loader from "./loader";
 
-export default class PdbLoader {
+export default class PdbLoader implements Loader<PDBParserItem[]> {
     constructor(private readonly pdbIds?: string[]) {}
     public async load(uniprotId: string): Promise<PDBParserItem[]> {
         return fetchWithTimeout(
@@ -10,19 +11,15 @@ export default class PdbLoader {
             {
                 timeout: 8000
             }
-        )
-            .then(
-                (data) => {
-                    return data.json();
-                },
-                (err) => {
-                    console.error(`Best structures API unavailable!`, err);
-                    return Promise.reject(err);
-                }
-            )
-            .then((data: PDBLoaderData) => {
-                return this.prepareParserData(data, uniprotId);
-            });
+        ).then(
+            async (data) => {
+                return this.prepareParserData(await data.json(), uniprotId);
+            },
+            (err) => {
+                console.error(`Best structures API unavailable!`, err);
+                return Promise.reject(err);
+            }
+        );
     }
     private async loadMapping(uniprotId: string) {
         return fetchWithTimeout(`https://www.ebi.ac.uk/pdbe/api/mappings/${uniprotId}`, {

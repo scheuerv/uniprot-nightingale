@@ -1,12 +1,9 @@
 /**
  * @jest-environment jest-environment-jsdom
  */
-import { use, expect } from "chai";
-import chaiAsPromised from "chai-as-promised";
 import BasicTrackRenderer from "../src/renderers/basic-track-renderer";
 import FeatureParser from "../src/parsers/feature-parser";
 import { Accession, Fragment, Location, TrackRow } from "../src/types/accession";
-use(chaiAsPromised);
 describe("FeatureParser tests", function () {
     const featuresData = {
         sequence:
@@ -79,18 +76,18 @@ describe("FeatureParser tests", function () {
             errorMessage:
                 "Invalid accession parameter.The values's format should be a valid UniProtKB accession."
         };
-        return expect(instance.parse("P12345", errorResponse)).to.eventually.equal(null);
+        await expect(instance.parse("P12345", errorResponse)).resolves.toEqual(null);
     });
 
     it("no features", async () => {
         instance = new FeatureParser();
 
-        return expect(
+        await expect(
             instance.parse("P12345", {
                 sequence: "",
                 features: []
             })
-        ).to.eventually.equal(null);
+        ).resolves.toEqual(null);
     });
 
     it("Custom data source", async () => {
@@ -145,7 +142,7 @@ describe("FeatureParser tests", function () {
                 "DOMAINS_AND_SITES"
             )
         ];
-        return expect(promise).to.eventually.deep.equal(expectedResult);
+        await expect(promise).resolves.toEqual(expectedResult);
     });
     it("exclude PROTEOMICS", async () => {
         instance = new FeatureParser(["PROTEOMICS"]);
@@ -234,7 +231,7 @@ describe("FeatureParser tests", function () {
                 "ANTIGEN"
             )
         ];
-        return expect(promise).to.eventually.deep.equal(expectedResult);
+        await expect(promise).resolves.toEqual(expectedResult);
     });
 
     it("basic case", async () => {
@@ -453,6 +450,6 @@ describe("FeatureParser tests", function () {
                 "ANTIGEN"
             )
         ];
-        return expect(promise).to.eventually.deep.equal(expectedResult);
+        await expect(promise).resolves.toEqual(expectedResult);
     });
 });

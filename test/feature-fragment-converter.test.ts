@@ -1,7 +1,6 @@
 /**
  * @jest-environment jest-environment-jsdom
  */
-import { expect } from "chai";
 import { Fragment } from "../src/types/accession";
 import { FeatureFragmentConverter } from "../src/parsers/feature-fragment-converter";
 
@@ -28,7 +27,7 @@ describe("FeatureFragmentConverter tests", function () {
                 '<table><tr> <td>Description</td><td>3; approximate</td></tr><tr> <td>Tools</td><td><span><a href="http://www.uniprot.org/blast/?about=P37840[42-56]&key=Repeat" target="_blank">BLAST</a></td></tr></table>',
             title: "REPEAT 42-56"
         });
-        expect(instance.convert(1, sequence, uniprotId, feature)).to.deep.equal(expectedFragment);
+        expect(instance.convert(1, sequence, uniprotId, feature)).toEqual(expectedFragment);
     });
 
     it("basic case, custom data provided, no color", async () => {
@@ -49,6 +48,6 @@ describe("FeatureFragmentConverter tests", function () {
                 '<table><tr> <td>Source</td><td>Custom data source</td></tr><tr> <td>Description</td><td>3; approximate</td></tr><tr> <td>Tools</td><td><span><a href="http://www.uniprot.org/blast/?about=P37840[42-56]&key=Repeat" target="_blank">BLAST</a></td></tr></table>',
             title: "REPEAT 42-56"
         });
-        expect(instance.convert(1, sequence, uniprotId, feature)).to.deep.equal(expectedFragment);
+        expect(instance.convert(1, sequence, uniprotId, feature)).toEqual(expectedFragment);
     });
 });

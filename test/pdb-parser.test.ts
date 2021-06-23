@@ -12,7 +12,7 @@ describe("PDBParser tests", function () {
     it("no structures", async () => {
         instance = new PdbParser();
         const loadedData: PDBParserItem[] = [];
-        return expect(instance.parse("P12345", loadedData)).resolves.toBe(null);
+        await expect(instance.parse("P12345", loadedData)).resolves.toBe(null);
     });
 
     it("3q26", async () => {

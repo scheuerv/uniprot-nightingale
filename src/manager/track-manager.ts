@@ -18,6 +18,9 @@ import { Fragment, Output, TrackFragment } from "../types/accession";
 import { ElementWithData } from "./fragment-wrapper";
 import { ProteinsAPIVariation } from "../types/variants";
 import PdbLoader from "../loaders/pdb-loader";
+import Loader from "../loaders/loader";
+import FetchLoader from "../loaders/fetch-loader";
+import CustomLoader from "../loaders/custom-loader";
 export default class TrackManager {
     private readonly emitOnResidueMouseOver = createEmitter<number>();
     public readonly onResidueMouseOver = this.emitOnResidueMouseOver.event;
@@ -33,10 +36,10 @@ export default class TrackManager {
     private sequence = "";
     private lastClickedFragment:
         | {
-            fragment: ElementWithData;
-            mouseX: number;
-            mouseY: number;
-        }
+              fragment: ElementWithData;
+              mouseX: number;
+              mouseY: number;
+          }
         | undefined;
     private readonly protvistaManagerD3 = d3
         .create("protvista-manager")
@@ -78,33 +81,28 @@ export default class TrackManager {
             (uniProtId) =>
                 config?.sequence
                     ? Promise.resolve({
-                        sequence: config?.sequence,
-                        startRow: 0
-                    })
+                          sequence: config?.sequence,
+                          startRow: 0
+                      })
                     : fetchWithTimeout(`https://www.uniprot.org/uniprot/${uniProtId}.fasta`, {
-                        timeout: 8000
-                    })
-                        .then((data) => data.text())
-                        .then((sequence) => {
-                            return {
-                                sequence: sequence,
-                                startRow: 1
-                            };
-                        }),
+                          timeout: 8000
+                      })
+                          .then((data) => data.text())
+                          .then((sequence) => {
+                              return {
+                                  sequence: sequence,
+                                  startRow: 1
+                              };
+                          }),
             config
         );
         if (config?.sequenceStructureMapping) {
-            trackManager.addTrack((uniProtId) => {
-                const record: Record<string, PDBParserItem> = {};
-                record[uniProtId] = config.sequenceStructureMapping!;
-                return Promise.resolve(record);
+            trackManager.addCustomTrack(() => {
+                return config.sequenceStructureMapping;
             }, new PdbParser("User provided structures", "USER_PROVIDED_STRUCTURES"));
         }
 
-        trackManager.addTrack(
-            (uniProtId) => new PdbLoader(config.pdbIds).load(uniProtId),
-            new PdbParser()
-        );
+        trackManager.addLoaderTrack(new PdbLoader(config.pdbIds), new PdbParser());
         trackManager.addFetchTrack(
             (uniProtId) =>
                 `https://swissmodel.expasy.org/repository/uniprot/${uniProtId}.json?provider=swissmodel`,
@@ -131,7 +129,8 @@ export default class TrackManager {
             if (customDataSource.url) {
                 trackManager.addFetchTrack(
                     (uniProtId) =>
-                        `${customDataSource.url}${uniProtId}${customDataSource.useExtension ? ".json" : ""
+                        `${customDataSource.url}${uniProtId}${
+                            customDataSource.useExtension ? ".json" : ""
                         }`,
                     new FeatureParser(config?.exclusions, customDataSource.source)
                 );
@@ -146,22 +145,18 @@ export default class TrackManager {
                         otherFeatures.push(feature);
                     }
                 });
-                trackManager.addTrack(
-                    () =>
-                        Promise.resolve({
-                            sequence: customDataSource.data.sequence,
-                            features: variationFeatures
-                        }),
-                    new VariationParser(config?.overwritePredictions, customDataSource.source)
-                );
-                trackManager.addTrack(
-                    () =>
-                        Promise.resolve({
-                            sequence: customDataSource.data.sequence,
-                            features: otherFeatures
-                        }),
-                    new FeatureParser(config?.exclusions, customDataSource.source)
-                );
+                trackManager.addCustomTrack(() => {
+                    return {
+                        sequence: customDataSource.data.sequence,
+                        features: variationFeatures
+                    };
+                }, new VariationParser(config?.overwritePredictions, customDataSource.source));
+                trackManager.addCustomTrack(() => {
+                    return {
+                        sequence: customDataSource.data.sequence,
+                        features: otherFeatures
+                    };
+                }, new FeatureParser(config?.exclusions, customDataSource.source));
             }
         });
         return trackManager;
@@ -192,7 +187,7 @@ export default class TrackManager {
 
         Promise.allSettled(
             this.tracks.map((track) =>
-                track.dataFetcher(this.uniprotId).then(
+                track.dataLoader.load(this.uniprotId).then(
                     (data) => {
                         return track.parser.parse(this.uniprotId, data);
                     },
@@ -435,8 +430,9 @@ export default class TrackManager {
     public setHighlights(highlights: Highlight[]): void {
         this.publicHighlights = highlights
             .map((highlight) => {
-                return `${highlight.start}:${highlight.end}${highlight.color ? ":" + highlight.color : ""
-                    }`;
+                return `${highlight.start}:${highlight.end}${
+                    highlight.color ? ":" + highlight.color : ""
+                }`;
             })
             .join(",");
         this.applyHighlights();
@@ -447,38 +443,27 @@ export default class TrackManager {
         this.applyHighlights();
     }
 
-    public addTrack<T>(dataFetcher: (uniprotId: string) => Promise<T>, parser: TrackParser): void {
+    public addLoaderTrack<T>(dataLoader: Loader<T>, parser: TrackParser): void {
         if (!this.config?.exclusions?.includes(parser.categoryName)) {
-            this.tracks.push({ dataFetcher: dataFetcher, parser });
+            this.tracks.push({ dataLoader: dataLoader, parser });
         }
+    }
+
+    public addCustomTrack<T>(dataLoader: (uniprotId: string) => T, parser: TrackParser): void {
+        this.addLoaderTrack(new CustomLoader(dataLoader), parser);
+    }
+
+    public addFetchTrack<T>(
+        urlGenerator: (uniprotId: string) => string,
+        parser: TrackParser,
+        mapper?: (data: any) => T
+    ): void {
+        this.addLoaderTrack(new FetchLoader(urlGenerator, mapper), parser);
     }
 
     public getMarkedFragments(): TrackFragment[] {
         return this.categoryContainers.flatMap((categoryContainer) =>
             categoryContainer.getMarkedTrackFragments()
-        );
-    }
-
-    public addFetchTrack(
-        urlGenerator: (uniprotId: string) => string,
-        parser: TrackParser,
-        mapper?: (data: any) => any
-    ): void {
-        this.addTrack(
-            (uniprodId) =>
-                fetchWithTimeout(urlGenerator(uniprodId), {
-                    timeout: 8000
-                }).then(
-                    (data) => {
-                        const json = data.json();
-                        return mapper ? mapper(json) : json;
-                    },
-                    (err) => {
-                        console.error(`API unavailable!`, err);
-                        return Promise.reject(err);
-                    }
-                ),
-            parser
         );
     }
 
@@ -521,17 +506,20 @@ export default class TrackManager {
     private setFixedHighlights(highlights: Highlight[]): void {
         this.fixedHighlights = highlights
             .map((highlight) => {
-                return `${highlight.start}:${highlight.end}${highlight.color ? ":" + highlight.color : ""
-                    }`;
+                return `${highlight.start}:${highlight.end}${
+                    highlight.color ? ":" + highlight.color : ""
+                }`;
             })
             .join(",");
         this.applyHighlights();
     }
 
     private applyHighlights(): void {
-        this.protvistaManager.highlight = `${this.fixedHighlights ?? ""}${this.clickedHighlights ? "," + this.clickedHighlights : ""
-            }${this.publicHighlights ? "," + this.publicHighlights : ""}${this.mouseoverHighlights ? "," + this.mouseoverHighlights : ""
-            }`;
+        this.protvistaManager.highlight = `${this.fixedHighlights ?? ""}${
+            this.clickedHighlights ? "," + this.clickedHighlights : ""
+        }${this.publicHighlights ? "," + this.publicHighlights : ""}${
+            this.mouseoverHighlights ? "," + this.mouseoverHighlights : ""
+        }`;
         this.protvistaManager.applyAttributes();
     }
 
@@ -602,7 +590,7 @@ export default class TrackManager {
 }
 
 type Track = {
-    readonly dataFetcher: (uniprotId: string) => Promise<any>;
+    readonly dataLoader: Loader<any>;
     readonly parser: TrackParser;
 };
 

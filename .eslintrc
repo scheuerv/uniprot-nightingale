@@ -4,7 +4,7 @@
     "parserOptions": {
         "ecmaVersion": 2020
     },
-    "plugins": ["@typescript-eslint"],
+    "plugins": ["@typescript-eslint","eslint-plugin-html"],
     "extends": [
         "eslint:recommended",
         "plugin:@typescript-eslint/eslint-recommended",
@@ -13,5 +13,6 @@
     ],
     "rules": {
         "@typescript-eslint/no-non-null-assertion": 0
-    }
+    },
+    "ignorePatterns": ["coverage/**"]
 }
