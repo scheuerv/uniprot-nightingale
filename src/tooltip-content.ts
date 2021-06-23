@@ -1,6 +1,6 @@
 import { config } from "protvista-track/src/config";
 import ecoMap from "protvista-feature-adapter/src/evidences";
-import { groupBy } from "./utils";
+import { groupBy } from "./utils/utils";
 import { Association, Prediction, SourceType } from "protvista-variation-adapter/dist/es/variants";
 import {
     formatTooltip as featureFormatTooltip,

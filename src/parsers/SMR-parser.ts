@@ -1,5 +1,5 @@
 import BasicTrackRenderer from "../renderers/basic-track-renderer";
-import { getDarkerColor } from "../utils";
+import { getDarkerColor } from "../utils/utils";
 import TooltipContentBuilder, { createBlast } from "../tooltip-content";
 import TrackParser from "./track-parser";
 import FragmentAligner from "./fragment-aligner";

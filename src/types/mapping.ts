@@ -1,6 +1,7 @@
 export type Mapping = FragmentMapping[];
 
 export type FragmentMapping = {
+    readonly entity_id?: number;
     readonly start: {
         readonly residue_number: number;
     };

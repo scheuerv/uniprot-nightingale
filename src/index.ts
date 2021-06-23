@@ -7,7 +7,7 @@ import ProtvistaNavigation from "protvista-navigation";
 import ProtvistaTooltip from "protvista-tooltip";
 import LimitedTrack from "./protvista/limited-track";
 
-import { loadComponent } from "./utils";
+import { loadComponent } from "./utils/utils";
 
 import TrackManager from "./manager/track-manager";
 import "./main.css";

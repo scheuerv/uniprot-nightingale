@@ -1,6 +1,6 @@
 import TrackRenderer from "./track-renderer";
 import * as d3 from "d3";
-import { createRow } from "../utils";
+import { createRow } from "../utils/utils";
 import ProtvistaTrack from "protvista-track";
 import TrackContainer from "../manager/track-container";
 import BasicCategoryContainer from "../manager/basic-category-container";

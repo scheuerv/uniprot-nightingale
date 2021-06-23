@@ -2,7 +2,7 @@ import CategoryContainer from "../manager/category-container";
 import TrackRenderer from "./track-renderer";
 import ProtvistaVariationGraph from "protvista-variation-graph";
 import VariationTrackContainer from "../manager/variation-track-container";
-import { createRow } from "../utils";
+import { createRow } from "../utils/utils";
 import * as d3 from "d3";
 import VariationFilter from "../protvista/variation-filter";
 import VariationCategoryContainer from "../manager/variation-category-container";

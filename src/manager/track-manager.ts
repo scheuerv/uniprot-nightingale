@@ -1,7 +1,7 @@
 import * as d3 from "d3";
 import CategoryContainer from "./category-container";
 import TrackParser from "../parsers/track-parser";
-import { createRow, fetchWithTimeout } from "../utils";
+import { createRow, fetchWithTimeout } from "../utils/utils";
 import PdbParser, { PDBParserItem } from "../parsers/pdb-parser";
 import FeatureParser from "../parsers/feature-parser";
 import SMRParser from "../parsers/SMR-parser";
@@ -17,6 +17,7 @@ import { Feature } from "protvista-feature-adapter/src/BasicHelper";
 import { Fragment, Output, TrackFragment } from "../types/accession";
 import { ElementWithData } from "./fragment-wrapper";
 import { ProteinsAPIVariation } from "../types/variants";
+import PdbLoader from "../loaders/pdb-loader";
 export default class TrackManager {
     private readonly emitOnResidueMouseOver = createEmitter<number>();
     public readonly onResidueMouseOver = this.emitOnResidueMouseOver.event;
@@ -32,10 +33,10 @@ export default class TrackManager {
     private sequence = "";
     private lastClickedFragment:
         | {
-              fragment: ElementWithData;
-              mouseX: number;
-              mouseY: number;
-          }
+            fragment: ElementWithData;
+            mouseX: number;
+            mouseY: number;
+        }
         | undefined;
     private readonly protvistaManagerD3 = d3
         .create("protvista-manager")
@@ -77,19 +78,19 @@ export default class TrackManager {
             (uniProtId) =>
                 config?.sequence
                     ? Promise.resolve({
-                          sequence: config?.sequence,
-                          startRow: 0
-                      })
+                        sequence: config?.sequence,
+                        startRow: 0
+                    })
                     : fetchWithTimeout(`https://www.uniprot.org/uniprot/${uniProtId}.fasta`, {
-                          timeout: 8000
-                      })
-                          .then((data) => data.text())
-                          .then((sequence) => {
-                              return {
-                                  sequence: sequence,
-                                  startRow: 1
-                              };
-                          }),
+                        timeout: 8000
+                    })
+                        .then((data) => data.text())
+                        .then((sequence) => {
+                            return {
+                                sequence: sequence,
+                                startRow: 1
+                            };
+                        }),
             config
         );
         if (config?.sequenceStructureMapping) {
@@ -97,12 +98,12 @@ export default class TrackManager {
                 const record: Record<string, PDBParserItem> = {};
                 record[uniProtId] = config.sequenceStructureMapping!;
                 return Promise.resolve(record);
-            }, new PdbParser(config?.pdbIds, "User provided structures", "USER_PROVIDED_STRUCTURES"));
+            }, new PdbParser("User provided structures", "USER_PROVIDED_STRUCTURES"));
         }
 
-        trackManager.addFetchTrack(
-            (uniProtId) => `https://www.ebi.ac.uk/pdbe/api/mappings/best_structures/${uniProtId}`,
-            new PdbParser(config?.pdbIds)
+        trackManager.addTrack(
+            (uniProtId) => new PdbLoader(config.pdbIds).load(uniProtId),
+            new PdbParser()
         );
         trackManager.addFetchTrack(
             (uniProtId) =>
@@ -130,8 +131,7 @@ export default class TrackManager {
             if (customDataSource.url) {
                 trackManager.addFetchTrack(
                     (uniProtId) =>
-                        `${customDataSource.url}${uniProtId}${
-                            customDataSource.useExtension ? ".json" : ""
+                        `${customDataSource.url}${uniProtId}${customDataSource.useExtension ? ".json" : ""
                         }`,
                     new FeatureParser(config?.exclusions, customDataSource.source)
                 );
@@ -197,8 +197,8 @@ export default class TrackManager {
                         return track.parser.parse(this.uniprotId, data);
                     },
                     (err) => {
-                        console.log(`DATA unavailable!`, err);
-                        return Promise.reject();
+                        console.error(`DATA unavailable!`, err);
+                        return Promise.reject(err);
                     }
                 )
             )
@@ -435,9 +435,8 @@ export default class TrackManager {
     public setHighlights(highlights: Highlight[]): void {
         this.publicHighlights = highlights
             .map((highlight) => {
-                return `${highlight.start}:${highlight.end}${
-                    highlight.color ? ":" + highlight.color : ""
-                }`;
+                return `${highlight.start}:${highlight.end}${highlight.color ? ":" + highlight.color : ""
+                    }`;
             })
             .join(",");
         this.applyHighlights();
@@ -475,8 +474,8 @@ export default class TrackManager {
                         return mapper ? mapper(json) : json;
                     },
                     (err) => {
-                        console.log(`API unavailable!`, err);
-                        return Promise.reject();
+                        console.error(`API unavailable!`, err);
+                        return Promise.reject(err);
                     }
                 ),
             parser
@@ -522,20 +521,17 @@ export default class TrackManager {
     private setFixedHighlights(highlights: Highlight[]): void {
         this.fixedHighlights = highlights
             .map((highlight) => {
-                return `${highlight.start}:${highlight.end}${
-                    highlight.color ? ":" + highlight.color : ""
-                }`;
+                return `${highlight.start}:${highlight.end}${highlight.color ? ":" + highlight.color : ""
+                    }`;
             })
             .join(",");
         this.applyHighlights();
     }
 
     private applyHighlights(): void {
-        this.protvistaManager.highlight = `${this.fixedHighlights ?? ""}${
-            this.clickedHighlights ? "," + this.clickedHighlights : ""
-        }${this.publicHighlights ? "," + this.publicHighlights : ""}${
-            this.mouseoverHighlights ? "," + this.mouseoverHighlights : ""
-        }`;
+        this.protvistaManager.highlight = `${this.fixedHighlights ?? ""}${this.clickedHighlights ? "," + this.clickedHighlights : ""
+            }${this.publicHighlights ? "," + this.publicHighlights : ""}${this.mouseoverHighlights ? "," + this.mouseoverHighlights : ""
+            }`;
         this.protvistaManager.applyAttributes();
     }
 

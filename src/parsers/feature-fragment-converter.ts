@@ -1,4 +1,4 @@
-import { getDarkerColor } from "../utils";
+import { getDarkerColor } from "../utils/utils";
 import { createFeatureTooltip } from "../tooltip-content";
 import { Feature } from "protvista-feature-adapter/src/BasicHelper";
 import { Fragment } from "../types/accession";
