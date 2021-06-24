@@ -16,7 +16,6 @@ import TrackRenderer from "../renderers/track-renderer";
 import { Feature } from "protvista-feature-adapter/src/BasicHelper";
 import { Fragment, Output, TrackFragment } from "../types/accession";
 import { ElementWithData } from "./fragment-wrapper";
-import { ProteinsAPIVariation } from "../types/variants";
 import PdbLoader from "../loaders/pdb-loader";
 import Loader from "../loaders/loader";
 import FetchLoader from "../loaders/fetch-loader";
@@ -122,8 +121,7 @@ export default class TrackManager {
         );
         trackManager.addFetchTrack(
             (uniProtId) => `https://www.ebi.ac.uk/proteins/api/variation/${uniProtId}`,
-            new VariationParser(config?.overwritePredictions),
-            (data: ProteinsAPIVariation) => data?.features ?? data
+            new VariationParser(config?.overwritePredictions)
         );
         config?.customDataSources?.forEach((customDataSource) => {
             if (customDataSource.url) {
