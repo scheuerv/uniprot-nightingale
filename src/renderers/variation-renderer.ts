@@ -14,7 +14,7 @@ import {
     filterDataVariation,
     filterDataVariationGraph,
     variantsFill
-} from "../variants-utils";
+} from "../utils/variants-utils";
 import { VariationData, VariantWithSources, OtherSourceData } from "../types/variants";
 import { FilterCase, FilterVariationData } from "../types/variation-filter";
 export default class VariationRenderer implements TrackRenderer {

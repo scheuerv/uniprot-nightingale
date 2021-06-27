@@ -1,4 +1,4 @@
-import { Variant } from "protvista-variation-adapter/src/variants";
+import { AminoAcid, Variant } from "protvista-variation-adapter/src/variants";
 import {
     ConsequenceType,
     Evidence,
@@ -13,7 +13,7 @@ export type VariantWithSources = Variant & {
     readonly description?: string;
     readonly customSource?: string;
     readonly color?: string;
-    readonly variant: string;
+    readonly variant: AminoAcid;
     readonly start: string;
 };
 

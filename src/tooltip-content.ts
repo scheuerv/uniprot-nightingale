@@ -8,7 +8,7 @@ import {
     Feature,
     Evidence
 } from "protvista-feature-adapter/src/BasicHelper";
-import { existAssociation } from "./variants-utils";
+import { existAssociation } from "./utils/variants-utils";
 import { TooltipContent } from "./types/tooltip-content";
 import { OtherSourceData, VariantWithSources } from "./types/variants";
 

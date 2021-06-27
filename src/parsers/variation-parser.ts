@@ -2,7 +2,7 @@ import TrackRenderer from "../renderers/track-renderer";
 import VariationRenderer from "../renderers/variation-renderer";
 import TrackParser, { ErrorResponse, isErrorResponse } from "./track-parser";
 import { createVariantTooltip } from "../tooltip-content";
-import { variantsFill } from "../variants-utils";
+import { variantsFill } from "../utils/variants-utils";
 import {
     OtherSourceData,
     ProteinsAPIVariation,

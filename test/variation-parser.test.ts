@@ -78,7 +78,7 @@ describe("VariationParser tests", function () {
                                 title: "VARIANT 2"
                             },
                             type: "VARIANT",
-                            variant: "Y",
+                            variant: AminoAcid.Y,
                             wildType: AminoAcid.D
                         },
                         {
@@ -96,7 +96,7 @@ describe("VariationParser tests", function () {
                                 title: "VARIANT 7"
                             },
                             type: "VARIANT",
-                            variant: "*",
+                            variant: AminoAcid.Empty,
                             wildType: AminoAcid.G
                         }
                     ]
@@ -167,7 +167,7 @@ describe("VariationParser tests", function () {
                                 title: "VARIANT 2"
                             },
                             type: "VARIANT",
-                            variant: "Y",
+                            variant: AminoAcid.Y,
                             wildType: AminoAcid.D
                         }
                     ]

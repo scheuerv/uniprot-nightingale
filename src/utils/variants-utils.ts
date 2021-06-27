@@ -1,7 +1,7 @@
 import { Association, SourceType } from "protvista-variation-adapter/dist/es/variants";
 import * as d3 from "d3";
-import { VariantWithSources, OtherSourceData, VariationData } from "./types/variants";
-import { FilterCase, FilterVariationData } from "./types/variation-filter";
+import { VariantWithSources, OtherSourceData, VariationData } from "../types/variants";
+import { FilterCase, FilterVariationData } from "../types/variation-filter";
 
 export function variantsFill(
     variant: VariantWithSources,
