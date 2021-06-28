@@ -1,5 +1,10 @@
 export type ParserMapping = Record<string, ParserChainMapping>;
 
+export type ParserChainMapping = {
+    readonly struct_asym_id: string;
+    readonly fragment_mappings: ParserFragmentMapping[];
+};
+
 export type ParserFragmentMapping = {
     readonly entity_id?: number;
     readonly start: {
@@ -10,9 +15,4 @@ export type ParserFragmentMapping = {
     };
     readonly unp_start: number;
     readonly unp_end: number;
-};
-
-export type ParserChainMapping = {
-    readonly struct_asym_id: string;
-    readonly fragment_mappings: ParserFragmentMapping[];
 };

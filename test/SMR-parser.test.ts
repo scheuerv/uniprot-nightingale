@@ -2,9 +2,10 @@
  * @jest-environment jest-environment-jsdom
  */
 import BasicTrackRenderer from "../src/renderers/basic-track-renderer";
-import SMRParser, { SMRData } from "../src/parsers/SMR-parser";
+import SMRParser from "../src/parsers/SMR-parser";
 import { Accession, Fragment, Location, Output, TrackRow } from "../src/types/accession";
 import { ChainMapping } from "../src/types/mapping";
+import { SMRData } from "../src/types/SMR-parser";
 describe("SMRParser tests", function () {
     let instance: SMRParser;
     const chainMapping14_96: ChainMapping = {
@@ -68,13 +69,13 @@ describe("SMRParser tests", function () {
     };
     it("no structures", async () => {
         instance = new SMRParser();
-        const loadedData = { result: { structures: [] } };
+        const loadedData: SMRData = { result: { structures: [] } };
         await expect(instance.parse("P12345", loadedData)).resolves.toEqual(null);
     });
 
     it("one segment, one chain, one structure", async () => {
         instance = new SMRParser();
-        const loadedData = {
+        const loadedData: SMRData = {
             result: {
                 structures: [
                     {
@@ -111,7 +112,7 @@ describe("SMRParser tests", function () {
             pdbId: "6ssx",
             url: "https://swissmodel.expasy.org/repository/uniprot/P37840.pdb?range=14-96&template=6ssx.1.I&provider=swissmodel"
         };
-        const expectedResult = [
+        const expectedResult: BasicTrackRenderer[] = [
             new BasicTrackRenderer(
                 new Map([
                     [
@@ -204,7 +205,7 @@ describe("SMRParser tests", function () {
             pdbId: "6ssx",
             url: "https://swissmodel.expasy.org/repository/uniprot/P37840.pdb?range=14-120&template=6ssx.1.I&provider=swissmodel"
         };
-        const expectedResult = [
+        const expectedResult: BasicTrackRenderer[] = [
             new BasicTrackRenderer(
                 new Map([
                     [
@@ -259,7 +260,7 @@ describe("SMRParser tests", function () {
 
     it("two segments overlapping, one chain, one structure", async () => {
         instance = new SMRParser();
-        const loadedData = {
+        const loadedData: SMRData = {
             result: {
                 structures: [
                     {
@@ -311,7 +312,7 @@ describe("SMRParser tests", function () {
             pdbId: "6ssx",
             url: "https://swissmodel.expasy.org/repository/uniprot/P37840.pdb?range=14-96&template=6ssx.1.I&provider=swissmodel"
         };
-        const expectedResult = [
+        const expectedResult: BasicTrackRenderer[] = [
             new BasicTrackRenderer(
                 new Map([
                     [
@@ -370,7 +371,7 @@ describe("SMRParser tests", function () {
 
     it("two chains overlapping, one structure", async () => {
         instance = new SMRParser();
-        const loadedData = {
+        const loadedData: SMRData = {
             result: {
                 structures: [
                     {
@@ -427,7 +428,7 @@ describe("SMRParser tests", function () {
             pdbId: "6ssx",
             url: "https://swissmodel.expasy.org/repository/uniprot/P37840.pdb?range=14-100&template=6ssx.1.I&provider=swissmodel"
         };
-        const expectedResult = [
+        const expectedResult: BasicTrackRenderer[] = [
             new BasicTrackRenderer(
                 new Map([
                     [
@@ -486,7 +487,7 @@ describe("SMRParser tests", function () {
 
     it("two chains non overlapping, one structure", async () => {
         instance = new SMRParser();
-        const loadedData = {
+        const loadedData: SMRData = {
             result: {
                 structures: [
                     {
@@ -541,7 +542,7 @@ describe("SMRParser tests", function () {
             pdbId: "6ssx",
             url: "https://swissmodel.expasy.org/repository/uniprot/P37840.pdb?range=14-120&template=6ssx.1.I&provider=swissmodel"
         };
-        const expectedResult = [
+        const expectedResult: BasicTrackRenderer[] = [
             new BasicTrackRenderer(
                 new Map([
                     [
@@ -596,7 +597,7 @@ describe("SMRParser tests", function () {
 
     it("two structures, same template", async () => {
         instance = new SMRParser();
-        const loadedData = {
+        const loadedData: SMRData = {
             result: {
                 structures: [
                     {
@@ -664,7 +665,7 @@ describe("SMRParser tests", function () {
             pdbId: "6ssx",
             url: "https://swissmodel.expasy.org/repository/uniprot/P37840.pdb?range=80-100&template=6ssx.1.I&provider=swissmodel"
         };
-        const expectedResult = [
+        const expectedResult: BasicTrackRenderer[] = [
             new BasicTrackRenderer(
                 new Map([
                     [
@@ -723,7 +724,7 @@ describe("SMRParser tests", function () {
 
     it("two structures, different template", async () => {
         instance = new SMRParser();
-        const loadedData = {
+        const loadedData: SMRData = {
             result: {
                 structures: [
                     {
@@ -791,7 +792,7 @@ describe("SMRParser tests", function () {
             pdbId: "6ssx",
             url: "https://swissmodel.expasy.org/repository/uniprot/P37840.pdb?range=80-100&template=6ssx.1.J&provider=swissmodel"
         };
-        const expectedResult = [
+        const expectedResult: BasicTrackRenderer[] = [
             new BasicTrackRenderer(
                 new Map([
                     [
@@ -859,7 +860,7 @@ describe("SMRParser tests", function () {
 
     it("smrIds config", async () => {
         instance = new SMRParser(["6ssx.1"]);
-        const loadedData = {
+        const loadedData: SMRData = {
             result: {
                 structures: [
                     {
@@ -916,7 +917,7 @@ describe("SMRParser tests", function () {
             pdbId: "6ssx",
             url: "https://swissmodel.expasy.org/repository/uniprot/P37840.pdb?range=1-1&template=6ssx.1.I&provider=swissmodel"
         };
-        const expectedResult = [
+        const expectedResult: BasicTrackRenderer[] = [
             new BasicTrackRenderer(
                 new Map([
                     [
@@ -957,7 +958,7 @@ describe("SMRParser tests", function () {
 
     it("no template", async () => {
         instance = new SMRParser();
-        const loadedData = {
+        const loadedData: SMRData = {
             result: {
                 structures: [
                     {

@@ -5,6 +5,7 @@ import TrackParser from "./track-parser";
 import FragmentAligner from "./fragment-aligner";
 import { Fragment, Output, TrackRow } from "../types/accession";
 import { ChainMapping } from "../types/mapping";
+import { SMRData, SMRResult, SMRChain, SMRSegment } from "../types/SMR-parser";
 export default class SMRParser implements TrackParser {
     private readonly categorylabel = "Predicted structures";
     public readonly categoryName = "PREDICTED_STRUCTURES";
@@ -115,31 +116,3 @@ export default class SMRParser implements TrackParser {
         }
     }
 }
-
-type SMRResult = {
-    readonly structures: SMRStructure[];
-};
-
-type SMRStructure = {
-    readonly chains: SMRChain[];
-    readonly coordinates: string;
-    readonly from: number;
-    readonly method?: string;
-    readonly provider: string;
-    readonly template: string;
-    readonly to: number;
-};
-type SMRChain = {
-    readonly id: string;
-    readonly segments: SMRSegment[];
-};
-type SMRSegment = {
-    readonly uniprot: {
-        readonly from: number;
-        readonly to: number;
-    };
-};
-
-export type SMRData = {
-    readonly result: SMRResult;
-};

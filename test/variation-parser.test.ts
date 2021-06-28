@@ -5,12 +5,13 @@ import mockConsole from "jest-mock-console";
 import VariationRenderer from "../src/renderers/variation-renderer";
 import VariationParser from "../src/parsers/variation-parser";
 import { AminoAcid, ConsequenceType, SourceType } from "protvista-variation-adapter/src/variants";
+import { ErrorResponse } from "../src/types/error-response";
 describe("VariationParser tests", function () {
     let instance: VariationParser;
 
     it("error message", async () => {
         instance = new VariationParser();
-        const errorResponse = {
+        const errorResponse: ErrorResponse = {
             requestedURL: "https://www.ebi.ac.uk/proteins/api/features/P378400",
             errorMessage:
                 "Invalid accession parameter.The values's format should be a valid UniProtKB accession."
@@ -54,7 +55,7 @@ describe("VariationParser tests", function () {
                 }
             ]
         };
-        const expectedResult = [
+        const expectedResult: VariationRenderer[] = [
             new VariationRenderer(
                 {
                     customSources: [],
@@ -136,7 +137,7 @@ describe("VariationParser tests", function () {
                 }
             ]
         };
-        const expectedResult = [
+        const expectedResult: VariationRenderer[] = [
             new VariationRenderer(
                 {
                     customSources: ["Custom source"],

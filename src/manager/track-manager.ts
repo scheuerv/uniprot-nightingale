@@ -2,7 +2,7 @@ import * as d3 from "d3";
 import CategoryContainer from "./category-container";
 import TrackParser from "../parsers/track-parser";
 import { createRow, fetchWithTimeout } from "../utils/utils";
-import PdbParser, { PDBParserItem } from "../parsers/pdb-parser";
+import PdbParser from "../parsers/pdb-parser";
 import FeatureParser from "../parsers/feature-parser";
 import SMRParser from "../parsers/SMR-parser";
 import VariationParser from "../parsers/variation-parser";
@@ -13,7 +13,6 @@ import OverlayScrollbars from "overlayscrollbars";
 import "overlayscrollbars/css/OverlayScrollbars.min.css";
 import TrackContainer from "./track-container";
 import TrackRenderer from "../renderers/track-renderer";
-import { Feature } from "protvista-feature-adapter/src/BasicHelper";
 import { Fragment, Output, TrackFragment } from "../types/accession";
 import { ElementWithData } from "./fragment-wrapper";
 import PdbLoader from "../loaders/pdb-loader";
@@ -21,6 +20,8 @@ import Loader from "../loaders/loader";
 import FetchLoader from "../loaders/fetch-loader";
 import CustomLoader from "../loaders/custom-loader";
 import { ChainMapping } from "../types/mapping";
+import { Config, CustomDataSourceFeature } from "../types/config";
+import { Highlight } from "../types/highlight";
 export default class TrackManager {
     private readonly emitOnResidueMouseOver = createEmitter<number>();
     public readonly onResidueMouseOver = this.emitOnResidueMouseOver.event;
@@ -580,24 +581,6 @@ type Track = {
     readonly parser: TrackParser;
 };
 
-type CustomDataSource = {
-    readonly source: string;
-    readonly useExtension?: boolean;
-    readonly url?: string;
-    readonly data: CustomDataSourceData;
-};
-
-type CustomDataSourceData = {
-    readonly sequence: string;
-    readonly features: CustomDataSourceFeature[];
-};
-
-type CustomDataSourceFeature = Feature & {
-    readonly type: string;
-    readonly category: string;
-    readonly color?: string;
-};
-
 type ActiveStructure = {
     readonly trackContainer: TrackContainer;
     readonly output: Output;
@@ -607,22 +590,4 @@ type EventDetail = {
     readonly eventtype: string;
     readonly coords: number[];
     readonly target: ElementWithData | undefined;
-};
-
-export type Highlight = {
-    readonly start: number;
-    readonly end: number;
-    readonly color?: string;
-};
-
-export type Config = {
-    readonly uniprotId: string;
-    readonly pdbIds?: string[];
-    readonly smrIds?: string[];
-    readonly categoryOrder?: string[];
-    readonly exclusions?: string[];
-    readonly customDataSources?: CustomDataSource[];
-    readonly overwritePredictions?: boolean;
-    readonly sequence?: string;
-    readonly sequenceStructureMapping?: PDBParserItem;
 };

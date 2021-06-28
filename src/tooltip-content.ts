@@ -11,6 +11,7 @@ import {
 import { existAssociation } from "./utils/variants-utils";
 import { TooltipContent } from "./types/tooltip-content";
 import { OtherSourceData, VariantWithSources } from "./types/variants";
+import { noBlastTypes } from "./config/no-blast-types";
 
 export interface TooltipData {
     render(): string;
@@ -396,7 +397,6 @@ function convertSources(
     return sources;
 }
 
-const noBlastTypes = new Set(["helix", "strand", "turn", "disulfid", "crosslnk", "variant"]);
 function getFeatureBlast(accession: string, feature: Feature, key?: string) {
     const type = feature.type.toLowerCase();
     if (parseInt(feature.end) - parseInt(feature.begin) >= 3 && !noBlastTypes.has(type)) {

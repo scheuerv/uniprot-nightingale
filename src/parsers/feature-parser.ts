@@ -1,11 +1,14 @@
 import BasicTrackRenderer from "../renderers/basic-track-renderer";
 import FragmentAligner from "./fragment-aligner";
-import TrackParser, { ErrorResponse, isErrorResponse, ProteinFeatureInfo } from "./track-parser";
+import TrackParser, { isErrorResponse } from "./track-parser";
 import TrackRenderer from "../renderers/track-renderer";
 import { config as trackConfig } from "protvista-track/src/config";
 import { Feature } from "protvista-feature-adapter/src/BasicHelper";
 import { TrackRow } from "../types/accession";
 import { FeatureFragmentConverter } from "./feature-fragment-converter";
+import { ProteinFeatureInfo } from "../types/feature-parser";
+import { ErrorResponse } from "../types/error-response";
+import { categoriesConfig } from "../config/feature-categories";
 export default class FeatureParser implements TrackParser {
     public readonly categoryName = "FEATURES";
     private readonly unique = "UNIQUE";
@@ -115,30 +118,3 @@ export default class FeatureParser implements TrackParser {
         return feature;
     }
 }
-
-const categoriesConfig: Record<string, { readonly label: string }> = {
-    DOMAINS_AND_SITES: {
-        label: "Domains & sites"
-    },
-    MOLECULE_PROCESSING: {
-        label: "Molecule processing"
-    },
-    PTM: {
-        label: "PTM"
-    },
-    SEQUENCE_INFORMATION: {
-        label: "Sequence information"
-    },
-    STRUCTURAL: {
-        label: "Structural features"
-    },
-    MUTAGENESIS: {
-        label: "Mutagenesis"
-    },
-    VARIANTS: {
-        label: "Variants"
-    },
-    ANTIGEN: {
-        label: "Antigenic sequences"
-    }
-};

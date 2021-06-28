@@ -1,6 +1,6 @@
 import TrackRenderer from "../renderers/track-renderer";
 import VariationRenderer from "../renderers/variation-renderer";
-import TrackParser, { ErrorResponse, isErrorResponse } from "./track-parser";
+import TrackParser, { isErrorResponse } from "./track-parser";
 import { createVariantTooltip } from "../tooltip-content";
 import { variantsFill } from "../utils/variants-utils";
 import {
@@ -10,6 +10,7 @@ import {
     VariationData
 } from "../types/variants";
 import { AminoAcid } from "protvista-variation-adapter/dist/es/variants";
+import { ErrorResponse } from "../types/error-response";
 export default class VariationParser implements TrackParser {
     private readonly categoryLabel = "Variation";
     public readonly categoryName = "VARIATION";

@@ -4,8 +4,8 @@
 import PdbLoader from "../src/loaders/pdb-loader";
 import fetchMock from "jest-fetch-mock";
 import mockConsole from "jest-mock-console";
-import { PDBParserItem } from "../src/parsers/pdb-parser";
 import { ParserChainMapping } from "../src/types/parser-mapping";
+import { PDBParserItem } from "../src/types/pdb-parser";
 
 describe("PDBLoader tests", function () {
     let instance: PdbLoader;

@@ -7,7 +7,6 @@ export class Accession {
 export class Location {
     constructor(public readonly fragments: Fragment[]) {}
 }
-
 export class Fragment {
     constructor(
         public readonly id: number,

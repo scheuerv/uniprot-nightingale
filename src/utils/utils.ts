@@ -6,13 +6,13 @@ interface RequestInitWithTimeOut extends RequestInit {
     timeout: number;
 }
 
-function loadComponent(name: string, className: CustomElementConstructor): void {
+export function loadComponent(name: string, className: CustomElementConstructor): void {
     if (!customElements.get(name)) {
         customElements.define(name, className);
     }
 }
 
-function createRow(
+export function createRow(
     label: Node,
     content: Node,
     customClass = "",
@@ -38,7 +38,7 @@ function createRow(
     return row;
 }
 
-function getDarkerColor(color: string | undefined): string {
+export function getDarkerColor(color: string | undefined): string {
     if (!color) {
         return "#000000";
     }
@@ -50,11 +50,11 @@ function getDarkerColor(color: string | undefined): string {
     return "#000000";
 }
 
-function groupBy<T, Id>(data: IterableIterator<T> | T[], by: (item: T) => Id): Map<Id, T[]> {
+export function groupBy<T, Id>(data: IterableIterator<T> | T[], by: (item: T) => Id): Map<Id, T[]> {
     return groupByAndMap(data, by, (i) => i);
 }
 
-function groupByAndMap<T, O, Id>(
+export function groupByAndMap<T, O, Id>(
     data: IterableIterator<T> | T[],
     by: (item: T) => Id,
     transform: (item: T) => O
@@ -72,7 +72,7 @@ function groupByAndMap<T, O, Id>(
     return grouped;
 }
 
-async function fetchWithTimeout(
+export async function fetchWithTimeout(
     resource: string,
     options: RequestInitWithTimeOut
 ): Promise<Response> {
@@ -86,5 +86,3 @@ async function fetchWithTimeout(
     clearTimeout(id);
     return response;
 }
-
-export { loadComponent, createRow, getDarkerColor, groupBy, groupByAndMap, fetchWithTimeout };

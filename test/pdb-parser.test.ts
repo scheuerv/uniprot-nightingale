@@ -1,13 +1,14 @@
 /**
  * @jest-environment jest-environment-jsdom
  */
-import PdbParser, { PDBParserData, PDBParserItem } from "../src/parsers/pdb-parser";
+import PdbParser from "../src/parsers/pdb-parser";
 import BasicTrackRenderer from "../src/renderers/basic-track-renderer";
 import { Accession, Fragment, Location, Output, TrackRow } from "../src/types/accession";
 
 import mockConsole from "jest-mock-console";
 import { ChainMapping } from "../src/types/mapping";
 import { ParserChainMapping } from "../src/types/parser-mapping";
+import { PDBParserData, PDBParserItem } from "../src/types/pdb-parser";
 
 describe("PDBParser tests", function () {
     let instance: PdbParser;
@@ -107,7 +108,7 @@ describe("PDBParser tests", function () {
             pdbId: "3q26",
             url: "https://www.ebi.ac.uk/pdbe/static/entry/3q26_updated.cif"
         };
-        const expectedResult = [
+        const expectedResult: BasicTrackRenderer[] = [
             new BasicTrackRenderer(
                 new Map([
                     [
@@ -315,7 +316,7 @@ describe("PDBParser tests", function () {
             pdbId: "5uig",
             url: undefined
         };
-        const expectedResult = [
+        const expectedResult: BasicTrackRenderer[] = [
             new BasicTrackRenderer(
                 new Map([
                     [
@@ -459,7 +460,7 @@ describe("PDBParser tests", function () {
             pdbId: "5uig",
             url: "https://www.ebi.ac.uk/pdbe/static/entry/5uig_updated.cif"
         };
-        const expectedResult = [
+        const expectedResult: BasicTrackRenderer[] = [
             new BasicTrackRenderer(
                 new Map([
                     [

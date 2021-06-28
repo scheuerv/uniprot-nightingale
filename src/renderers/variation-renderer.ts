@@ -10,13 +10,13 @@ import { createVariantTooltip } from "../tooltip-content";
 import FixedProtvistaVariation from "../protvista/variation";
 import VariationGraphTrackContainer from "../manager/variation-graph-track-container";
 import {
-    filterCases,
     filterDataVariation,
     filterDataVariationGraph,
     variantsFill
 } from "../utils/variants-utils";
 import { VariationData, VariantWithSources, OtherSourceData } from "../types/variants";
 import { FilterCase, FilterVariationData } from "../types/variation-filter";
+import { filterCases } from "../config/filter-cases";
 export default class VariationRenderer implements TrackRenderer {
     private variationGraph: VariationGraphTrackContainer;
     private variation: VariationTrackContainer;

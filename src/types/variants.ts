@@ -1,13 +1,19 @@
-import { AminoAcid, Variant } from "protvista-variation-adapter/src/variants";
 import {
+    AminoAcid,
     ConsequenceType,
     Evidence,
     Prediction,
+    Variant,
     Xref
 } from "protvista-variation-adapter/dist/es/variants";
 import { TooltipContent } from "./tooltip-content";
 
-export type VariantWithSources = Variant & {
+export type ProteinsAPIVariation = {
+    readonly sequence: string;
+    readonly features: VariantWithSources[];
+};
+
+export type VariantWithSources = Partial<Variant> & {
     readonly otherSources?: Record<string, OtherSourceData>;
     readonly tooltipContent?: TooltipContent;
     readonly description?: string;
@@ -29,9 +35,4 @@ export type VariationData = {
     readonly sequence: string;
     readonly customSources: string[];
     readonly variants: VariantWithSources[];
-};
-
-export type ProteinsAPIVariation = {
-    sequence: string;
-    features: VariantWithSources[];
 };

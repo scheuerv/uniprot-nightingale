@@ -1,7 +1,8 @@
 import { fetchWithTimeout } from "../utils/utils";
-import { PolymerCoverage, PDBParserItem, Molecule, ChainData } from "../parsers/pdb-parser";
 import Loader from "./loader";
 import { ParserMapping } from "../types/parser-mapping";
+import { PDBMappingData, PDBLoaderData, PDBLoaderItemAgg } from "../types/pdb-loader";
+import { PDBParserItem, PolymerCoverage, Molecule, ChainData } from "../types/pdb-parser";
 
 export default class PdbLoader implements Loader<PDBParserItem[]> {
     constructor(private readonly pdbIds?: string[]) {}
@@ -194,37 +195,3 @@ export default class PdbLoader implements Loader<PDBParserItem[]> {
         return result;
     }
 }
-
-type PDBMappingData = Record<string, Record<string, Record<string, PDBMappingItem[]>>>;
-
-type PDBMappingItem = {
-    readonly entity_id: number;
-    readonly end: {
-        readonly residue_number: number;
-    };
-    readonly start: {
-        readonly residue_number: number;
-    };
-    readonly chain_id: string;
-    readonly unp_end: number;
-    readonly unp_start: number;
-    readonly struct_asym_id: string;
-};
-
-type PDBLoaderItemAgg = PDBLoaderItem & {
-    readonly tax_ids: number[];
-};
-
-type PDBLoaderData = Record<string, readonly PDBLoaderItem[]>;
-
-type PDBLoaderItem = {
-    readonly end: number;
-    readonly chain_id: string;
-    readonly pdb_id: string;
-    readonly start: number;
-    readonly unp_end: number;
-    readonly coverage?: number;
-    readonly unp_start: number;
-    readonly experimental_method?: string;
-    readonly tax_id?: number;
-};
