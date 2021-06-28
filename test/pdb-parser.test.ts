@@ -6,6 +6,8 @@ import BasicTrackRenderer from "../src/renderers/basic-track-renderer";
 import { Accession, Fragment, Location, Output, TrackRow } from "../src/types/accession";
 
 import mockConsole from "jest-mock-console";
+import { ChainMapping } from "../src/types/mapping";
+import { ParserChainMapping } from "../src/types/parser-mapping";
 
 describe("PDBParser tests", function () {
     let instance: PdbParser;
@@ -17,20 +19,43 @@ describe("PDBParser tests", function () {
 
     it("3q26", async () => {
         instance = new PdbParser();
+        const parserChainMapping: ParserChainMapping = {
+            struct_asym_id: "A",
+            fragment_mappings: [
+                {
+                    entity_id: 1,
+                    end: { residue_number: 404 },
+                    start: { residue_number: 372 },
+                    unp_end: 42,
+                    unp_start: 10
+                }
+            ]
+        };
+        const parserMapping: Record<string, ParserChainMapping> = {
+            A: parserChainMapping
+        };
+
+        const chainMapping: ChainMapping = {
+            structAsymId: "A",
+            fragmentMappings: [
+                {
+                    entityId: 1,
+                    structureEnd: 404,
+                    structureStart: 372,
+                    sequenceEnd: 42,
+                    sequenceStart: 10
+                }
+            ]
+        };
+        const mapping: Record<string, ChainMapping> = {
+            A: chainMapping
+        };
         const data: PDBParserData = [
             {
                 chain_id: "A",
                 end: 404,
                 experimental_method: "X-ray diffraction",
-                mappings: [
-                    {
-                        end: { residue_number: 404 },
-                        entity_id: 1,
-                        start: { residue_number: 372 },
-                        unp_end: 42,
-                        unp_start: 10
-                    }
-                ],
+                mappings: parserMapping,
                 pdb_id: "3q26",
                 polymer_coverage: {
                     "3q26": {
@@ -78,19 +103,7 @@ describe("PDBParser tests", function () {
             chain: "A",
             format: "mmcif",
             data: undefined,
-            mapping: [
-                {
-                    entity_id: 1,
-                    start: {
-                        residue_number: 372
-                    },
-                    unp_end: 42,
-                    unp_start: 10,
-                    end: {
-                        residue_number: 404
-                    }
-                }
-            ],
+            mapping: mapping,
             pdbId: "3q26",
             url: "https://www.ebi.ac.uk/pdbe/static/entry/3q26_updated.cif"
         };
@@ -161,7 +174,7 @@ describe("PDBParser tests", function () {
         await expect(instance.parse("P37840", data)).resolves.toEqual(expectedResult);
     });
 
-    it("uri provided", async () => {
+    it("mapping not found", async () => {
         instance = new PdbParser();
         const loadedData: PDBParserData = [
             {
@@ -175,24 +188,7 @@ describe("PDBParser tests", function () {
                 end: 438,
                 unp_start: 1,
                 unp_end: 316,
-                mappings: [
-                    {
-                        start: {
-                            residue_number: 341
-                        },
-                        unp_end: 316,
-                        unp_start: 219,
-                        end: {
-                            residue_number: 438
-                        }
-                    },
-                    {
-                        start: { residue_number: 27 },
-                        unp_end: 208,
-                        unp_start: 1,
-                        end: { residue_number: 234 }
-                    }
-                ],
+                mappings: {},
                 polymer_coverage: {
                     "5uig": {
                         molecules: [
@@ -235,138 +231,41 @@ describe("PDBParser tests", function () {
                 }
             }
         ];
-        const output: Output = {
-            chain: "A",
-            format: "mmcif",
-            data: undefined,
-            mapping: [
-                {
-                    unp_start: 1,
-                    unp_end: 208,
-                    start: { residue_number: 27 },
-                    end: { residue_number: 234 }
-                },
-                {
-                    unp_start: 219,
-                    unp_end: 316,
-                    start: { residue_number: 341 },
-                    end: { residue_number: 438 }
-                }
-            ],
-            pdbId: "5uig",
-            url: "https://www.ebi.ac.uk/pdbe/static/entry/5uig_updated.cif"
-        };
-        const expectedResult = [
-            new BasicTrackRenderer(
-                new Map([
-                    [
-                        "5uig a",
-                        new TrackRow(
-                            [
-                                new Accession([
-                                    new Location([
-                                        new Fragment(
-                                            1,
-                                            4,
-                                            122,
-                                            "#2e86c1",
-                                            "#2e86c1",
-                                            undefined,
-                                            {
-                                                content:
-                                                    '<table><tr> <td>BLAST</td><td><span><a href="http://www.uniprot.org/blast/?about=P37840[4-122]&key=5uig a" target="_blank">BLAST</a></td></tr></table>',
-                                                title: "5UIG_A 4-122"
-                                            },
-                                            output
-                                        ),
-                                        new Fragment(
-                                            2,
-                                            159,
-                                            208,
-                                            "#2e86c1",
-                                            "#2e86c1",
-                                            undefined,
-                                            {
-                                                content:
-                                                    '<table><tr> <td>BLAST</td><td><span><a href="http://www.uniprot.org/blast/?about=P37840[159-208]&key=5uig a" target="_blank">BLAST</a></td></tr></table>',
-                                                title: "5UIG_A 159-208"
-                                            },
-                                            output
-                                        ),
-                                        new Fragment(
-                                            3,
-                                            219,
-                                            311,
-                                            "#2e86c1",
-                                            "#2e86c1",
-                                            undefined,
-                                            {
-                                                content:
-                                                    '<table><tr> <td>BLAST</td><td><span><a href="http://www.uniprot.org/blast/?about=P37840[219-311]&key=5uig a" target="_blank">BLAST</a></td></tr></table>',
-                                                title: "5UIG_A 219-311"
-                                            },
-                                            output
-                                        ),
-                                        new Fragment(
-                                            4,
-                                            1,
-                                            3,
-                                            "#bdbfc1",
-                                            "#bdbfc1",
-                                            undefined,
-                                            {
-                                                content:
-                                                    '<table><tr> <td>BLAST</td><td><span><a href="http://www.uniprot.org/blast/?about=P37840[1-3]&key=5uig a" target="_blank">BLAST</a></td></tr></table>',
-                                                title: "5UIG_A 1-3"
-                                            },
-                                            undefined
-                                        ),
-                                        new Fragment(
-                                            5,
-                                            123,
-                                            158,
-                                            "#bdbfc1",
-                                            "#bdbfc1",
-                                            undefined,
-                                            {
-                                                content:
-                                                    '<table><tr> <td>BLAST</td><td><span><a href="http://www.uniprot.org/blast/?about=P37840[123-158]&key=5uig a" target="_blank">BLAST</a></td></tr></table>',
-                                                title: "5UIG_A 123-158"
-                                            },
-                                            undefined
-                                        ),
-                                        new Fragment(
-                                            6,
-                                            312,
-                                            316,
-                                            "#bdbfc1",
-                                            "#bdbfc1",
-                                            undefined,
-                                            {
-                                                content:
-                                                    '<table><tr> <td>BLAST</td><td><span><a href="http://www.uniprot.org/blast/?about=P37840[312-316]&key=5uig a" target="_blank">BLAST</a></td></tr></table>',
-                                                title: "5UIG_A 312-316"
-                                            },
-                                            undefined
-                                        )
-                                    ])
-                                ])
-                            ],
-                            "5uig a",
-                            output
-                        )
-                    ]
-                ]),
-                "Experimental structures",
-                false,
-                "EXPERIMENTAL_STRUCTURES"
-            )
-        ];
-        await expect(instance.parse("P37840", loadedData)).resolves.toEqual(expectedResult);
+
+        const restoreConsole = mockConsole();
+        await expect(instance.parse("P37840", loadedData)).resolves.toEqual(null);
+        expect(console.warn).toHaveBeenCalledWith("Mapping for 5uig A not found.");
+        restoreConsole();
     });
 
     it("data provided", async () => {
         instance = new PdbParser();
+        const ParserChainMapping: ParserChainMapping = {
+            struct_asym_id: "A",
+            fragment_mappings: [
+                {
+                    start: { residue_number: 27 },
+                    end: { residue_number: 438 },
+                    unp_end: 316,
+                    unp_start: 1
+                }
+            ]
+        };
+
+        const chainMapping: ChainMapping = {
+            structAsymId: "A",
+            fragmentMappings: [
+                {
+                    structureEnd: 438,
+                    structureStart: 27,
+                    sequenceEnd: 316,
+                    sequenceStart: 1
+                }
+            ]
+        };
+        const mapping: Record<string, ChainMapping> = {
+            A: chainMapping
+        };
         const loadedData: PDBParserData = [
             {
                 pdb_id: "5uig",
@@ -379,14 +278,9 @@ describe("PDBParser tests", function () {
                 end: 438,
                 unp_start: 1,
                 unp_end: 316,
-                mappings: [
-                    {
-                        start: { residue_number: 27 },
-                        end: { residue_number: 438 },
-                        unp_end: 316,
-                        unp_start: 1
-                    }
-                ],
+                mappings: {
+                    A: ParserChainMapping
+                },
                 polymer_coverage: {
                     "5uig": {
                         molecules: [
@@ -417,14 +311,7 @@ describe("PDBParser tests", function () {
             chain: "A",
             format: "mmcif",
             data: "structure data",
-            mapping: [
-                {
-                    start: { residue_number: 27 },
-                    end: { residue_number: 438 },
-                    unp_end: 316,
-                    unp_start: 1
-                }
-            ],
+            mapping: mapping,
             pdbId: "5uig",
             url: undefined
         };
@@ -497,6 +384,31 @@ describe("PDBParser tests", function () {
 
     it("data and uri provided", async () => {
         instance = new PdbParser();
+        const parserChainMapping: ParserChainMapping = {
+            struct_asym_id: "A",
+            fragment_mappings: [
+                {
+                    start: { residue_number: 27 },
+                    end: { residue_number: 438 },
+                    unp_end: 316,
+                    unp_start: 1
+                }
+            ]
+        };
+        const chainMapping: ChainMapping = {
+            structAsymId: "A",
+            fragmentMappings: [
+                {
+                    structureEnd: 438,
+                    structureStart: 27,
+                    sequenceEnd: 316,
+                    sequenceStart: 1
+                }
+            ]
+        };
+        const mapping: Record<string, ChainMapping> = {
+            A: chainMapping
+        };
         const loadedData: PDBParserData = [
             {
                 pdb_id: "5uig",
@@ -510,14 +422,9 @@ describe("PDBParser tests", function () {
                 end: 438,
                 unp_start: 1,
                 unp_end: 316,
-                mappings: [
-                    {
-                        start: { residue_number: 27 },
-                        end: { residue_number: 438 },
-                        unp_end: 316,
-                        unp_start: 1
-                    }
-                ],
+                mappings: {
+                    A: parserChainMapping
+                },
                 polymer_coverage: {
                     "5uig": {
                         molecules: [
@@ -548,14 +455,7 @@ describe("PDBParser tests", function () {
             chain: "A",
             format: "mmcif",
             data: undefined,
-            mapping: [
-                {
-                    start: { residue_number: 27 },
-                    end: { residue_number: 438 },
-                    unp_end: 316,
-                    unp_start: 1
-                }
-            ],
+            mapping: mapping,
             pdbId: "5uig",
             url: "https://www.ebi.ac.uk/pdbe/static/entry/5uig_updated.cif"
         };
@@ -633,6 +533,22 @@ describe("PDBParser tests", function () {
 
     it("no data nor uri provided", async () => {
         instance = new PdbParser();
+        const parserChainMapping: ParserChainMapping = {
+            struct_asym_id: "A",
+            fragment_mappings: [
+                {
+                    start: {
+                        residue_number: 27
+                    },
+                    end: {
+                        residue_number: 438
+                    },
+                    unp_end: 316,
+                    unp_start: 1
+                }
+            ]
+        };
+
         const loadedData: PDBParserData = [
             {
                 pdb_id: "5uig",
@@ -644,14 +560,9 @@ describe("PDBParser tests", function () {
                 end: 438,
                 unp_start: 1,
                 unp_end: 316,
-                mappings: [
-                    {
-                        start: { residue_number: 27 },
-                        end: { residue_number: 438 },
-                        unp_end: 316,
-                        unp_start: 1
-                    }
-                ],
+                mappings: {
+                    A: parserChainMapping
+                },
                 polymer_coverage: {
                     "5uig": {
                         molecules: [
@@ -685,6 +596,33 @@ describe("PDBParser tests", function () {
 
     it("no observed", async () => {
         instance = new PdbParser();
+        const parserChainMapping: ParserChainMapping = {
+            struct_asym_id: "A",
+            fragment_mappings: [
+                {
+                    start: { residue_number: 27 },
+                    end: {
+                        residue_number: 438
+                    },
+                    unp_end: 316,
+                    unp_start: 1
+                }
+            ]
+        };
+        const chainMapping: ChainMapping = {
+            structAsymId: "A",
+            fragmentMappings: [
+                {
+                    structureEnd: 438,
+                    structureStart: 27,
+                    sequenceEnd: 316,
+                    sequenceStart: 1
+                }
+            ]
+        };
+        const mapping: Record<string, ChainMapping> = {
+            A: chainMapping
+        };
         const loadedData: PDBParserData = [
             {
                 pdb_id: "5uig",
@@ -698,14 +636,9 @@ describe("PDBParser tests", function () {
                 end: 438,
                 unp_start: 1,
                 unp_end: 316,
-                mappings: [
-                    {
-                        start: { residue_number: 27 },
-                        end: { residue_number: 438 },
-                        unp_end: 316,
-                        unp_start: 1
-                    }
-                ],
+                mappings: {
+                    A: parserChainMapping
+                },
                 polymer_coverage: {
                     "5uig": {
                         molecules: [
@@ -727,14 +660,7 @@ describe("PDBParser tests", function () {
             chain: "A",
             format: "mmcif",
             data: undefined,
-            mapping: [
-                {
-                    start: { residue_number: 27 },
-                    end: { residue_number: 438 },
-                    unp_end: 316,
-                    unp_start: 1
-                }
-            ],
+            mapping: mapping,
             pdbId: "5uig",
             url: "https://www.ebi.ac.uk/pdbe/static/entry/5uig_updated.cif"
         };

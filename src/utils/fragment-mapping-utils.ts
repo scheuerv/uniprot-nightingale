@@ -19,10 +19,10 @@ export function findUniprotIntervalsFromStructureResidues(
     if (startInterval.direct) {
         startUniprot =
             start -
-            mappings[startInterval.id].start.residue_number +
-            mappings[startInterval.id].unp_start;
+            mappings[startInterval.id].structureStart +
+            mappings[startInterval.id].sequenceStart;
     } else {
-        startUniprot = mappings[startInterval.id].unp_start;
+        startUniprot = mappings[startInterval.id].sequenceStart;
     }
 
     let endId;
@@ -30,21 +30,19 @@ export function findUniprotIntervalsFromStructureResidues(
     if (endInterval.direct) {
         endId = endInterval.id;
         endUniprot =
-            end -
-            mappings[endInterval.id].start.residue_number +
-            mappings[endInterval.id].unp_start;
+            end - mappings[endInterval.id].structureStart + mappings[endInterval.id].sequenceStart;
     } else {
         endId = endInterval.id - 1;
-        endUniprot = mappings[endInterval.id - 1].unp_end;
+        endUniprot = mappings[endInterval.id - 1].sequenceEnd;
     }
     let lastStart = startUniprot;
     const intervals: Interval[] = [];
     for (let id = startId + 1; id <= endId; ++id) {
         intervals.push({
             start: lastStart,
-            end: mappings[id - 1].unp_end
+            end: mappings[id - 1].sequenceEnd
         });
-        lastStart = mappings[id].unp_start;
+        lastStart = mappings[id].sequenceStart;
     }
     intervals.push({
         start: lastStart,
@@ -72,7 +70,7 @@ export function findUniprotIntervalsFromUniprotSequence(
     if (startInterval.direct) {
         startUniprot = start;
     } else {
-        startUniprot = mappings[startInterval.id].unp_start;
+        startUniprot = mappings[startInterval.id].sequenceStart;
     }
 
     let endId;
@@ -82,16 +80,16 @@ export function findUniprotIntervalsFromUniprotSequence(
         endUniprot = end;
     } else {
         endId = endInterval.id - 1;
-        endUniprot = mappings[endInterval.id - 1].unp_end;
+        endUniprot = mappings[endInterval.id - 1].sequenceEnd;
     }
     let lastStart = startUniprot;
     const intervals: Interval[] = [];
     for (let id = startId + 1; id <= endId; ++id) {
         intervals.push({
             start: lastStart,
-            end: mappings[id - 1].unp_end
+            end: mappings[id - 1].sequenceEnd
         });
-        lastStart = mappings[id].unp_start;
+        lastStart = mappings[id].sequenceStart;
     }
     intervals.push({
         start: lastStart,
@@ -104,13 +102,12 @@ function findIntervalIdByResNumber(resNumber: number, mappings: FragmentMapping[
     for (let i = 0; i < mappings.length; ++i) {
         const mapping = mappings[i];
         if (
-            (mapping.start.residue_number <= resNumber &&
-                resNumber <= mapping.end.residue_number) ||
-            mapping.start.residue_number > resNumber
+            (mapping.structureStart <= resNumber && resNumber <= mapping.structureEnd) ||
+            mapping.structureStart > resNumber
         ) {
             return {
                 id: i,
-                direct: mapping.start.residue_number <= resNumber,
+                direct: mapping.structureStart <= resNumber,
                 outOfRange: false
             };
         }
@@ -129,12 +126,12 @@ function findIntervalIdByUniprotNumber(
     for (let i = 0; i < mappings.length; ++i) {
         const mapping = mappings[i];
         if (
-            (mapping.unp_start <= unpNumber && unpNumber <= mapping.unp_end) ||
-            mapping.unp_start > unpNumber
+            (mapping.sequenceStart <= unpNumber && unpNumber <= mapping.sequenceEnd) ||
+            mapping.sequenceStart > unpNumber
         ) {
             return {
                 id: i,
-                direct: mapping.unp_start <= unpNumber,
+                direct: mapping.sequenceStart <= unpNumber,
                 outOfRange: false
             };
         }

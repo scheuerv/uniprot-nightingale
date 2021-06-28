@@ -4,6 +4,7 @@ import TooltipContentBuilder, { createBlast } from "../tooltip-content";
 import TrackParser from "./track-parser";
 import FragmentAligner from "./fragment-aligner";
 import { Fragment, Output, TrackRow } from "../types/accession";
+import { ChainMapping } from "../types/mapping";
 export default class SMRParser implements TrackParser {
     private readonly categorylabel = "Predicted structures";
     public readonly categoryName = "PREDICTED_STRUCTURES";
@@ -30,23 +31,24 @@ export default class SMRParser implements TrackParser {
                     structure.chains.forEach((chain: SMRChain) => {
                         chain.segments.map((segment: SMRSegment) => {
                             let output: Output | undefined = undefined;
+                            const mapping: Record<string, ChainMapping> = {};
+                            mapping[chain.id] = {
+                                structAsymId: chain.id,
+                                fragmentMappings: [
+                                    {
+                                        sequenceStart: segment.uniprot.from,
+                                        sequenceEnd: segment.uniprot.to,
+                                        structureStart: segment.uniprot.from,
+                                        structureEnd: segment.uniprot.to
+                                    }
+                                ]
+                            };
                             output = {
                                 pdbId: sTemplate[1],
                                 chain: chain.id,
                                 url: coordinatesFile,
                                 format: "pdb",
-                                mapping: [
-                                    {
-                                        unp_start: segment.uniprot.from,
-                                        unp_end: segment.uniprot.to,
-                                        start: {
-                                            residue_number: segment.uniprot.from
-                                        },
-                                        end: {
-                                            residue_number: segment.uniprot.to
-                                        }
-                                    }
-                                ]
+                                mapping: mapping
                             };
                             const tooltipContent: TooltipContentBuilder = new TooltipContentBuilder(
                                 `${smrId.toUpperCase()}_${chain.id} ${segment.uniprot.from}${
@@ -138,6 +140,6 @@ type SMRSegment = {
     };
 };
 
-type SMRData = {
+export type SMRData = {
     readonly result: SMRResult;
 };

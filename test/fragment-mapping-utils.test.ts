@@ -9,11 +9,10 @@ describe("Fragment-mapping-utils tests", function () {
             expect(
                 findUniprotIntervalsFromStructureResidues(5, 15, [
                     {
-                        unp_start: 20,
-                        unp_end: 25,
-
-                        start: { residue_number: 30 },
-                        end: { residue_number: 35 }
+                        sequenceStart: 20,
+                        sequenceEnd: 25,
+                        structureStart: 30,
+                        structureEnd: 35
                     }
                 ])
             ).toEqual([]);
@@ -23,11 +22,11 @@ describe("Fragment-mapping-utils tests", function () {
             expect(
                 findUniprotIntervalsFromStructureResidues(5, 15, [
                     {
-                        unp_start: 20,
-                        unp_end: 23,
+                        sequenceStart: 20,
+                        sequenceEnd: 23,
 
-                        start: { residue_number: 0 },
-                        end: { residue_number: 3 }
+                        structureStart: 0,
+                        structureEnd: 3
                     }
                 ])
             ).toEqual([]);
@@ -43,10 +42,10 @@ describe("Fragment-mapping-utils tests", function () {
             expect(
                 findUniprotIntervalsFromStructureResidues(5, 15, [
                     {
-                        unp_start: 30,
-                        unp_end: 40,
-                        start: { residue_number: 10 },
-                        end: { residue_number: 20 }
+                        sequenceStart: 30,
+                        sequenceEnd: 40,
+                        structureStart: 10,
+                        structureEnd: 20
                     }
                 ])
             ).toEqual(expectedResult);
@@ -62,10 +61,10 @@ describe("Fragment-mapping-utils tests", function () {
             expect(
                 findUniprotIntervalsFromStructureResidues(5, 15, [
                     {
-                        unp_start: 30,
-                        unp_end: 40,
-                        start: { residue_number: 0 },
-                        end: { residue_number: 10 }
+                        sequenceStart: 30,
+                        sequenceEnd: 40,
+                        structureStart: 0,
+                        structureEnd: 10
                     }
                 ])
             ).toEqual(expectedResult);
@@ -81,10 +80,10 @@ describe("Fragment-mapping-utils tests", function () {
             expect(
                 findUniprotIntervalsFromStructureResidues(5, 15, [
                     {
-                        unp_start: 20,
-                        unp_end: 40,
-                        start: { residue_number: 0 },
-                        end: { residue_number: 20 }
+                        sequenceStart: 20,
+                        sequenceEnd: 40,
+                        structureStart: 0,
+                        structureEnd: 20
                     }
                 ])
             ).toEqual(expectedResult);
@@ -108,22 +107,22 @@ describe("Fragment-mapping-utils tests", function () {
             expect(
                 findUniprotIntervalsFromStructureResidues(5, 55, [
                     {
-                        unp_start: 20,
-                        unp_end: 30,
-                        start: { residue_number: 0 },
-                        end: { residue_number: 10 }
+                        sequenceStart: 20,
+                        sequenceEnd: 30,
+                        structureStart: 0,
+                        structureEnd: 10
                     },
                     {
-                        unp_start: 50,
-                        unp_end: 60,
-                        start: { residue_number: 15 },
-                        end: { residue_number: 25 }
+                        sequenceStart: 50,
+                        sequenceEnd: 60,
+                        structureStart: 15,
+                        structureEnd: 25
                     },
                     {
-                        unp_start: 120,
-                        unp_end: 140,
-                        start: { residue_number: 40 },
-                        end: { residue_number: 60 }
+                        sequenceStart: 120,
+                        sequenceEnd: 140,
+                        structureStart: 40,
+                        structureEnd: 60
                     }
                 ])
             ).toEqual(expectedResult);
@@ -135,11 +134,11 @@ describe("Fragment-mapping-utils tests", function () {
             expect(
                 findUniprotIntervalsFromUniprotSequence(5, 15, [
                     {
-                        unp_start: 30,
-                        unp_end: 35,
+                        sequenceStart: 30,
+                        sequenceEnd: 35,
 
-                        start: { residue_number: 20 },
-                        end: { residue_number: 25 }
+                        structureStart: 20,
+                        structureEnd: 25
                     }
                 ])
             ).toEqual([]);
@@ -149,11 +148,11 @@ describe("Fragment-mapping-utils tests", function () {
             expect(
                 findUniprotIntervalsFromUniprotSequence(5, 15, [
                     {
-                        unp_start: 0,
-                        unp_end: 3,
+                        sequenceStart: 0,
+                        sequenceEnd: 3,
 
-                        start: { residue_number: 20 },
-                        end: { residue_number: 23 }
+                        structureStart: 20,
+                        structureEnd: 23
                     }
                 ])
             ).toEqual([]);
@@ -169,10 +168,10 @@ describe("Fragment-mapping-utils tests", function () {
             expect(
                 findUniprotIntervalsFromUniprotSequence(5, 15, [
                     {
-                        unp_start: 10,
-                        unp_end: 20,
-                        start: { residue_number: 30 },
-                        end: { residue_number: 40 }
+                        sequenceStart: 10,
+                        sequenceEnd: 20,
+                        structureStart: 30,
+                        structureEnd: 40
                     }
                 ])
             ).toEqual(expectedResult);
@@ -188,10 +187,10 @@ describe("Fragment-mapping-utils tests", function () {
             expect(
                 findUniprotIntervalsFromUniprotSequence(5, 15, [
                     {
-                        unp_start: 0,
-                        unp_end: 10,
-                        start: { residue_number: 30 },
-                        end: { residue_number: 40 }
+                        sequenceStart: 0,
+                        sequenceEnd: 10,
+                        structureStart: 30,
+                        structureEnd: 40
                     }
                 ])
             ).toEqual(expectedResult);
@@ -207,10 +206,10 @@ describe("Fragment-mapping-utils tests", function () {
             expect(
                 findUniprotIntervalsFromUniprotSequence(5, 15, [
                     {
-                        unp_start: 0,
-                        unp_end: 20,
-                        start: { residue_number: 20 },
-                        end: { residue_number: 40 }
+                        sequenceStart: 0,
+                        sequenceEnd: 20,
+                        structureStart: 20,
+                        structureEnd: 40
                     }
                 ])
             ).toEqual(expectedResult);
@@ -234,22 +233,22 @@ describe("Fragment-mapping-utils tests", function () {
             expect(
                 findUniprotIntervalsFromUniprotSequence(5, 55, [
                     {
-                        unp_start: 0,
-                        unp_end: 10,
-                        start: { residue_number: 20 },
-                        end: { residue_number: 30 }
+                        sequenceStart: 0,
+                        sequenceEnd: 10,
+                        structureStart: 20,
+                        structureEnd: 30
                     },
                     {
-                        unp_start: 15,
-                        unp_end: 25,
-                        start: { residue_number: 50 },
-                        end: { residue_number: 60 }
+                        sequenceStart: 15,
+                        sequenceEnd: 25,
+                        structureStart: 50,
+                        structureEnd: 60
                     },
                     {
-                        unp_start: 40,
-                        unp_end: 60,
-                        start: { residue_number: 120 },
-                        end: { residue_number: 140 }
+                        sequenceStart: 40,
+                        sequenceEnd: 60,
+                        structureStart: 120,
+                        structureEnd: 140
                     }
                 ])
             ).toEqual(expectedResult);

@@ -3,11 +3,12 @@ import TooltipContentBuilder, { createBlast } from "../tooltip-content";
 import TrackParser from "./track-parser";
 import { Accession, Fragment, Location, Output, TrackRow } from "../types/accession";
 import { TooltipContent } from "../types/tooltip-content";
-import { FragmentMapping } from "../types/mapping";
+import { ChainMapping, FragmentMapping } from "../types/mapping";
 import {
     findUniprotIntervalsFromStructureResidues,
     findUniprotIntervalsFromUniprotSequence
 } from "../utils/fragment-mapping-utils";
+import { ParserMapping } from "../types/parser-mapping";
 
 export default class PdbParser implements TrackParser {
     private readonly observedColor = "#2e86c1";
@@ -17,7 +18,7 @@ export default class PdbParser implements TrackParser {
     constructor(
         private readonly categoryLabel = "Experimental structures",
         public readonly categoryName = "EXPERIMENTAL_STRUCTURES"
-    ) {}
+    ) { }
 
     public async parse(
         uniprotId: string,
@@ -25,78 +26,100 @@ export default class PdbParser implements TrackParser {
     ): Promise<BasicTrackRenderer[] | null> {
         const trackRows: Map<string, TrackRow> = new Map();
         for (const pdbParserItem of data) {
-            const sortedMappings = pdbParserItem.mappings.sort((a, b) => {
-                return a.start.residue_number - b.start.residue_number;
+            const sortedMappings: Record<string, ChainMapping> = {};
+            Object.entries(pdbParserItem.mappings).forEach(([chainId, chainMapping]) => {
+                const sortedChainMappings = chainMapping.fragment_mappings.sort((a, b) => {
+                    return a.start.residue_number - b.start.residue_number;
+                });
+                sortedMappings[chainId] = {
+                    structAsymId: chainMapping.struct_asym_id,
+                    fragmentMappings: sortedChainMappings.map((chainMapping) => {
+                        return {
+                            entityId: chainMapping.entity_id,
+                            sequenceEnd: chainMapping.unp_end,
+                            structureStart: chainMapping.start.residue_number,
+                            structureEnd: chainMapping.end.residue_number,
+                            sequenceStart: chainMapping.unp_start
+                        };
+                    })
+                };
             });
+
             const pdbId: string = pdbParserItem.pdb_id;
             pdbParserItem.polymer_coverage[pdbId].molecules.forEach((molecule) => {
                 molecule.chains.forEach((chain) => {
                     const chainId: string = chain.chain_id;
-                    const uniprotStart: number = pdbParserItem.unp_start;
-                    const uniprotEnd: number = pdbParserItem.unp_end;
-                    const structure: structureData = pdbParserItem.structure;
-                    if (structure.uri && structure.data) {
-                        console.warn(
-                            "Structure parameter provides information about both uri and data. Uri will be used."
-                        );
-                    } else if (!structure.uri && !structure.data) {
-                        throw Error("Structure parameter requires information about uri or data.");
-                    }
-                    const output: Output = {
-                        pdbId: pdbId,
-                        chain: chainId,
-                        mapping: sortedMappings,
-                        url: structure.uri ?? undefined,
-                        data: !structure.uri ? structure.data : undefined,
-
-                        format: structure.format
-                    };
-                    const observedFragments: Fragment[] = [];
-                    chain.observed.forEach((fragment) => {
-                        const intervals = findUniprotIntervalsFromStructureResidues(
-                            fragment.start.residue_number,
-                            fragment.end.residue_number,
-                            sortedMappings
-                        );
-                        intervals.forEach((interval) => {
-                            observedFragments.push(
-                                new Fragment(
-                                    this.id++,
-                                    interval.start,
-                                    interval.end,
-                                    this.observedColor,
-                                    this.observedColor,
-                                    undefined,
-                                    this.createTooltip(
-                                        uniprotId,
-                                        pdbId,
-                                        chainId,
+                    const chainMapping = sortedMappings[chainId];
+                    if (chainMapping) {
+                        const uniprotStart: number = pdbParserItem.unp_start;
+                        const uniprotEnd: number = pdbParserItem.unp_end;
+                        const structure: StructureData = pdbParserItem.structure;
+                        if (structure.uri && structure.data) {
+                            console.warn(
+                                "Structure parameter provides information about both uri and data. Uri will be used."
+                            );
+                        } else if (!structure.uri && !structure.data) {
+                            throw Error(
+                                "Structure parameter requires information about uri or data."
+                            );
+                        }
+                        const output: Output = {
+                            pdbId: pdbId,
+                            chain: chainId,
+                            mapping: sortedMappings,
+                            url: structure.uri ?? undefined,
+                            data: !structure.uri ? structure.data : undefined,
+                            format: structure.format
+                        };
+                        const observedFragments: Fragment[] = [];
+                        chain.observed.forEach((observedFragment) => {
+                            const intervals = findUniprotIntervalsFromStructureResidues(
+                                observedFragment.start.residue_number,
+                                observedFragment.end.residue_number,
+                                chainMapping.fragmentMappings
+                            );
+                            intervals.forEach((interval) => {
+                                observedFragments.push(
+                                    new Fragment(
+                                        this.id++,
                                         interval.start,
                                         interval.end,
-                                        pdbParserItem.experimental_method
-                                    ),
-                                    output
-                                )
-                            );
+                                        this.observedColor,
+                                        this.observedColor,
+                                        undefined,
+                                        this.createTooltip(
+                                            uniprotId,
+                                            pdbId,
+                                            chainId,
+                                            interval.start,
+                                            interval.end,
+                                            pdbParserItem.experimental_method
+                                        ),
+                                        output
+                                    )
+                                );
+                            });
                         });
-                    });
 
-                    const unobservedFragments: Fragment[] = this.getUnobservedFragments(
-                        observedFragments,
-                        uniprotStart,
-                        uniprotEnd,
-                        pdbId,
-                        chainId,
-                        uniprotId,
-                        sortedMappings,
-                        pdbParserItem.experimental_method
-                    );
-                    const fragments: Fragment[] = observedFragments.concat(unobservedFragments);
-                    const accessions: Accession[] = [new Accession([new Location(fragments)])];
-                    trackRows.set(
-                        pdbId + " " + chainId.toLowerCase(),
-                        new TrackRow(accessions, pdbId + " " + chainId.toLowerCase(), output)
-                    );
+                        const unobservedFragments: Fragment[] = this.getUnobservedFragments(
+                            observedFragments,
+                            uniprotStart,
+                            uniprotEnd,
+                            pdbId,
+                            chainId,
+                            uniprotId,
+                            chainMapping.fragmentMappings,
+                            pdbParserItem.experimental_method
+                        );
+                        const fragments: Fragment[] = observedFragments.concat(unobservedFragments);
+                        const accessions: Accession[] = [new Accession([new Location(fragments)])];
+                        trackRows.set(
+                            pdbId + " " + chainId.toLowerCase(),
+                            new TrackRow(accessions, pdbId + " " + chainId.toLowerCase(), output)
+                        );
+                    } else {
+                        console.warn(`Mapping for ${pdbId} ${chainId} not found.`);
+                    }
                 });
             });
         }
@@ -256,11 +279,12 @@ export type PDBParserItem = {
     readonly polymer_coverage: PolymerCoverage;
     readonly unp_start: number;
     readonly experimental_method?: string;
+    readonly tax_id?: number;
     readonly tax_ids?: number[];
-    readonly structure: structureData;
-    readonly mappings: FragmentMapping[];
+    readonly structure: StructureData;
+    readonly mappings: ParserMapping;
 };
-type structureData = {
+type StructureData = {
     format: "mmcif" | "pdb";
     data?: string;
     uri?: string;
@@ -283,7 +307,7 @@ export type ChainData = {
     readonly chain_id: string;
 };
 
-type Observed = {
+export type Observed = {
     readonly start: {
         readonly residue_number: number;
     };

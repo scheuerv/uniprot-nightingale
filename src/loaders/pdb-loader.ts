@@ -1,7 +1,7 @@
 import { fetchWithTimeout } from "../utils/utils";
 import { PolymerCoverage, PDBParserItem, Molecule, ChainData } from "../parsers/pdb-parser";
-import { FragmentMapping } from "../types/mapping";
 import Loader from "./loader";
+import { ParserMapping } from "../types/parser-mapping";
 
 export default class PdbLoader implements Loader<PDBParserItem[]> {
     constructor(private readonly pdbIds?: string[]) {}
@@ -36,25 +36,26 @@ export default class PdbLoader implements Loader<PDBParserItem[]> {
                 }
             )
             .then((mappings) => {
-                const pdbMappings: Map<string, Map<string, FragmentMapping[]>> = new Map();
+                const pdbMappings: Map<string, ParserMapping> = new Map();
                 for (const pdbId in mappings[uniprotId]["PDB"]) {
                     if (!this.pdbIds || this.pdbIds.includes(pdbId)) {
-                        pdbMappings.set(pdbId, new Map());
+                        pdbMappings.set(pdbId, {});
+                        const pdbMapping = pdbMappings.get(pdbId)!;
                         const pdbIdMapping = mappings[uniprotId]["PDB"][pdbId];
                         for (const pdbChainMapping of pdbIdMapping) {
-                            if (!pdbMappings.get(pdbId)?.has(pdbChainMapping.chain_id)) {
-                                pdbMappings.get(pdbId)?.set(pdbChainMapping.chain_id, []);
+                            if (!pdbMapping[pdbChainMapping.chain_id]) {
+                                pdbMapping[pdbChainMapping.chain_id] = {
+                                    struct_asym_id: pdbChainMapping.struct_asym_id,
+                                    fragment_mappings: []
+                                };
                             }
-                            pdbMappings
-                                .get(pdbId)
-                                ?.get(pdbChainMapping.chain_id)
-                                ?.push({
-                                    entity_id: pdbChainMapping.entity_id,
-                                    unp_end: pdbChainMapping.unp_end,
-                                    start: { residue_number: pdbChainMapping.start.residue_number },
-                                    end: { residue_number: pdbChainMapping.end.residue_number },
-                                    unp_start: pdbChainMapping.unp_start
-                                });
+                            pdbMapping[pdbChainMapping.chain_id].fragment_mappings.push({
+                                entity_id: pdbChainMapping.entity_id,
+                                unp_end: pdbChainMapping.unp_end,
+                                start: { residue_number: pdbChainMapping.start.residue_number },
+                                end: { residue_number: pdbChainMapping.end.residue_number },
+                                unp_start: pdbChainMapping.unp_start
+                            });
                         }
                     }
                 }
@@ -115,22 +116,33 @@ export default class PdbLoader implements Loader<PDBParserItem[]> {
                 })
                 .filter((result) => result != null)
                 .map((result) => result!);
-            const pdbMappings: Map<string, Map<string, FragmentMapping[]>> = await this.loadMapping(
-                uniprotId
-            );
+            const pdbMappings: Map<string, ParserMapping> = await this.loadMapping(uniprotId);
             for (const result of filteredResults) {
                 const entityChain: Set<string> = new Set();
+
                 for (const pdbId in result.data) {
-                    pdbMappings.get(pdbId)?.forEach((mappings, chainId) => {
-                        mappings.forEach((mapping) => {
-                            entityChain.add(`${mapping.entity_id}_${chainId}`);
+                    const pdbMapping = pdbMappings.get(pdbId);
+                    if (pdbMapping) {
+                        Object.entries(pdbMapping).forEach(([chainId, chainMapping]) => {
+                            chainMapping.fragment_mappings.forEach((mapping) => {
+                                entityChain.add(`${mapping.entity_id}_${chainId}`);
+                            });
                         });
-                    });
+                    }
                 }
 
                 for (const pdbLoaderItemAgg of result.source) {
                     pdbParserItems.push({
-                        ...pdbLoaderItemAgg,
+                        pdb_id: pdbLoaderItemAgg.pdb_id,
+                        chain_id: pdbLoaderItemAgg.chain_id,
+                        unp_start: pdbLoaderItemAgg.unp_start,
+                        unp_end: pdbLoaderItemAgg.unp_end,
+                        end: pdbLoaderItemAgg.end,
+                        start: pdbLoaderItemAgg.start,
+                        coverage: pdbLoaderItemAgg.coverage,
+                        experimental_method: pdbLoaderItemAgg.experimental_method,
+                        tax_id: pdbLoaderItemAgg.tax_id,
+                        tax_ids: pdbLoaderItemAgg.tax_ids,
                         polymer_coverage: this.transformPolymerCoverageData(
                             result.data,
                             pdbLoaderItemAgg.pdb_id,
@@ -141,10 +153,7 @@ export default class PdbLoader implements Loader<PDBParserItem[]> {
                             format: "mmcif",
                             uri: `https://www.ebi.ac.uk/pdbe/static/entry/${pdbLoaderItemAgg.pdb_id}_updated.cif`
                         },
-                        mappings:
-                            pdbMappings
-                                .get(pdbLoaderItemAgg.pdb_id)
-                                ?.get(pdbLoaderItemAgg.chain_id) ?? []
+                        mappings: pdbMappings.get(pdbLoaderItemAgg.pdb_id) ?? {}
                     });
                 }
             }
@@ -189,16 +198,17 @@ export default class PdbLoader implements Loader<PDBParserItem[]> {
 type PDBMappingData = Record<string, Record<string, Record<string, PDBMappingItem[]>>>;
 
 type PDBMappingItem = {
-    entity_id: number;
-    end: {
-        residue_number: number;
+    readonly entity_id: number;
+    readonly end: {
+        readonly residue_number: number;
     };
-    start: {
-        residue_number: number;
+    readonly start: {
+        readonly residue_number: number;
     };
-    chain_id: string;
-    unp_end: number;
-    unp_start: number;
+    readonly chain_id: string;
+    readonly unp_end: number;
+    readonly unp_start: number;
+    readonly struct_asym_id: string;
 };
 
 type PDBLoaderItemAgg = PDBLoaderItem & {

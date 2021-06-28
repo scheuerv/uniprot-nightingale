@@ -1,13 +1,14 @@
-export type Mapping = FragmentMapping[];
+export type Mapping = Record<string, ChainMapping>;
 
 export type FragmentMapping = {
-    readonly entity_id?: number;
-    readonly start: {
-        readonly residue_number: number;
-    };
-    readonly end: {
-        readonly residue_number: number;
-    };
-    readonly unp_start: number;
-    readonly unp_end: number;
+    readonly entityId?: number;
+    readonly structureStart: number;
+    readonly structureEnd: number;
+    readonly sequenceStart: number;
+    readonly sequenceEnd: number;
+};
+
+export type ChainMapping = {
+    readonly structAsymId: string;
+    readonly fragmentMappings: FragmentMapping[];
 };

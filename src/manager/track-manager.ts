@@ -20,6 +20,7 @@ import PdbLoader from "../loaders/pdb-loader";
 import Loader from "../loaders/loader";
 import FetchLoader from "../loaders/fetch-loader";
 import CustomLoader from "../loaders/custom-loader";
+import { ChainMapping } from "../types/mapping";
 export default class TrackManager {
     private readonly emitOnResidueMouseOver = createEmitter<number>();
     public readonly onResidueMouseOver = this.emitOnResidueMouseOver.event;
@@ -216,17 +217,8 @@ export default class TrackManager {
                             const output = trackContainer.getOutput()!;
                             this.activeStructure = { trackContainer, output };
                             this.activeStructure?.trackContainer.activate();
-                            this.setFixedHighlights([
-                                {
-                                    start: Math.min(
-                                        ...output.mapping.map((mapping) => mapping.unp_start)
-                                    ),
-                                    end: Math.max(
-                                        ...output.mapping.map((mapping) => mapping.unp_end)
-                                    ),
-                                    color: "#0000001A"
-                                }
-                            ]);
+                            const chainMapping = output.mapping[output.chain];
+                            this.setChainHighlights(chainMapping);
                             this.emitOnSelectedStructure(output);
                         }
                         this.categoryContainers.push(categoryContainer);
@@ -250,17 +242,8 @@ export default class TrackManager {
                                 output
                             };
                             this.activeStructure.trackContainer.activate();
-                            this.setFixedHighlights([
-                                {
-                                    start: Math.min(
-                                        ...output.mapping.map((mapping) => mapping.unp_start)
-                                    ),
-                                    end: Math.max(
-                                        ...output.mapping.map((mapping) => mapping.unp_end)
-                                    ),
-                                    color: "#0000001A"
-                                }
-                            ]);
+                            const chainMapping = output.mapping[output.chain];
+                            this.setChainHighlights(chainMapping);
                             this.emitOnSelectedStructure(output);
                         });
                         trackContainer.track.addEventListener("click", (e) => {
@@ -289,19 +272,8 @@ export default class TrackManager {
                                         output
                                     };
                                     this.activeStructure.trackContainer.activate();
-                                    this.setFixedHighlights([
-                                        {
-                                            start: Math.min(
-                                                ...output.mapping.map(
-                                                    (mapping) => mapping.unp_start
-                                                )
-                                            ),
-                                            end: Math.max(
-                                                ...output.mapping.map((mapping) => mapping.unp_end)
-                                            ),
-                                            color: "#0000001A"
-                                        }
-                                    ]);
+                                    const chainMapping = output.mapping[output.chain];
+                                    this.setChainHighlights(chainMapping);
                                     this.emitOnSelectedStructure(output);
                                 }
                             }
@@ -423,6 +395,22 @@ export default class TrackManager {
             .catch((e) => {
                 console.log(e);
             });
+    }
+
+    private setChainHighlights(chainMapping?: ChainMapping) {
+        if (chainMapping) {
+            this.setFixedHighlights([
+                {
+                    start: Math.min(
+                        ...chainMapping.fragmentMappings.map((mapping) => mapping.sequenceStart)
+                    ),
+                    end: Math.max(
+                        ...chainMapping.fragmentMappings.map((mapping) => mapping.sequenceEnd)
+                    ),
+                    color: "#0000001A"
+                }
+            ]);
+        }
     }
 
     public setHighlights(highlights: Highlight[]): void {

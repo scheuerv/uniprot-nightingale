@@ -4,6 +4,8 @@
 import PdbLoader from "../src/loaders/pdb-loader";
 import fetchMock from "jest-fetch-mock";
 import mockConsole from "jest-mock-console";
+import { PDBParserItem } from "../src/parsers/pdb-parser";
+import { ParserChainMapping } from "../src/types/parser-mapping";
 
 describe("PDBLoader tests", function () {
     let instance: PdbLoader;
@@ -198,7 +200,6 @@ describe("PDBLoader tests", function () {
                                 unp_end: 114,
                                 coverage: 0.991,
                                 unp_start: 2,
-                                resolution: 1.8,
                                 tax_id: 9606
                             },
                             {
@@ -210,7 +211,6 @@ describe("PDBLoader tests", function () {
                                 unp_end: 114,
                                 coverage: 0.991,
                                 unp_start: 2,
-                                resolution: 1.8,
                                 tax_id: 9606
                             }
                         ]
@@ -221,21 +221,40 @@ describe("PDBLoader tests", function () {
         });
 
         instance = new PdbLoader();
-        const expectedResult = [
+        const chainMappingH: ParserChainMapping = {
+            struct_asym_id: "H",
+            fragment_mappings: [
+                {
+                    entity_id: 2,
+                    end: { residue_number: 113 },
+                    start: { residue_number: 1 },
+                    unp_end: 114,
+                    unp_start: 2
+                }
+            ]
+        };
+        const chainMappingK: ParserChainMapping = {
+            struct_asym_id: "K",
+            fragment_mappings: [
+                {
+                    entity_id: 2,
+                    end: { residue_number: 113 },
+                    start: { residue_number: 1 },
+                    unp_end: 114,
+                    unp_start: 2
+                }
+            ]
+        };
+        const expectedResult: PDBParserItem[] = [
             {
                 chain_id: "H",
                 coverage: 0.991,
                 end: 113,
                 experimental_method: "X-ray diffraction",
-                mappings: [
-                    {
-                        entity_id: 2,
-                        end: { residue_number: 113 },
-                        start: { residue_number: 1 },
-                        unp_end: 114,
-                        unp_start: 2
-                    }
-                ],
+                mappings: {
+                    H: chainMappingH,
+                    K: chainMappingK
+                },
                 pdb_id: "1xk4",
                 polymer_coverage: {
                     "1xk4": {
@@ -265,7 +284,6 @@ describe("PDBLoader tests", function () {
                         ]
                     }
                 },
-                resolution: 1.8,
                 start: 1,
                 structure: {
                     format: "mmcif",
@@ -281,15 +299,10 @@ describe("PDBLoader tests", function () {
                 coverage: 0.991,
                 end: 113,
                 experimental_method: "X-ray diffraction",
-                mappings: [
-                    {
-                        entity_id: 2,
-                        end: { residue_number: 113 },
-                        start: { residue_number: 1 },
-                        unp_end: 114,
-                        unp_start: 2
-                    }
-                ],
+                mappings: {
+                    H: chainMappingH,
+                    K: chainMappingK
+                },
                 pdb_id: "1xk4",
                 polymer_coverage: {
                     "1xk4": {
@@ -319,7 +332,6 @@ describe("PDBLoader tests", function () {
                         ]
                     }
                 },
-                resolution: 1.8,
                 start: 1,
                 structure: {
                     format: "mmcif",
@@ -425,7 +437,6 @@ describe("PDBLoader tests", function () {
                                     unp_end: 114,
                                     coverage: 0.991,
                                     unp_start: 2,
-                                    resolution: 1.8,
                                     tax_id: 9606
                                 },
                                 {
@@ -437,7 +448,6 @@ describe("PDBLoader tests", function () {
                                     unp_end: 114,
                                     coverage: 0.991,
                                     unp_start: 2,
-                                    resolution: 1.8,
                                     tax_id: 9606
                                 }
                             ]
@@ -508,7 +518,6 @@ describe("PDBLoader tests", function () {
                                 unp_end: 114,
                                 coverage: 1,
                                 unp_start: 1,
-                                resolution: 1.6,
                                 tax_id: 9606
                             },
                             {
@@ -520,7 +529,6 @@ describe("PDBLoader tests", function () {
                                 unp_end: 114,
                                 coverage: 0.991,
                                 unp_start: 2,
-                                resolution: 1.8,
                                 tax_id: 9606
                             }
                         ]
@@ -548,23 +556,6 @@ describe("PDBLoader tests", function () {
                                         unp_end: 114,
                                         unp_start: 1,
                                         struct_asym_id: "B"
-                                    },
-                                    {
-                                        entity_id: 2,
-                                        end: {
-                                            author_residue_number: null,
-                                            author_insertion_code: "",
-                                            residue_number: 114
-                                        },
-                                        start: {
-                                            author_residue_number: null,
-                                            author_insertion_code: "",
-                                            residue_number: 1
-                                        },
-                                        chain_id: "L",
-                                        unp_end: 114,
-                                        unp_start: 1,
-                                        struct_asym_id: "D"
                                     }
                                 ],
 
@@ -596,21 +587,27 @@ describe("PDBLoader tests", function () {
             return Promise.reject("error");
         });
         instance = new PdbLoader(["4ggf"]);
-        const expectedResult = [
+        const chainMappingC: ParserChainMapping = {
+            struct_asym_id: "B",
+            fragment_mappings: [
+                {
+                    end: { residue_number: 114 },
+                    entity_id: 2,
+                    start: { residue_number: 1 },
+                    unp_end: 114,
+                    unp_start: 1
+                }
+            ]
+        };
+        const expectedResult: PDBParserItem[] = [
             {
                 chain_id: "C",
                 coverage: 1,
                 end: 114,
                 experimental_method: "X-ray diffraction",
-                mappings: [
-                    {
-                        end: { residue_number: 114 },
-                        entity_id: 2,
-                        start: { residue_number: 1 },
-                        unp_end: 114,
-                        unp_start: 1
-                    }
-                ],
+                mappings: {
+                    C: chainMappingC
+                },
                 pdb_id: "4ggf",
                 polymer_coverage: {
                     "4ggf": {
@@ -632,7 +629,6 @@ describe("PDBLoader tests", function () {
                         ]
                     }
                 },
-                resolution: 1.6,
                 start: 1,
                 structure: {
                     format: "mmcif",
@@ -703,7 +699,6 @@ describe("PDBLoader tests", function () {
                                 unp_end: 114,
                                 coverage: 1,
                                 unp_start: 1,
-                                resolution: 1.6,
                                 tax_id: 9606
                             },
                             {
@@ -715,7 +710,6 @@ describe("PDBLoader tests", function () {
                                 unp_end: 114,
                                 coverage: 0.991,
                                 unp_start: 2,
-                                resolution: 1.8,
                                 tax_id: 9606
                             }
                         ]
@@ -743,23 +737,6 @@ describe("PDBLoader tests", function () {
                                         unp_end: 114,
                                         unp_start: 1,
                                         struct_asym_id: "B"
-                                    },
-                                    {
-                                        entity_id: 2,
-                                        end: {
-                                            author_residue_number: null,
-                                            author_insertion_code: "",
-                                            residue_number: 114
-                                        },
-                                        start: {
-                                            author_residue_number: null,
-                                            author_insertion_code: "",
-                                            residue_number: 1
-                                        },
-                                        chain_id: "L",
-                                        unp_end: 114,
-                                        unp_start: 1,
-                                        struct_asym_id: "D"
                                     }
                                 ],
 
@@ -791,21 +768,27 @@ describe("PDBLoader tests", function () {
             return Promise.reject("error");
         });
         instance = new PdbLoader();
-        const expectedResult = [
+        const chainMappingC: ParserChainMapping = {
+            struct_asym_id: "B",
+            fragment_mappings: [
+                {
+                    end: { residue_number: 114 },
+                    entity_id: 2,
+                    start: { residue_number: 1 },
+                    unp_end: 114,
+                    unp_start: 1
+                }
+            ]
+        };
+        const expectedResult: PDBParserItem[] = [
             {
                 chain_id: "C",
                 coverage: 1,
                 end: 114,
                 experimental_method: "X-ray diffraction",
-                mappings: [
-                    {
-                        end: { residue_number: 114 },
-                        entity_id: 2,
-                        start: { residue_number: 1 },
-                        unp_end: 114,
-                        unp_start: 1
-                    }
-                ],
+                mappings: {
+                    C: chainMappingC
+                },
                 pdb_id: "4ggf",
                 polymer_coverage: {
                     "4ggf": {
@@ -827,7 +810,6 @@ describe("PDBLoader tests", function () {
                         ]
                     }
                 },
-                resolution: 1.6,
                 start: 1,
                 structure: {
                     format: "mmcif",
@@ -962,20 +944,26 @@ describe("PDBLoader tests", function () {
             return Promise.reject("error");
         });
         instance = new PdbLoader();
-        const expectedResult = [
+        const chainMappingA: ParserChainMapping = {
+            struct_asym_id: "A",
+            fragment_mappings: [
+                {
+                    end: { residue_number: 404 },
+                    entity_id: 1,
+                    start: { residue_number: 372 },
+                    unp_end: 42,
+                    unp_start: 10
+                }
+            ]
+        };
+        const expectedResult: PDBParserItem[] = [
             {
                 chain_id: "A",
                 end: 404,
                 experimental_method: "X-ray diffraction",
-                mappings: [
-                    {
-                        end: { residue_number: 404 },
-                        entity_id: 1,
-                        start: { residue_number: 372 },
-                        unp_end: 42,
-                        unp_start: 10
-                    }
-                ],
+                mappings: {
+                    A: chainMappingA
+                },
                 pdb_id: "3q26",
                 polymer_coverage: {
                     "3q26": {
