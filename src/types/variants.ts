@@ -20,6 +20,8 @@ export type VariantWithSources = Partial<Variant> & {
     readonly customSource?: string;
     readonly color?: string;
     readonly variant: AminoAcid;
+    readonly begin: string;
+    readonly end: string;
     readonly start: string;
 };
 
