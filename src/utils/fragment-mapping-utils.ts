@@ -1,3 +1,4 @@
+import { Interval } from "../types/interval";
 import { FragmentMapping } from "../types/mapping";
 
 export function findUniprotIntervalsFromStructureResidues(
@@ -146,9 +147,4 @@ type FoundInterval = {
     readonly id: number;
     readonly direct: boolean;
     readonly outOfRange: boolean;
-};
-
-type Interval = {
-    readonly start: number;
-    readonly end: number;
 };
