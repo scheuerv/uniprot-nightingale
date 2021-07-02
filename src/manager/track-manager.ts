@@ -286,7 +286,11 @@ export default class TrackManager {
                         );
                         this.clickedHighlights = highligtedFragments
                             .map((fragment) => {
-                                return `${fragment.start}:${fragment.end}:${fragment.color}`;
+                                return `${fragment.start}:${fragment.end}:${
+                                    fragment.color.length >= 7
+                                        ? fragment.color.slice(0, 7).concat("66")
+                                        : fragment.color
+                                }`;
                             })
                             .join(",");
                         this.applyHighlights();

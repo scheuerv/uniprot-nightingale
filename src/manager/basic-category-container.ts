@@ -2,9 +2,10 @@ import * as d3 from "d3";
 import CategoryContainer from "./category-container";
 import TrackContainer from "./track-container";
 import { createEmitter } from "ts-typed-events";
-import { TrackFragment } from "../types/accession";
+import { Fragment, TrackFragment } from "../types/accession";
 import { ElementWithData, FragmentWrapper } from "./fragment-wrapper";
 import { RowWrapper, RowWrapperBuilder } from "./row-wrapper";
+import { safeHexColor } from "../utils/color-utils";
 
 export default class BasicCategoryContainer implements CategoryContainer {
     private _rowWrappers: RowWrapper[];
@@ -87,9 +88,19 @@ export default class BasicCategoryContainer implements CategoryContainer {
                 }
             });
         map.forEach((fragmentRowTuples) => {
+            const fragment = fragmentRowTuples[0].element.__data__;
             const fragmentWrapper = new FragmentWrapper(
                 fragmentRowTuples.map((it) => it.element),
-                fragmentRowTuples[0].element.__data__
+                new Fragment(
+                    fragment.id,
+                    fragment.start,
+                    fragment.end,
+                    safeHexColor(fragment.color),
+                    fragment.fill,
+                    fragment.shape,
+                    fragment.tooltipContent,
+                    fragment.output
+                )
             );
             fragmentRowTuples.forEach((fragmentRowTuple) => {
                 fragmentRowTuple.builder.addFragmentWrapper(fragmentWrapper);

@@ -8,6 +8,7 @@ import * as d3 from "d3";
 import VariationGraphTrackContainer from "./variation-graph-track-container";
 import { TrackFragment } from "../types/accession";
 import { VariantWithSources } from "../types/variants";
+import { safeHexColor } from "../utils/color-utils";
 
 export default class VariationCategoryContainer implements CategoryContainer {
     private readonly emitOnHighlightChange = createEmitter<TrackFragment[]>();
@@ -72,23 +73,7 @@ export default class VariationCategoryContainer implements CategoryContainer {
             const event = e as CustomEvent;
             if (event.detail.eventtype == "click" && event.detail.feature) {
                 const variant = event.detail.feature as VariantWithSources;
-                let match = variant.color?.match(/^#[0-9a-f]{3,6}$/i);
-                let color = "";
-                if (match) {
-                    color = match[0];
-                } else {
-                    match = variant.color?.match(/rgb\((\d{1,3}), (\d{1,3}), (\d{1,3})\)/);
-                    if (match) {
-                        color =
-                            "#" +
-                            ColorConvert.rgb.hex([
-                                parseInt(match[1]),
-                                parseInt(match[2]),
-                                parseInt(match[3])
-                            ]);
-                    }
-                }
-
+                const color = safeHexColor(variant.color);
                 const trackFragment: TrackFragment = {
                     start: parseInt(variant.begin),
                     end: parseInt(variant.end),
