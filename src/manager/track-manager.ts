@@ -185,7 +185,7 @@ export default class TrackManager {
             );
         });
 
-        Promise.allSettled(
+        await Promise.allSettled(
             this.tracks.map((track) =>
                 track.dataLoader.load(this.uniprotId).then(
                     (data) => {
@@ -402,22 +402,6 @@ export default class TrackManager {
             });
     }
 
-    private setChainHighlights(chainMapping?: ChainMapping) {
-        if (chainMapping) {
-            this.setFixedHighlights([
-                {
-                    start: Math.min(
-                        ...chainMapping.fragmentMappings.map((mapping) => mapping.sequenceStart)
-                    ),
-                    end: Math.max(
-                        ...chainMapping.fragmentMappings.map((mapping) => mapping.sequenceEnd)
-                    ),
-                    color: "#0000001A"
-                }
-            ]);
-        }
-    }
-
     public setHighlights(highlights: Highlight[]): void {
         this.publicHighlights = highlights
             .map((highlight) => {
@@ -456,6 +440,22 @@ export default class TrackManager {
         return this.categoryContainers.flatMap((categoryContainer) =>
             categoryContainer.getMarkedTrackFragments()
         );
+    }
+
+    private setChainHighlights(chainMapping?: ChainMapping) {
+        if (chainMapping) {
+            this.setFixedHighlights([
+                {
+                    start: Math.min(
+                        ...chainMapping.fragmentMappings.map((mapping) => mapping.sequenceStart)
+                    ),
+                    end: Math.max(
+                        ...chainMapping.fragmentMappings.map((mapping) => mapping.sequenceEnd)
+                    ),
+                    color: "#0000001A"
+                }
+            ]);
+        }
     }
 
     private highlightOff(): void {

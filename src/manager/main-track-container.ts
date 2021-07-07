@@ -9,7 +9,7 @@ export default class MainTrackContainer<T> implements TrackContainer {
 
     constructor(
         public readonly track: ProtvistaTrack,
-        public readonly emptyTrack: ProtvistaTrack,
+        private readonly emptyTrack: ProtvistaTrack,
         private readonly data: T
     ) {}
 
