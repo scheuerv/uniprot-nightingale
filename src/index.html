@@ -519,7 +519,7 @@
             };
             // let trackManger = UniprotNightingale.TrackManager.createDefault(config);
             // trackManger.render(document.getElementById("root"));
-            UniprotNightingale.TrackManager.createDefault(config).render(
+            UniprotNightingale.TrackManagerBuilder.createDefault(config).load(
                 document.getElementById("root")
             );
 

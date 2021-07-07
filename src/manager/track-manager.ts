@@ -1,11 +1,6 @@
 import * as d3 from "d3";
 import CategoryContainer from "./category-container";
-import TrackParser from "../parsers/track-parser";
-import { createRow, fetchWithTimeout } from "../utils/utils";
-import PdbParser from "../parsers/pdb-parser";
-import FeatureParser from "../parsers/feature-parser";
-import SMRParser from "../parsers/SMR-parser";
-import VariationParser from "../parsers/variation-parser";
+import { createRow } from "../utils/utils";
 import ProtvistaManager from "protvista-manager";
 import { createEmitter } from "ts-typed-events";
 import ProtvistaNavigation from "protvista-navigation";
@@ -15,12 +10,7 @@ import TrackContainer from "./track-container";
 import TrackRenderer from "../renderers/track-renderer";
 import { Fragment, Output, TrackFragment } from "../types/accession";
 import { ElementWithData } from "./fragment-wrapper";
-import PdbLoader from "../loaders/pdb-loader";
-import Loader from "../loaders/loader";
-import FetchLoader from "../loaders/fetch-loader";
-import CustomLoader from "../loaders/custom-loader";
 import { ChainMapping } from "../types/mapping";
-import { Config, CustomDataSourceFeature } from "../types/config";
 import { Highlight } from "../types/highlight";
 export default class TrackManager {
     private readonly emitOnResidueMouseOver = createEmitter<number>();
@@ -29,12 +19,8 @@ export default class TrackManager {
     public readonly onSelectedStructure = this.emitOnSelectedStructure.event;
     private readonly emitOnFragmentMouseOut = createEmitter<void>();
     public readonly onFragmentMouseOut = this.emitOnFragmentMouseOut.event;
-    private readonly emitOnRendered = createEmitter<void>();
-    public readonly onRendered = this.emitOnRendered.event;
     private readonly emitOnHighlightChange = createEmitter<TrackFragment[]>();
     public readonly onHighlightChange = this.emitOnHighlightChange.event;
-    private readonly tracks: Track[] = [];
-    private sequence = "";
     private lastClickedFragment:
         | {
               fragment: ElementWithData;
@@ -56,181 +42,70 @@ export default class TrackManager {
     private mouseoverHighlights = "";
     private readonly categoryContainers: CategoryContainer[] = [];
     private activeStructure?: ActiveStructure = undefined;
-    private readonly uniprotId: string;
 
-    constructor(
-        private readonly sequenceUrlGenerator: (
-            url: string
-        ) => Promise<{ sequence: string; startRow: number }>,
-        private readonly config?: Config
-    ) {
-        if (config?.uniprotId) {
-            if (config?.sequence) {
-                throw new Error("UniProt ID and sequence are mutually exclusive!");
+    constructor(element: HTMLElement, sequence: string, trackRenderers: TrackRenderer[]) {
+        this.activeStructure = undefined;
+        const navigationElement = d3.create("protvista-navigation").attr("length", sequence.length);
+        this.protvistaManager.appendChild(
+            createRow(d3.create("div").node()!, navigationElement.node()!).node()!
+        );
+        const sequenceElement = d3
+            .create("protvista-sequence")
+            .attr("length", sequence.length)
+            .attr("sequence", sequence)
+            .attr("numberofticks", 10);
+        this.protvistaManager.appendChild(
+            createRow(d3.create("div").node()!, sequenceElement.node()!).node()!
+        );
+        trackRenderers.forEach((renderer) => {
+            const categoryContainer = renderer.getCategoryContainer(sequence);
+            const trackContainer = categoryContainer.getFirstTrackContainerWithOutput();
+            if (trackContainer && !this.activeStructure) {
+                const output = trackContainer.getOutput()!;
+                this.activeStructure = { trackContainer, output };
+                this.activeStructure?.trackContainer.activate();
+                const chainMapping = output.mapping[output.chain];
+                this.setChainHighlights(chainMapping);
+                this.emitOnSelectedStructure(output);
             }
-            this.uniprotId = config.uniprotId;
-        } else if (!config?.sequence) {
-            throw new Error("UniProt ID or sequence is missing!");
-        }
-        if (config?.sequence && !config.sequenceStructureMapping) {
-            throw new Error("Sequence-structure mapping is missing!");
-        }
-    }
+            this.categoryContainers.push(categoryContainer);
+            this.protvistaManager.appendChild(categoryContainer.content);
+        });
 
-    public static createDefault(config: Config): TrackManager {
-        const trackManager = new TrackManager(
-            (uniProtId) =>
-                config?.sequence
-                    ? Promise.resolve({
-                          sequence: config?.sequence,
-                          startRow: 0
-                      })
-                    : fetchWithTimeout(`https://www.uniprot.org/uniprot/${uniProtId}.fasta`, {
-                          timeout: 8000
-                      })
-                          .then((data) => data.text())
-                          .then((sequence) => {
-                              return {
-                                  sequence: sequence,
-                                  startRow: 1
-                              };
-                          }),
-            config
-        );
-        if (config?.sequenceStructureMapping) {
-            trackManager.addCustomTrack(() => {
-                return config.sequenceStructureMapping;
-            }, new PdbParser("User provided structures", "USER_PROVIDED_STRUCTURES"));
-        }
-
-        trackManager.addLoaderTrack(new PdbLoader(config.pdbIds), new PdbParser());
-        trackManager.addFetchTrack(
-            (uniProtId) =>
-                `https://swissmodel.expasy.org/repository/uniprot/${uniProtId}.json?provider=swissmodel`,
-            new SMRParser(config?.smrIds)
-        );
-        trackManager.addFetchTrack(
-            (uniProtId) => `https://www.ebi.ac.uk/proteins/api/features/${uniProtId}`,
-            new FeatureParser(config?.exclusions)
-        );
-        trackManager.addFetchTrack(
-            (uniProtId) => `https://www.ebi.ac.uk/proteins/api/proteomics/${uniProtId}`,
-            new FeatureParser(config?.exclusions)
-        );
-        trackManager.addFetchTrack(
-            (uniProtId) => `https://www.ebi.ac.uk/proteins/api/antigen/${uniProtId}`,
-            new FeatureParser(config?.exclusions)
-        );
-        trackManager.addFetchTrack(
-            (uniProtId) => `https://www.ebi.ac.uk/proteins/api/variation/${uniProtId}`,
-            new VariationParser(config?.overwritePredictions)
-        );
-        config?.customDataSources?.forEach((customDataSource) => {
-            if (customDataSource.url) {
-                trackManager.addFetchTrack(
-                    (uniProtId) =>
-                        `${customDataSource.url}${uniProtId}${
-                            customDataSource.useExtension ? ".json" : ""
-                        }`,
-                    new FeatureParser(config?.exclusions, customDataSource.source)
-                );
-            }
-            if (customDataSource.data) {
-                const variationFeatures: CustomDataSourceFeature[] = [];
-                const otherFeatures: CustomDataSourceFeature[] = [];
-                customDataSource.data.features.forEach((feature) => {
-                    if (feature.category == "VARIATION") {
-                        variationFeatures.push(feature);
-                    } else {
-                        otherFeatures.push(feature);
+        element.appendChild(this.protvistaManager);
+        this.categoryContainers.forEach((categoryContainer) => {
+            categoryContainer.trackContainers.forEach((trackContainer) => {
+                trackContainer.onLabelClick.on((output) => {
+                    if (
+                        this.activeStructure?.trackContainer == trackContainer &&
+                        this.activeStructure.output == output
+                    ) {
+                        return;
+                    }
+                    this.activeStructure?.trackContainer.deactivate();
+                    this.activeStructure = {
+                        trackContainer,
+                        output
+                    };
+                    this.activeStructure.trackContainer.activate();
+                    const chainMapping = output.mapping[output.chain];
+                    this.setChainHighlights(chainMapping);
+                    this.emitOnSelectedStructure(output);
+                });
+                trackContainer.track.addEventListener("click", (e) => {
+                    if (!(e.target as Element).closest(".feature")) {
+                        this.removeAllTooltips();
+                        this.highlightOff();
                     }
                 });
-                trackManager.addCustomTrack(() => {
-                    return {
-                        sequence: customDataSource.data.sequence,
-                        features: variationFeatures
-                    };
-                }, new VariationParser(config?.overwritePredictions, customDataSource.source));
-                trackManager.addCustomTrack(() => {
-                    return {
-                        sequence: customDataSource.data.sequence,
-                        features: otherFeatures
-                    };
-                }, new FeatureParser(config?.exclusions, customDataSource.source));
-            }
-        });
-        return trackManager;
-    }
 
-    public async render(element: HTMLElement): Promise<void> {
-        this.activeStructure = undefined;
-        await this.sequenceUrlGenerator(this.uniprotId).then((data) => {
-            const tokens: string[] = data.sequence.split(/\r?\n/);
-            for (let i = data.startRow; i < tokens.length; i++) {
-                this.sequence += tokens[i];
-            }
-            const navigationElement = d3
-                .create("protvista-navigation")
-                .attr("length", this.sequence.length);
-            this.protvistaManager.appendChild(
-                createRow(d3.create("div").node()!, navigationElement.node()!).node()!
-            );
-            const sequenceElement = d3
-                .create("protvista-sequence")
-                .attr("length", this.sequence.length)
-                .attr("sequence", this.sequence)
-                .attr("numberofticks", 10);
-            this.protvistaManager.appendChild(
-                createRow(d3.create("div").node()!, sequenceElement.node()!).node()!
-            );
-        });
-
-        await Promise.allSettled(
-            this.tracks.map((track) =>
-                track.dataLoader.load(this.uniprotId).then(
-                    (data) => {
-                        return track.parser.parse(this.uniprotId, data);
-                    },
-                    (err) => {
-                        console.error(`DATA unavailable!`, err);
-                        return Promise.reject(err);
-                    }
-                )
-            )
-        )
-            .then((renderers) => {
-                const filteredRenderes: TrackRenderer[] = renderers
-                    .map((promiseSettled) => {
-                        if (promiseSettled.status == "fulfilled") {
-                            return promiseSettled.value;
-                        }
-                        console.warn(promiseSettled.reason);
-                        return null;
-                    })
-                    .flatMap((renderer) => renderer)
-                    .filter((renderer) => renderer != null)
-                    .map((renderer) => renderer!);
-                this.sortRenderers(filteredRenderes, this.config?.categoryOrder).forEach(
-                    (renderer) => {
-                        const categoryContainer = renderer.getCategoryContainer(this.sequence);
-                        const trackContainer = categoryContainer.getFirstTrackContainerWithOutput();
-                        if (trackContainer && !this.activeStructure) {
-                            const output = trackContainer.getOutput()!;
-                            this.activeStructure = { trackContainer, output };
-                            this.activeStructure?.trackContainer.activate();
-                            const chainMapping = output.mapping[output.chain];
-                            this.setChainHighlights(chainMapping);
-                            this.emitOnSelectedStructure(output);
-                        }
-                        this.categoryContainers.push(categoryContainer);
-                        this.protvistaManager.appendChild(categoryContainer.content);
-                    }
-                );
-
-                element.appendChild(this.protvistaManager);
-                this.categoryContainers.forEach((categoryContainer) => {
-                    categoryContainer.trackContainers.forEach((trackContainer) => {
-                        trackContainer.onLabelClick.on((output) => {
+                trackContainer.track.addEventListener("change", (e) => {
+                    const event = e as CustomEvent;
+                    const detail: EventDetail = event.detail;
+                    this.updateTooltip(detail, resizeObserver);
+                    if (detail?.eventtype == "click") {
+                        const output = detail.target?.__data__?.output;
+                        if (output) {
                             if (
                                 this.activeStructure?.trackContainer == trackContainer &&
                                 this.activeStructure.output == output
@@ -246,159 +121,117 @@ export default class TrackManager {
                             const chainMapping = output.mapping[output.chain];
                             this.setChainHighlights(chainMapping);
                             this.emitOnSelectedStructure(output);
-                        });
-                        trackContainer.track.addEventListener("click", (e) => {
-                            if (!(e.target as Element).closest(".feature")) {
-                                this.removeAllTooltips();
-                                this.highlightOff();
-                            }
-                        });
-
-                        trackContainer.track.addEventListener("change", (e) => {
-                            const event = e as CustomEvent;
-                            const detail: EventDetail = event.detail;
-                            this.updateTooltip(detail, resizeObserver);
-                            if (detail?.eventtype == "click") {
-                                const output = detail.target?.__data__?.output;
-                                if (output) {
-                                    if (
-                                        this.activeStructure?.trackContainer == trackContainer &&
-                                        this.activeStructure.output == output
-                                    ) {
-                                        return;
-                                    }
-                                    this.activeStructure?.trackContainer.deactivate();
-                                    this.activeStructure = {
-                                        trackContainer,
-                                        output
-                                    };
-                                    this.activeStructure.trackContainer.activate();
-                                    const chainMapping = output.mapping[output.chain];
-                                    this.setChainHighlights(chainMapping);
-                                    this.emitOnSelectedStructure(output);
-                                }
-                            }
-                        });
-                    });
-                    categoryContainer.onHighlightChange.on(() => {
-                        const highligtedFragments = this.categoryContainers.flatMap(
-                            (categoryContainer) => categoryContainer.getHighlightedTrackFragments()
-                        );
-                        this.clickedHighlights = highligtedFragments
-                            .map((fragment) => {
-                                return `${fragment.start}:${fragment.end}:${
-                                    fragment.color.length >= 7
-                                        ? fragment.color.slice(0, 7).concat("66")
-                                        : fragment.color
-                                }`;
-                            })
-                            .join(",");
-                        this.applyHighlights();
-                        this.emitOnHighlightChange.emit(
-                            this.categoryContainers.flatMap((categoryContainer) =>
-                                categoryContainer.getMarkedTrackFragments()
-                            )
-                        );
-                    });
-                    categoryContainer.addData();
-                });
-                const resizeObserver = new ResizeObserver(() => {
-                    if (this.lastClickedFragment) {
-                        const boundingRect =
-                            this.lastClickedFragment.fragment.getBoundingClientRect();
-                        if (boundingRect.width == 0) {
-                            resizeObserver.unobserve(this.lastClickedFragment.fragment);
-                            this.lastClickedFragment = undefined;
-                            this.removeAllTooltips();
-                        } else {
-                            const mouseX = boundingRect.width * this.lastClickedFragment.mouseX;
-                            const mouseY = boundingRect.height * this.lastClickedFragment.mouseY;
-                            this.protvistaManagerD3
-                                .select("protvista-tooltip")
-                                .attr("x", boundingRect.x + mouseX)
-                                .attr("y", boundingRect.y + mouseY)
-                                .attr("visible", "");
                         }
                     }
                 });
-                OverlayScrollbars(document.querySelectorAll(".subtracks-container.scrollable"), {
-                    resize: "vertical",
-                    paddingAbsolute: true,
-                    scrollbars: {
-                        clickScrolling: true,
-                        autoHide: "leave"
+            });
+            categoryContainer.onHighlightChange.on(() => {
+                const highligtedFragments = this.categoryContainers.flatMap((categoryContainer) =>
+                    categoryContainer.getHighlightedTrackFragments()
+                );
+                this.clickedHighlights = highligtedFragments
+                    .map((fragment) => {
+                        return `${fragment.start}:${fragment.end}:${
+                            fragment.color.length >= 7
+                                ? fragment.color.slice(0, 7).concat("66")
+                                : fragment.color
+                        }`;
+                    })
+                    .join(",");
+                this.applyHighlights();
+                this.emitOnHighlightChange.emit(
+                    this.categoryContainers.flatMap((categoryContainer) =>
+                        categoryContainer.getMarkedTrackFragments()
+                    )
+                );
+            });
+            categoryContainer.addData();
+        });
+        const resizeObserver = new ResizeObserver(() => {
+            if (this.lastClickedFragment) {
+                const boundingRect = this.lastClickedFragment.fragment.getBoundingClientRect();
+                if (boundingRect.width == 0) {
+                    resizeObserver.unobserve(this.lastClickedFragment.fragment);
+                    this.lastClickedFragment = undefined;
+                    this.removeAllTooltips();
+                } else {
+                    const mouseX = boundingRect.width * this.lastClickedFragment.mouseX;
+                    const mouseY = boundingRect.height * this.lastClickedFragment.mouseY;
+                    this.protvistaManagerD3
+                        .select("protvista-tooltip")
+                        .attr("x", boundingRect.x + mouseX)
+                        .attr("y", boundingRect.y + mouseY)
+                        .attr("visible", "");
+                }
+            }
+        });
+        OverlayScrollbars(document.querySelectorAll(".subtracks-container.scrollable"), {
+            resize: "vertical",
+            paddingAbsolute: true,
+            scrollbars: {
+                clickScrolling: true,
+                autoHide: "leave"
+            }
+        });
+        resizeObserver.observe(element);
+        const protvistaNavigation = this.protvistaManagerD3
+            .select("protvista-navigation")
+            .node() as ProtvistaNavigation;
+        let lastFocusedResidue: number | undefined;
+        this.protvistaManagerD3
+            .selectAll("protvista-variation")
+            .on("change", () => {
+                const detail = d3.event.detail;
+                if (detail.eventtype == "mouseover") {
+                    const feature = detail.feature as {
+                        start: number;
+                        end: number;
+                    };
+                    const residueNumber = feature.start;
+                    if (lastFocusedResidue != residueNumber) {
+                        lastFocusedResidue = residueNumber;
+                        this.mouseoverHighlights = `${residueNumber}:${residueNumber}`;
+                        this.applyHighlights();
+                        this.emitOnResidueMouseOver.emit(residueNumber);
                     }
-                });
-                resizeObserver.observe(element);
-                const protvistaNavigation = this.protvistaManagerD3
-                    .select("protvista-navigation")
-                    .node() as ProtvistaNavigation;
-                let lastFocusedResidue: number | undefined;
-                this.protvistaManagerD3
-                    .selectAll("protvista-variation")
-                    .on("change", () => {
-                        const detail = d3.event.detail;
-                        if (detail.eventtype == "mouseover") {
-                            const feature = detail.feature as {
-                                start: number;
-                                end: number;
-                            };
-                            const residueNumber = feature.start;
-                            if (lastFocusedResidue != residueNumber) {
-                                lastFocusedResidue = residueNumber;
-                                this.mouseoverHighlights = `${residueNumber}:${residueNumber}`;
-                                this.applyHighlights();
-                                this.emitOnResidueMouseOver.emit(residueNumber);
-                            }
-                        }
-                    })
-                    .on("mouseout", () => {
-                        lastFocusedResidue = undefined;
-                        this.mouseoverHighlights = "";
-                        this.applyHighlights();
-                        this.emitOnFragmentMouseOut.emit();
-                    });
-                this.protvistaManagerD3
-                    .selectAll("protvista-track g.fragment-group")
-                    .on("mousemove", (f) => {
-                        const feature = f as { start: number; end: number };
-                        const xScale = d3
-                            .scaleLinear<number>()
-                            .domain([
-                                0,
-                                protvistaNavigation.width - 2 * protvistaNavigation._padding
-                            ])
-                            .rangeRound([
-                                parseInt(protvistaNavigation._displaystart),
-                                parseInt(protvistaNavigation._displayend) + 1
-                            ]);
-
-                        // console.log(e.offsetX - protvistaNavigation._padding);
-                        // console.log(e.offsetX);
-                        const residueNumber = Math.max(
-                            Math.min(
-                                xScale(d3.event.offsetX - protvistaNavigation._padding),
-                                feature.end
-                            ),
-                            feature.start
-                        );
-                        if (lastFocusedResidue != residueNumber) {
-                            lastFocusedResidue = residueNumber;
-                            this.mouseoverHighlights = `${residueNumber}:${residueNumber}`;
-                            this.applyHighlights();
-                            this.emitOnResidueMouseOver.emit(residueNumber);
-                        }
-                    })
-                    .on("mouseout", () => {
-                        lastFocusedResidue = undefined;
-                        this.mouseoverHighlights = "";
-                        this.applyHighlights();
-                        this.emitOnFragmentMouseOut.emit();
-                    });
-                this.emitOnRendered.emit();
+                }
             })
-            .catch((e) => {
-                console.log(e);
+            .on("mouseout", () => {
+                lastFocusedResidue = undefined;
+                this.mouseoverHighlights = "";
+                this.applyHighlights();
+                this.emitOnFragmentMouseOut.emit();
+            });
+        this.protvistaManagerD3
+            .selectAll("protvista-track g.fragment-group")
+            .on("mousemove", (f) => {
+                const feature = f as { start: number; end: number };
+                const xScale = d3
+                    .scaleLinear<number>()
+                    .domain([0, protvistaNavigation.width - 2 * protvistaNavigation._padding])
+                    .rangeRound([
+                        parseInt(protvistaNavigation._displaystart),
+                        parseInt(protvistaNavigation._displayend) + 1
+                    ]);
+
+                // console.log(e.offsetX - protvistaNavigation._padding);
+                // console.log(e.offsetX);
+                const residueNumber = Math.max(
+                    Math.min(xScale(d3.event.offsetX - protvistaNavigation._padding), feature.end),
+                    feature.start
+                );
+                if (lastFocusedResidue != residueNumber) {
+                    lastFocusedResidue = residueNumber;
+                    this.mouseoverHighlights = `${residueNumber}:${residueNumber}`;
+                    this.applyHighlights();
+                    this.emitOnResidueMouseOver.emit(residueNumber);
+                }
+            })
+            .on("mouseout", () => {
+                lastFocusedResidue = undefined;
+                this.mouseoverHighlights = "";
+                this.applyHighlights();
+                this.emitOnFragmentMouseOut.emit();
             });
     }
 
@@ -416,24 +249,6 @@ export default class TrackManager {
     public clearHighlights(): void {
         this.publicHighlights = "";
         this.applyHighlights();
-    }
-
-    public addLoaderTrack<T>(dataLoader: Loader<T>, parser: TrackParser): void {
-        if (!this.config?.exclusions?.includes(parser.categoryName)) {
-            this.tracks.push({ dataLoader: dataLoader, parser });
-        }
-    }
-
-    public addCustomTrack<T>(dataLoader: (uniprotId: string) => T, parser: TrackParser): void {
-        this.addLoaderTrack(new CustomLoader(dataLoader), parser);
-    }
-
-    public addFetchTrack<T>(
-        urlGenerator: (uniprotId: string) => string,
-        parser: TrackParser,
-        mapper?: (data: any) => T
-    ): void {
-        this.addLoaderTrack(new FetchLoader(urlGenerator, mapper), parser);
     }
 
     public getMarkedFragments(): TrackFragment[] {
@@ -465,33 +280,6 @@ export default class TrackManager {
             trackContainer.clearHighlightedTrackFragments()
         );
         this.applyHighlights();
-    }
-
-    private sortRenderers(
-        filteredRenderes: TrackRenderer[],
-        categoryOrder?: string[]
-    ): TrackRenderer[] {
-        const map = new Map<string, TrackRenderer>();
-        filteredRenderes.forEach((renderer) => {
-            const previousRenderer = map.get(renderer.categoryName);
-            if (previousRenderer) {
-                map.set(renderer.categoryName, previousRenderer.combine(renderer));
-            } else {
-                map.set(renderer.categoryName, renderer);
-            }
-        });
-        const sortedRenderers: TrackRenderer[] = [];
-        categoryOrder?.forEach((categoryName) => {
-            const renderer = map.get(categoryName);
-            if (renderer) {
-                sortedRenderers.push(renderer);
-                map.delete(categoryName);
-            }
-        });
-        map.forEach((renderer) => {
-            sortedRenderers.push(renderer);
-        });
-        return sortedRenderers;
     }
 
     private setFixedHighlights(highlights: Highlight[]): void {
@@ -579,12 +367,6 @@ export default class TrackManager {
         this.protvistaManagerD3.selectAll("protvista-tooltip").remove();
     }
 }
-
-type Track = {
-    readonly dataLoader: Loader<any>;
-    readonly parser: TrackParser;
-};
-
 type ActiveStructure = {
     readonly trackContainer: TrackContainer;
     readonly output: Output;

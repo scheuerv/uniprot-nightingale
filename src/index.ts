@@ -9,11 +9,11 @@ import LimitedTrack from "./protvista/limited-track";
 
 import { loadComponent } from "./utils/utils";
 
-import TrackManager from "./manager/track-manager";
 import "./main.css";
 import FixedVariationGraph from "./protvista/variation-graph";
 import FixedProtvistaVariation from "./protvista/variation";
 import "@fortawesome/fontawesome-free/css/all.css";
+import TrackManagerBuilder from "./manager/track-manager-builder";
 
 const registerWebComponents = function () {
     loadComponent("protvista-manager", ProtvistaManager);
@@ -35,4 +35,4 @@ if (window.customElements) {
     });
 }
 
-export { TrackManager };
+export { TrackManagerBuilder };
