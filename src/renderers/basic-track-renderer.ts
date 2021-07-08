@@ -1,5 +1,5 @@
 import TrackRenderer from "./track-renderer";
-import * as d3 from "d3";
+import $ from "jquery";
 import { createRow } from "../utils/utils";
 import ProtvistaTrack from "protvista-track";
 import TrackContainer from "../manager/track-container";
@@ -12,8 +12,8 @@ import { Accession, Fragment, Location, TrackRow } from "../types/accession";
 export default class BasicTrackRenderer implements TrackRenderer {
     private mainTrack: MainTrackContainer<Accession[]>;
     private subtracks: BasicTrackContainer[];
-    private subtracksDiv: HTMLDivElement;
-    private mainTrackRow: d3.Selection<HTMLDivElement, undefined, null, undefined>;
+    private subtracksDiv: HTMLElement;
+    private mainTrackRow: JQuery<HTMLElement>;
     constructor(
         private readonly rows: Map<string, TrackRow>,
         private readonly mainTrackLabel: string,
@@ -24,7 +24,7 @@ export default class BasicTrackRenderer implements TrackRenderer {
         if (other instanceof BasicTrackRenderer) {
             const combined: Map<string, TrackRow> = new Map();
             let maxId = Math.max(
-                ...Array.from(other.rows.values())
+                ...[...other.rows.values()]
                     .flatMap((trackRow) => trackRow.rowData)
                     .flatMap((typeRowDatum) => typeRowDatum.locations[0].fragments)
                     .map((fragment) => fragment.id)
@@ -83,37 +83,37 @@ export default class BasicTrackRenderer implements TrackRenderer {
         [this.mainTrack, this.mainTrackRow] = this.getMainTrack(sequence);
         [this.subtracks, this.subtracksDiv] = this.getSubtracks(sequence);
         const trackContainers: TrackContainer[] = [];
-        const categoryDiv = d3.create("div").node()!;
-        categoryDiv.appendChild(this.mainTrackRow.node()!);
+        const categoryDiv = $("<div/>");
+        categoryDiv.append(this.mainTrackRow);
         trackContainers.push(this.mainTrack);
         this.subtracks.forEach((subtrack) => {
             trackContainers.push(subtrack);
         });
         categoryDiv.append(this.subtracksDiv);
-        return new BasicCategoryContainer(trackContainers, categoryDiv);
+        return new BasicCategoryContainer(trackContainers, categoryDiv[0]);
     }
     private toggle() {
-        const classList = d3.select(this.mainTrack.track).node()?.parentElement!.classList;
+        const parent = $(this.mainTrack.track).parent();
         if (this.subtracksDiv.style.display === "none") {
             this.subtracksDiv.style.display = "block";
-            classList?.remove("main");
-            classList?.add("empty");
+            parent.removeClass("main");
+            parent.addClass("empty");
             this.mainTrackRow
-                .select(".track-label.main")
-                .attr("class", "track-label main arrow-down");
+                .find(".track-label.main")
+                .addClass("arrow-down")
+                .removeClass("arrow-right");
         } else {
             this.subtracksDiv.style.display = "none";
-            classList?.remove("empty");
-            classList?.add("main");
+            parent.removeClass("empty");
+            parent.addClass("main");
             this.mainTrackRow
-                .select(".track-label.main")
-                .attr("class", "track-label main arrow-right");
+                .find(".track-label.main")
+                .addClass("arrow-right")
+                .removeClass("arrow-down");
         }
     }
-    private getMainTrack(
-        sequence: string
-    ): [MainTrackContainer<Accession[]>, d3.Selection<HTMLDivElement, undefined, null, undefined>] {
-        const mainTrackData = Array.from(this.rows.values()).flatMap((row) => row.rowData);
+    private getMainTrack(sequence: string): [MainTrackContainer<Accession[]>, JQuery<HTMLElement>] {
+        const mainTrackData = [...this.rows.values()].flatMap((row) => row.rowData);
         const fragmentAligner = new FragmentAligner();
         mainTrackData.forEach((accession) =>
             accession.locations[0].fragments.forEach((fragment) =>
@@ -121,32 +121,29 @@ export default class BasicTrackRenderer implements TrackRenderer {
             )
         );
         const mainTrackDataAligned = fragmentAligner.getAccessions();
-        const track = d3
-            .create("protvista-track")
+        const track = $("<protvista-track/>")
             .attr("highlight-event", "none")
             .attr("height", 44)
-            .attr("class", "main")
+            .addClass("main")
             .attr("layout", "non-overlapping")
-            .attr("length", sequence.length)
-            .node() as ProtvistaTrack;
+            .attr("length", sequence.length)[0] as ProtvistaTrack;
 
         const mainTrackRow = createRow(
-            document.createTextNode(this.mainTrackLabel),
-            track,
+            $(document.createTextNode(this.mainTrackLabel)),
+            $(track),
             "main",
             this.displayArrow
         );
-        const emptyTrack = d3
-            .create("protvista-track")
+        const emptyTrack = $("<protvista-track/>")
             .attr("height", 44)
             .attr("length", sequence.length)
-            .attr("class", "empty")
-            .node() as ProtvistaTrack;
+            .addClass("empty")[0] as ProtvistaTrack;
         track.parentElement!.appendChild(emptyTrack);
-        mainTrackRow.attr("class", mainTrackRow.attr("class") + " main");
+        mainTrackRow.addClass("main");
         mainTrackRow
-            .select(".track-label")
-            .attr("class", "track-label main arrow-right")
+            .find(".track-label")
+            .addClass("arrow-right")
+            .removeClass("arrow-down")
             .on("click", () => this.toggle());
         return [
             new MainTrackContainer<Accession[]>(track, emptyTrack, mainTrackDataAligned),
@@ -154,36 +151,26 @@ export default class BasicTrackRenderer implements TrackRenderer {
         ];
     }
 
-    private getSubtracks(sequence: string): [BasicTrackContainer[], HTMLDivElement] {
+    private getSubtracks(sequence: string): [BasicTrackContainer[], HTMLElement] {
         const subtrackContainers: BasicTrackContainer[] = [];
-        const subtracksDiv = d3
-            .create("div")
-            .attr("class", "subtracks-container")
-            .style("display", "none")
-            .node()!;
+        const subtracksDiv = $("<div/>").addClass("subtracks-container").css("display", "none");
         if (this.rows.size >= 5) {
-            subtracksDiv.classList.add("scrollable");
-            subtracksDiv.style.maxHeight = this.rows.size * 43 + "px";
+            subtracksDiv.addClass("scrollable");
+            subtracksDiv.css("maxHeight", this.rows.size * 43 + "px");
         }
         this.rows.forEach((subtrackData) => {
-            const d3Track = d3
-                .create("protvista-track")
+            const subTrack = $("<protvista-track/>")
                 .attr("highlight-event", "none")
                 .attr("height", 44)
-                .attr("layout", "non-overlapping");
-            const subtrack = d3Track.node() as ProtvistaTrack;
-
-            d3.select(subtrack).attr("length", sequence.length);
-            const labelElement = d3.create("div").text(subtrackData.label);
-            const subTrackRowDiv = createRow(
-                labelElement.node()!,
-                subtrack,
-                "sub",
-                this.displayArrow
+                .attr("layout", "non-overlapping")
+                .attr("length", sequence.length);
+            const labelElement = $("<div/>").text(subtrackData.label);
+            const subTrackRowDiv = createRow(labelElement, subTrack, "sub", this.displayArrow);
+            subtracksDiv.append(subTrackRowDiv[0]);
+            subtrackContainers.push(
+                new BasicTrackContainer(subTrack[0] as ProtvistaTrack, subtrackData, labelElement)
             );
-            subtracksDiv.appendChild(subTrackRowDiv.node()!);
-            subtrackContainers.push(new BasicTrackContainer(subtrack, subtrackData, labelElement));
         });
-        return [subtrackContainers, subtracksDiv];
+        return [subtrackContainers, subtracksDiv[0]];
     }
 }

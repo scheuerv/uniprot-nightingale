@@ -3,7 +3,7 @@ import TrackRenderer from "./track-renderer";
 import ProtvistaVariationGraph from "protvista-variation-graph";
 import VariationTrackContainer from "../manager/variation-track-container";
 import { createRow } from "../utils/utils";
-import * as d3 from "d3";
+import $ from "jquery";
 import VariationFilter from "../protvista/variation-filter";
 import VariationCategoryContainer from "../manager/variation-category-container";
 import { createVariantTooltip } from "../tooltip-content";
@@ -20,8 +20,8 @@ import { filterCases } from "../config/filter-cases";
 export default class VariationRenderer implements TrackRenderer {
     private variationGraph: VariationGraphTrackContainer;
     private variation: VariationTrackContainer;
-    private subtracksDiv: HTMLDivElement;
-    private mainTrackRow: d3.Selection<HTMLDivElement, undefined, null, undefined>;
+    private subtracksDiv: JQuery<HTMLElement>;
+    private mainTrackRow: JQuery<HTMLElement>;
 
     constructor(
         private readonly data: VariationData,
@@ -46,48 +46,42 @@ export default class VariationRenderer implements TrackRenderer {
     }
 
     public getCategoryContainer(sequence: string): CategoryContainer {
-        const variationGraph = d3
-            .create("protvista-variation-graph")
+        const variationGraph = $("<protvista-variation-graph/>")
             .attr("highlight-event", "none")
             .attr("id", "protvista-variation-graph")
             .attr("length", sequence.length)
-            .attr("height", 40)
-            .node() as ProtvistaVariationGraph;
+            .attr("height", 40)[0] as ProtvistaVariationGraph;
         this.variationGraph = new VariationGraphTrackContainer(variationGraph, this.data);
-        const variationTrack = d3
-            .create("protvista-variation")
+        const variationTrack = $("<protvista-variation/>")
             .attr("id", "protvista-variation")
             .attr("length", sequence.length)
-            .attr("highlight-event", "none")
-            .node() as FixedProtvistaVariation;
+            .attr("highlight-event", "none")[0] as FixedProtvistaVariation;
         variationTrack.colorConfig = function () {
             return "black";
         };
 
         this.variation = new VariationTrackContainer(variationTrack, this.data);
-        const categoryDiv = d3.create("div").node()!;
+        const categoryDiv = $("<div/>");
         this.mainTrackRow = createRow(
-            document.createTextNode(this.mainTrackLabel),
-            this.variationGraph.track,
+            $(document.createTextNode(this.mainTrackLabel)),
+            $(this.variationGraph.track),
             "main",
             true
         );
-        this.mainTrackRow.attr("class", this.mainTrackRow.attr("class") + " main");
-        this.mainTrackRow
-            .select(".track-label")
-            .attr("class", "track-label main arrow-right")
+        this.mainTrackRow.addClass("main");
+        $(this.mainTrackRow)
+            .find(".track-label")
+            .addClass("arrow-right")
             .on("click", () => this.toggle());
 
-        categoryDiv.appendChild(this.mainTrackRow.node()!);
-        this.subtracksDiv = d3
-            .create("div")
-            .attr("class", "subtracks-container")
-            .style("display", "none")
-            .node()!;
-        const protvistaFilter = d3.create("protvista-filter").node() as VariationFilter;
-        const trackRowDiv = createRow(protvistaFilter, this.variation.track, "sub");
-        trackRowDiv.select(".track-label").insert("i", ":first-child").attr("class", "fas fa-redo");
-        this.subtracksDiv.appendChild(trackRowDiv.node()!);
+        categoryDiv.append(this.mainTrackRow);
+        this.subtracksDiv = $("<div/>").addClass("subtracks-container").css("display", "none");
+        const protvistaFilter = $("<protvista-filter/>")[0] as VariationFilter;
+        const trackRowDiv = createRow($(protvistaFilter), $(this.variation.track), "sub");
+        $(trackRowDiv)
+            .find(".track-label")
+            .prepend($("<i/>", { class: "fas fa-redo" }));
+        this.subtracksDiv.append(trackRowDiv);
         categoryDiv.append(this.subtracksDiv);
         const customSources: Map<string, FilterCase> = new Map();
         const customConsequences: Map<string, FilterCase> = new Map();
@@ -165,8 +159,8 @@ export default class VariationRenderer implements TrackRenderer {
         });
 
         protvistaFilter.filters = filterCases
-            .concat(Array.from(customSources.values()))
-            .concat(Array.from(customConsequences.values()));
+            .concat([...customSources.values()])
+            .concat([...customConsequences.values()]);
         protvistaFilter.multiFor = new Map();
         protvistaFilter.multiFor.set(
             "protvista-variation-graph",
@@ -179,9 +173,9 @@ export default class VariationRenderer implements TrackRenderer {
         return new VariationCategoryContainer(
             this.variationGraph,
             this.variation,
-            categoryDiv,
+            categoryDiv[0],
             protvistaFilter,
-            this.mainTrackRow
+            this.mainTrackRow[0]
         );
     }
 
@@ -192,7 +186,7 @@ export default class VariationRenderer implements TrackRenderer {
         return {
             sequence: variants1.sequence,
             customSources: variants1.customSources.concat(variants2.customSources),
-            variants: Array.from(map.values())
+            variants: [...map.values()]
         };
     }
 
@@ -239,16 +233,18 @@ export default class VariationRenderer implements TrackRenderer {
     }
 
     private toggle() {
-        if (this.subtracksDiv.style.display === "none") {
-            this.subtracksDiv.style.display = "block";
-            this.mainTrackRow
-                .select(".track-label.main")
-                .attr("class", "track-label main arrow-down");
+        if (this.subtracksDiv.css("display") === "none") {
+            this.subtracksDiv.css("display", "block");
+            $(this.mainTrackRow)
+                .find(".track-label.main")
+                .removeClass("arrow-right")
+                .addClass("arrow-down");
         } else {
-            this.subtracksDiv.style.display = "none";
-            this.mainTrackRow
-                .select(".track-label.main")
-                .attr("class", "track-label main arrow-right");
+            this.subtracksDiv.css("display", "none");
+            $(this.mainTrackRow)
+                .find(".track-label.main")
+                .removeClass("arrow-down")
+                .addClass("arrow-right");
         }
     }
 }

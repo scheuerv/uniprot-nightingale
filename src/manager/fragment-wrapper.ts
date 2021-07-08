@@ -1,35 +1,35 @@
-import * as d3 from "d3";
+import $ from "jquery";
 import { Fragment } from "../types/accession";
 import { createEmitter } from "ts-typed-events";
 
 export class FragmentWrapper {
     private readonly emitOnClick = createEmitter<boolean>();
     public readonly onClick = this.emitOnClick.event;
-    private readonly emitOnMarkedChange = createEmitter<boolean>();
+    private readonly emitOnMarkedChange = createEmitter<MarkEvent>();
     public readonly onMarkedChange = this.emitOnMarkedChange.event;
     private isMarked = false;
     constructor(
-        public readonly fragmentElements: ElementWithData[] = [],
+        public readonly fragmentElements: HTMLElementWithData[] = [],
         public readonly fragmentData: Fragment
     ) {
         fragmentElements.forEach((fragmentElement) => {
-            d3.select(fragmentElement).on("click", () => {
+            $(fragmentElement).on("click", (e) => {
                 if (this.isMarked) {
                     this.unmark();
                 } else {
-                    this.mark();
+                    this.mark(e.shiftKey);
                 }
                 this.emitOnClick(this.isMarked);
             });
         });
     }
-    public mark(): void {
+    public mark(highlight: boolean): void {
         if (!this.isMarked) {
             this.fragmentElements.forEach((fragmentElement) => {
                 fragmentElement.classList.add("clicked");
             });
             this.isMarked = true;
-            this.emitOnMarkedChange(this.isMarked);
+            this.emitOnMarkedChange({ isMarked: this.isMarked, highlight });
         }
     }
     public unmark(): void {
@@ -38,11 +38,15 @@ export class FragmentWrapper {
                 fragmentElement.classList.remove("clicked");
             });
             this.isMarked = false;
-            this.emitOnMarkedChange(this.isMarked);
+            this.emitOnMarkedChange({ isMarked: this.isMarked, highlight: false });
         }
     }
 }
 
-export class ElementWithData extends Element {
+export type MarkEvent = {
+    readonly isMarked: boolean;
+    readonly highlight: boolean;
+};
+export class HTMLElementWithData extends HTMLElement {
     public readonly __data__: Fragment;
 }

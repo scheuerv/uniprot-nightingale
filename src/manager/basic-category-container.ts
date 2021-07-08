@@ -1,9 +1,9 @@
-import * as d3 from "d3";
+import $ from "jquery";
 import CategoryContainer from "./category-container";
 import TrackContainer from "./track-container";
 import { createEmitter } from "ts-typed-events";
 import { Fragment, TrackFragment } from "../types/accession";
-import { ElementWithData, FragmentWrapper } from "./fragment-wrapper";
+import { HTMLElementWithData, FragmentWrapper } from "./fragment-wrapper";
 import { RowWrapper, RowWrapperBuilder } from "./row-wrapper";
 import { safeHexColor } from "../utils/color-utils";
 
@@ -14,7 +14,7 @@ export default class BasicCategoryContainer implements CategoryContainer {
 
     constructor(
         private readonly _tracks: TrackContainer[],
-        private readonly _categoryDiv: HTMLDivElement
+        private readonly _categoryDiv: HTMLElement
     ) {}
 
     public get content(): HTMLElement {
@@ -45,17 +45,17 @@ export default class BasicCategoryContainer implements CategoryContainer {
     public addData(): void {
         this._tracks.forEach((track) => track.addData());
         const map: Map<number, ElementAndBuilder[]> = new Map();
-        const mainRowElement = d3.select(this._categoryDiv).select(".track-row.main");
+        const mainRowElement = $(this._categoryDiv).find(".track-row.main");
         const rowWrapperBuilders: RowWrapperBuilder[] = [];
-        const arrowElement = mainRowElement.select(".fa-arrow-circle-right").node() as Element;
-        if (arrowElement) {
-            const mainRowWrapperBuilder = new RowWrapperBuilder(arrowElement);
+        const arrowElement = mainRowElement.find(".fa-arrow-circle-right");
+        if (arrowElement.length > 0) {
+            const mainRowWrapperBuilder = new RowWrapperBuilder(arrowElement[0]);
             rowWrapperBuilders.push(mainRowWrapperBuilder);
             mainRowElement
-                .selectAll(".fragment-group")
-                .nodes()
+                .find(".fragment-group")
+                .get()
                 .forEach((fragment) => {
-                    const fragmentWithData = fragment as ElementWithData;
+                    const fragmentWithData = fragment as HTMLElementWithData;
                     map.set(fragmentWithData.__data__.id, [
                         {
                             element: fragmentWithData,
@@ -64,22 +64,20 @@ export default class BasicCategoryContainer implements CategoryContainer {
                     ]);
                 });
         }
-        d3.select(this._categoryDiv)
-            .selectAll(".subtracks-container .track-row")
-            .nodes()
-            .forEach((row) => {
-                const rowSelection = d3.select(row);
-                const arrowElement = rowSelection
-                    .select(".fa-arrow-circle-right")
-                    .node() as Element;
-                if (arrowElement) {
-                    const rowWrapperBuilder = new RowWrapperBuilder(arrowElement);
+        $(this._categoryDiv)
+            .find(".subtracks-container .track-row")
+            .get()
+            .forEach((row: Element) => {
+                const rowSelection = $(row);
+                const arrowElement = rowSelection.find(".fa-arrow-circle-right");
+                if (arrowElement.length > 0) {
+                    const rowWrapperBuilder = new RowWrapperBuilder(arrowElement[0]);
                     rowWrapperBuilders.push(rowWrapperBuilder);
                     rowSelection
-                        .selectAll(".fragment-group")
-                        .nodes()
+                        .find(".fragment-group")
+                        .get()
                         .forEach((fragment) => {
-                            const fragmentWithData = fragment as ElementWithData;
+                            const fragmentWithData = fragment as HTMLElementWithData;
                             map.get(fragmentWithData.__data__.id)?.push({
                                 element: fragmentWithData,
                                 builder: rowWrapperBuilder
@@ -124,6 +122,6 @@ export default class BasicCategoryContainer implements CategoryContainer {
 }
 
 type ElementAndBuilder = {
-    readonly element: ElementWithData;
+    readonly element: HTMLElementWithData;
     readonly builder: RowWrapperBuilder;
 };

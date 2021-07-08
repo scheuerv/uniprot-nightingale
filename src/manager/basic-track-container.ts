@@ -11,16 +11,16 @@ export default class BasicTrackContainer implements TrackContainer {
     constructor(
         public readonly track: ProtvistaTrack,
         private readonly trackRow: TrackRow,
-        private readonly labelElement: d3.Selection<HTMLDivElement, undefined, null, undefined>
+        private readonly labelElement: JQuery<HTMLElement>
     ) {
         if (trackRow.output) {
-            labelElement.style("cursor", "pointer");
+            labelElement.css("cursor", "pointer");
             labelElement.on("mouseover", () => {
-                labelElement.classed("bold", true);
+                labelElement.addClass("bold");
             });
             labelElement.on("mouseout", () => {
                 if (!this.active) {
-                    labelElement.classed("bold", false);
+                    labelElement.removeClass("bold");
                 }
             });
             labelElement.on("click", () => {
@@ -35,12 +35,12 @@ export default class BasicTrackContainer implements TrackContainer {
 
     public activate(): void {
         this.active = true;
-        this.labelElement.classed("bold", true);
+        this.labelElement.addClass("bold");
     }
 
     public deactivate(): void {
         this.active = false;
-        this.labelElement.classed("bold", false);
+        this.labelElement.removeClass("bold");
     }
 
     public addData(): void {

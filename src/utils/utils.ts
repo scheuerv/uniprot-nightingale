@@ -1,4 +1,4 @@
-import * as d3 from "d3";
+import $ from "jquery";
 import ColorConvert from "color-convert";
 import { HSV } from "color-convert/conversions";
 
@@ -13,29 +13,27 @@ export function loadComponent(name: string, className: CustomElementConstructor)
 }
 
 export function createRow(
-    label: Node,
-    content: Node,
+    label: JQuery<Text> | JQuery<HTMLElement>,
+    content: JQuery<HTMLElement>,
     customClass = "",
     arrow = false
-): d3.Selection<HTMLDivElement, undefined, null, undefined> {
-    const labelWrapper: HTMLSpanElement = d3
-        .create("span")
-        .attr("title", label.textContent ?? "")
-        .node()!;
+): JQuery<HTMLElement> {
+    const labelWrapper = $("<span/>").attr("title", label.text());
     if (arrow) {
-        labelWrapper.appendChild(d3.create("i").attr("class", "fas fa-arrow-circle-right").node()!);
+        labelWrapper.append($("<i/>", { class: "fas fa-arrow-circle-right" }));
     }
-    labelWrapper.appendChild(label);
-    const row = d3.create("div").attr("class", "track-row");
-    row.append("div")
-        .attr("class", "track-label " + customClass)
-        .node()
-        ?.appendChild(labelWrapper);
-    row.append("div")
-        .attr("class", "track-content " + customClass)
-        .node()
-        ?.appendChild(content);
-    return row;
+    return $("<div/>")
+        .addClass("track-row")
+        .append(
+            $("<div/>")
+                .addClass("track-label " + customClass)
+                .append(labelWrapper.append(label))
+        )
+        .append(
+            $("<div/>")
+                .addClass("track-content " + customClass)
+                .append(content)
+        );
 }
 
 export function getDarkerColor(color: string | undefined): string {

@@ -1,5 +1,5 @@
 import ColorConvert from "color-convert";
-export function safeHexColor(color?: string) {
+export function safeHexColor(color?: string): string {
     let match = color?.match(/^#[0-9a-f]{3,6}$/i);
     let convertedColor = "";
     if (match) {

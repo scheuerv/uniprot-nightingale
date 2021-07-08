@@ -1,4 +1,5 @@
 import * as d3 from "d3";
+import $ from "jquery";
 import CategoryContainer from "./category-container";
 import { createRow } from "../utils/utils";
 import ProtvistaManager from "protvista-manager";
@@ -9,7 +10,7 @@ import "overlayscrollbars/css/OverlayScrollbars.min.css";
 import TrackContainer from "./track-container";
 import TrackRenderer from "../renderers/track-renderer";
 import { Fragment, Output, TrackFragment } from "../types/accession";
-import { ElementWithData } from "./fragment-wrapper";
+import { HTMLElementWithData } from "./fragment-wrapper";
 import { ChainMapping } from "../types/mapping";
 import { Highlight } from "../types/highlight";
 export default class TrackManager {
@@ -23,19 +24,15 @@ export default class TrackManager {
     public readonly onHighlightChange = this.emitOnHighlightChange.event;
     private lastClickedFragment:
         | {
-              fragment: ElementWithData;
+              fragment: HTMLElementWithData;
               mouseX: number;
               mouseY: number;
           }
         | undefined;
-    private readonly protvistaManagerD3 = d3
-        .create("protvista-manager")
-        .attr(
-            "attributes",
-            "length displaystart displayend highlightstart highlightend activefilters filters"
-        );
-    private readonly protvistaManager: ProtvistaManager =
-        this.protvistaManagerD3.node()! as ProtvistaManager;
+    private readonly protvistaManager = $("<protvista-manager/>").attr(
+        "attributes",
+        "length displaystart displayend highlightstart highlightend activefilters filters"
+    ) as JQuery<ProtvistaManager>;
     private fixedHighlights = "";
     private clickedHighlights = "";
     private publicHighlights = "";
@@ -45,18 +42,13 @@ export default class TrackManager {
 
     constructor(element: HTMLElement, sequence: string, trackRenderers: TrackRenderer[]) {
         this.activeStructure = undefined;
-        const navigationElement = d3.create("protvista-navigation").attr("length", sequence.length);
-        this.protvistaManager.appendChild(
-            createRow(d3.create("div").node()!, navigationElement.node()!).node()!
-        );
-        const sequenceElement = d3
-            .create("protvista-sequence")
+        const navigationElement = $("<protvista-navigation/>").attr("length", sequence.length);
+        this.protvistaManager.append(createRow($("<div/>"), navigationElement));
+        const sequenceElement = $("<protvista-sequence/>")
             .attr("length", sequence.length)
             .attr("sequence", sequence)
             .attr("numberofticks", 10);
-        this.protvistaManager.appendChild(
-            createRow(d3.create("div").node()!, sequenceElement.node()!).node()!
-        );
+        this.protvistaManager.append(createRow($("<div/>"), sequenceElement));
         trackRenderers.forEach((renderer) => {
             const categoryContainer = renderer.getCategoryContainer(sequence);
             const trackContainer = categoryContainer.getFirstTrackContainerWithOutput();
@@ -69,10 +61,10 @@ export default class TrackManager {
                 this.emitOnSelectedStructure(output);
             }
             this.categoryContainers.push(categoryContainer);
-            this.protvistaManager.appendChild(categoryContainer.content);
+            this.protvistaManager.append(categoryContainer.content);
         });
 
-        element.appendChild(this.protvistaManager);
+        $(element).append(this.protvistaManager);
         this.categoryContainers.forEach((categoryContainer) => {
             categoryContainer.trackContainers.forEach((trackContainer) => {
                 trackContainer.onLabelClick.on((output) => {
@@ -157,8 +149,8 @@ export default class TrackManager {
                 } else {
                     const mouseX = boundingRect.width * this.lastClickedFragment.mouseX;
                     const mouseY = boundingRect.height * this.lastClickedFragment.mouseY;
-                    this.protvistaManagerD3
-                        .select("protvista-tooltip")
+                    this.protvistaManager
+                        .find("protvista-tooltip")
                         .attr("x", boundingRect.x + mouseX)
                         .attr("y", boundingRect.y + mouseY)
                         .attr("visible", "");
@@ -174,14 +166,14 @@ export default class TrackManager {
             }
         });
         resizeObserver.observe(element);
-        const protvistaNavigation = this.protvistaManagerD3
-            .select("protvista-navigation")
-            .node() as ProtvistaNavigation;
+        const protvistaNavigation = this.protvistaManager.find(
+            "protvista-navigation"
+        )[0] as ProtvistaNavigation;
         let lastFocusedResidue: number | undefined;
-        this.protvistaManagerD3
-            .selectAll("protvista-variation")
-            .on("change", () => {
-                const detail = d3.event.detail;
+        this.protvistaManager
+            .find("protvista-variation")
+            .on("change", (e) => {
+                const detail = e.detail as any;
                 if (detail.eventtype == "mouseover") {
                     const feature = detail.feature as {
                         start: number;
@@ -202,10 +194,11 @@ export default class TrackManager {
                 this.applyHighlights();
                 this.emitOnFragmentMouseOut.emit();
             });
-        this.protvistaManagerD3
-            .selectAll("protvista-track g.fragment-group")
-            .on("mousemove", (f) => {
-                const feature = f as { start: number; end: number };
+        this.protvistaManager
+            .find("protvista-track g.fragment-group")
+            .on("mousemove", (e) => {
+                const element = e.target as HTMLElementWithData;
+                const feature = element.__data__;
                 const xScale = d3
                     .scaleLinear<number>()
                     .domain([0, protvistaNavigation.width - 2 * protvistaNavigation._padding])
@@ -217,7 +210,7 @@ export default class TrackManager {
                 // console.log(e.offsetX - protvistaNavigation._padding);
                 // console.log(e.offsetX);
                 const residueNumber = Math.max(
-                    Math.min(xScale(d3.event.offsetX - protvistaNavigation._padding), feature.end),
+                    Math.min(xScale(e.offsetX - protvistaNavigation._padding), feature.end),
                     feature.start
                 );
                 if (lastFocusedResidue != residueNumber) {
@@ -294,18 +287,21 @@ export default class TrackManager {
     }
 
     private applyHighlights(): void {
-        this.protvistaManager.highlight = `${this.fixedHighlights ?? ""}${
-            this.clickedHighlights ? "," + this.clickedHighlights : ""
-        }${this.publicHighlights ? "," + this.publicHighlights : ""}${
-            this.mouseoverHighlights ? "," + this.mouseoverHighlights : ""
-        }`;
-        this.protvistaManager.applyAttributes();
+        this.protvistaManager.attr(
+            "highlight",
+            `${this.fixedHighlights ?? ""}${
+                this.clickedHighlights ? "," + this.clickedHighlights : ""
+            }${this.publicHighlights ? "," + this.publicHighlights : ""}${
+                this.mouseoverHighlights ? "," + this.mouseoverHighlights : ""
+            }`
+        );
+        this.protvistaManager[0].applyAttributes();
     }
 
     private updateTooltip(detail: EventDetail, resizeObserver: ResizeObserver): void {
-        const previousTooltip = this.protvistaManagerD3.select("protvista-tooltip");
+        const previousTooltip = this.protvistaManager.find("protvista-tooltip");
         if (detail.eventtype == "mouseout") {
-            if (previousTooltip.empty() || !previousTooltip.classed("click-open")) {
+            if (previousTooltip.length == 0 || !previousTooltip.hasClass("click-open")) {
                 this.removeAllTooltips();
             }
             return;
@@ -315,7 +311,7 @@ export default class TrackManager {
             return;
         }
         if (detail.eventtype == "mouseover") {
-            if (previousTooltip.empty() || !previousTooltip.classed("click-open")) {
+            if (previousTooltip.length == 0 || !previousTooltip.hasClass("click-open")) {
                 this.removeAllTooltips();
                 this.createTooltip(detail, resizeObserver);
             }
@@ -335,20 +331,14 @@ export default class TrackManager {
         }
         if (detail.target) {
             const fragment: Fragment = detail.target.__data__;
-            this.protvistaManagerD3
-                .selectAll("protvista-tooltip")
-                .data([fragment])
-                .enter()
-                .append("protvista-tooltip");
-            this.protvistaManagerD3
-                .selectAll("protvista-tooltip")
+            this.findOrCreateTooltip()
                 .attr("x", detail.coords[0])
                 .attr("y", detail.coords[1])
                 .attr("title", fragment.tooltipContent?.title ?? "")
-                .attr("visible", true)
+                .attr("visible", "true")
                 .html(fragment.tooltipContent?.content ?? "");
             if (closeable) {
-                const fragment: ElementWithData = detail.target;
+                const fragment: HTMLElementWithData = detail.target;
                 const boundingRect: DOMRect = fragment.getBoundingClientRect();
                 const mouseX: number = (detail.coords[0] - boundingRect.x) / boundingRect.width;
                 const mouseY: number = (detail.coords[1] - boundingRect.y) / boundingRect.height;
@@ -358,13 +348,22 @@ export default class TrackManager {
                     mouseY: mouseY
                 };
                 resizeObserver.observe(this.lastClickedFragment.fragment);
-                this.protvistaManagerD3.select("protvista-tooltip").classed("click-open", true);
+                this.protvistaManager.find("protvista-tooltip").addClass("click-open");
             }
         }
     }
+    private findOrCreateTooltip(): JQuery<HTMLElement> {
+        const lastTooltip = this.protvistaManager.find("protvista-tooltip");
+        if (lastTooltip.length == 0) {
+            const newTooltip = $("<protvista-tooltip/>");
+            this.protvistaManager.append(newTooltip);
+            return newTooltip;
+        }
+        return lastTooltip;
+    }
 
     private removeAllTooltips(): void {
-        this.protvistaManagerD3.selectAll("protvista-tooltip").remove();
+        this.protvistaManager.find("protvista-tooltip").remove();
     }
 }
 type ActiveStructure = {
@@ -375,5 +374,5 @@ type ActiveStructure = {
 type EventDetail = {
     readonly eventtype: string;
     readonly coords: number[];
-    readonly target: ElementWithData | undefined;
+    readonly target: HTMLElementWithData | undefined;
 };
