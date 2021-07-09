@@ -164,7 +164,13 @@ export default class TrackManagerBuilder {
                     this.config?.categoryOrder
                 );
 
-                const trackManager = new TrackManager(element, sequence, trackRenderers);
+                const trackManager = new TrackManager(
+                    element,
+                    sequence,
+                    trackRenderers.map((trackRenderer) =>
+                        trackRenderer.getCategoryContainer(sequence)
+                    )
+                );
                 this.emitOnRendered.emit();
                 return trackManager;
             })

@@ -8,7 +8,6 @@ import ProtvistaNavigation from "protvista-navigation";
 import OverlayScrollbars from "overlayscrollbars";
 import "overlayscrollbars/css/OverlayScrollbars.min.css";
 import TrackContainer from "./track-container";
-import TrackRenderer from "../renderers/track-renderer";
 import { Fragment, Output, TrackFragment } from "../types/accession";
 import { HTMLElementWithData } from "./fragment-wrapper";
 import { ChainMapping } from "../types/mapping";
@@ -40,8 +39,8 @@ export default class TrackManager {
     private readonly categoryContainers: CategoryContainer[] = [];
     private activeStructure?: ActiveStructure = undefined;
 
-    constructor(element: HTMLElement, sequence: string, trackRenderers: TrackRenderer[]) {
-        this.activeStructure = undefined;
+    constructor(element: HTMLElement, sequence: string, categoryContainers: CategoryContainer[]) {
+        this.categoryContainers = categoryContainers;
         const navigationElement = $("<protvista-navigation/>").attr("length", sequence.length);
         this.protvistaManager.append(createRow($("<div/>"), navigationElement));
         const sequenceElement = $("<protvista-sequence/>")
@@ -49,8 +48,7 @@ export default class TrackManager {
             .attr("sequence", sequence)
             .attr("numberofticks", 10);
         this.protvistaManager.append(createRow($("<div/>"), sequenceElement));
-        trackRenderers.forEach((renderer) => {
-            const categoryContainer = renderer.getCategoryContainer(sequence);
+        this.categoryContainers.forEach((categoryContainer) => {
             const trackContainer = categoryContainer.getFirstTrackContainerWithOutput();
             if (trackContainer && !this.activeStructure) {
                 const output = trackContainer.getOutput()!;
@@ -60,7 +58,6 @@ export default class TrackManager {
                 this.setChainHighlights(chainMapping);
                 this.emitOnSelectedStructure(output);
             }
-            this.categoryContainers.push(categoryContainer);
             this.protvistaManager.append(categoryContainer.content);
         });
 
