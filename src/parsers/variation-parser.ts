@@ -11,7 +11,7 @@ import {
 } from "../types/variants";
 import { AminoAcid } from "protvista-variation-adapter/dist/es/variants";
 import { ErrorResponse } from "../types/error-response";
-export default class VariationParser implements TrackParser {
+export default class VariationParser implements TrackParser<ProteinsAPIVariation> {
     private readonly categoryLabel = "Variation";
     public readonly categoryName = "VARIATION";
 

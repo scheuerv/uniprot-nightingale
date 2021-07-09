@@ -1,3 +1,6 @@
+/**
+ * @jest-environment jest-environment-jsdom
+ */
 import { OtherSourceData, VariantWithSources } from "../src/types/variants";
 import { createFeatureTooltip, createVariantTooltip } from "../src/tooltip-content";
 import {
@@ -8,7 +11,7 @@ import {
     Source,
     SourceType
 } from "protvista-variation-adapter/dist/es/variants";
-import { Feature } from "protvista-feature-adapter/src/BasicHelper";
+import { Feature } from "../src/types/feature";
 describe("TooltipContent tests", function () {
     describe("createFeatureTooltip", function () {
         it("basic case", async () => {

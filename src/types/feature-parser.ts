@@ -1,4 +1,4 @@
-import { Feature } from "protvista-feature-adapter/src/BasicHelper";
+import { Feature } from "./feature";
 
 export type ProteinFeatureInfo = {
     readonly sequence: string;

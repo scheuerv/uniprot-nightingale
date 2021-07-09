@@ -10,7 +10,7 @@ import {
 } from "../utils/fragment-mapping-utils";
 import { PDBParserData, StructureData } from "../types/pdb-parser";
 
-export default class PdbParser implements TrackParser {
+export default class PdbParser implements TrackParser<PDBParserData> {
     private readonly observedColor = "#2e86c1";
     private readonly unobservedColor = "#bdbfc1";
     private id = 1;

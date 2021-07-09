@@ -2,26 +2,16 @@ import { config } from "protvista-track/src/config";
 import ecoMap from "protvista-feature-adapter/src/evidences";
 import { groupBy } from "./utils/utils";
 import { Association, Prediction, SourceType } from "protvista-variation-adapter/dist/es/variants";
-import {
-    formatTooltip as featureFormatTooltip,
-    DbReferenceObject,
-    Feature,
-    Evidence
-} from "protvista-feature-adapter/src/BasicHelper";
 import { existAssociation } from "./utils/variants-utils";
 import { TooltipContent } from "./types/tooltip-content";
 import { OtherSourceData, VariantWithSources } from "./types/variants";
 import { noBlastTypes } from "./config/no-blast-types";
+import { Evidence } from "protvista-variation-adapter/dist/es/variants";
+import { Xref } from "protvista-variation-adapter/dist/es/variants";
+import { Feature } from "./types/feature";
 
 export interface TooltipData {
     render(): string;
-}
-class TooltipGeneral implements TooltipData {
-    constructor(private readonly content: string) {}
-
-    public render(): string {
-        return this.content;
-    }
 }
 
 class TooltipDataTable implements TooltipData {
@@ -55,23 +45,19 @@ class TooltipDataTable implements TooltipData {
                 const sources = evidences
                     .filter((evidence) => evidence.source)
                     .map((evidence) => evidence.source!);
-                const convertedSources: DbReferenceObject[] = convertSources(
-                    uniprotId,
-                    sources,
-                    code
-                );
+                const convertedSources: Xref[] = convertSources(uniprotId, sources, code);
                 this.addRowIfContentDefined("Evidence", getEvidenceText(code, convertedSources));
-                const groupedSourcesByName: Map<string, DbReferenceObject[]> = groupBy(
+                const groupedSourcesByName: Map<string, Xref[]> = groupBy(
                     convertedSources,
                     (source) => source.name
                 );
-                groupedSourcesByName.forEach((sources: DbReferenceObject[], name: string) => {
+                groupedSourcesByName.forEach((sources: Xref[], name: string) => {
                     this.addRowIfContentDefined(
                         "",
                         getEvidenceXRefLinks({
                             sources: sources,
                             name: name,
-                            text: (source: DbReferenceObject) => source.id,
+                            text: (source: Xref) => source.id,
                             alternative: false
                         })
                     );
@@ -81,7 +67,7 @@ class TooltipDataTable implements TooltipData {
                             getEvidenceXRefLinks({
                                 sources: sources,
                                 name: "EuropePMC",
-                                text: (source: DbReferenceObject) => source.id,
+                                text: (source: Xref) => source.id,
                                 alternative: true
                             })
                         );
@@ -92,7 +78,7 @@ class TooltipDataTable implements TooltipData {
         return this;
     }
 
-    public addXRefsIfDefined(xrefs?: DbReferenceObject[]): TooltipDataTable {
+    public addXRefsIfDefined(xrefs?: Xref[]): TooltipDataTable {
         if (xrefs) {
             const groupedXrefsByCode = groupBy(
                 xrefs.filter((xref) => xref.id != undefined),
@@ -106,7 +92,7 @@ class TooltipDataTable implements TooltipData {
                         getEvidenceXRefLinks({
                             sources: groupedXrefsById,
                             name: id,
-                            text: (source: DbReferenceObject) => source.name,
+                            text: (source: Xref) => source.name,
                             alternative: false
                         })
                     );
@@ -117,7 +103,7 @@ class TooltipDataTable implements TooltipData {
                         getEvidenceXRefLinks({
                             sources: groupedXrefsById,
                             name: id,
-                            text: (source: DbReferenceObject) => source.name,
+                            text: (source: Xref) => source.name,
                             alternative: false
                         })
                     );
@@ -180,11 +166,6 @@ export default class TooltipContentBuilder {
     public addDataTable(title?: string): TooltipDataTable {
         const table = new TooltipDataTable(title);
         return this.addData(table);
-    }
-
-    public addFeature(feature: Feature): TooltipGeneral {
-        const general = new TooltipGeneral(featureFormatTooltip(feature));
-        return this.addData(general);
     }
 
     public build(): TooltipContent {
@@ -373,11 +354,7 @@ export function createVariantTooltip(
     return tooltipContent.build();
 }
 
-function convertSources(
-    uniprotId: string,
-    sources: DbReferenceObject[],
-    code: string
-): DbReferenceObject[] {
+function convertSources(uniprotId: string, sources: Xref[], code: string): Xref[] {
     const eco = ecoMap.filter((record) => record.name == code)[0];
     const acronym = eco?.acronym;
     if (acronym === "EXP" || acronym === "NAS") {
@@ -429,7 +406,7 @@ function convertTypeToLabel(name: string) {
     return label;
 }
 
-function getEvidenceText(code: string, sources: DbReferenceObject[]) {
+function getEvidenceText(code: string, sources: Xref[]) {
     const eco = ecoMap.filter((record) => record.name == code)[0];
     const acronym = eco?.acronym;
     let publications = sources.filter(
@@ -470,9 +447,9 @@ function getEvidenceText(code: string, sources: DbReferenceObject[]) {
 }
 
 function getEvidenceXRefLinks(info: {
-    sources: DbReferenceObject[];
+    sources: Xref[];
     name: string;
-    text: (source: DbReferenceObject) => string;
+    text: (source: Xref) => string;
     alternative: boolean;
 }) {
     let text = info.name + " ";

@@ -112,10 +112,6 @@ export default class BasicCategoryContainer implements CategoryContainer {
         });
     }
 
-    public get rowWrappers(): RowWrapper[] {
-        return this._rowWrappers;
-    }
-
     public get trackContainers(): TrackContainer[] {
         return this._tracks;
     }

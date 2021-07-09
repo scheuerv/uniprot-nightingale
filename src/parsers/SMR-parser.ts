@@ -6,7 +6,7 @@ import FragmentAligner from "./fragment-aligner";
 import { Fragment, Output, TrackRow } from "../types/accession";
 import { ChainMapping } from "../types/mapping";
 import { SMRData, SMRResult, SMRChain, SMRSegment } from "../types/SMR-parser";
-export default class SMRParser implements TrackParser {
+export default class SMRParser implements TrackParser<SMRData> {
     private readonly categorylabel = "Predicted structures";
     public readonly categoryName = "PREDICTED_STRUCTURES";
     private readonly color = "#2e86c1";

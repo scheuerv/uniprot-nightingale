@@ -1,5 +1,6 @@
-import { Feature } from "protvista-feature-adapter/src/BasicHelper";
-import { PDBParserItem } from "./pdb-parser";
+import { Feature } from "./feature";
+import { PDBParserData } from "./pdb-parser";
+import { VariantWithCategory } from "./variants";
 
 export type Config = {
     readonly uniprotId: string;
@@ -10,7 +11,7 @@ export type Config = {
     readonly customDataSources?: CustomDataSource[];
     readonly overwritePredictions?: boolean;
     readonly sequence?: string;
-    readonly sequenceStructureMapping?: PDBParserItem;
+    readonly sequenceStructureMapping?: PDBParserData;
 };
 
 export type CustomDataSource = {
@@ -25,6 +26,4 @@ export type CustomDataSourceData = {
     readonly features: CustomDataSourceFeature[];
 };
 
-export type CustomDataSourceFeature = Feature & {
-    readonly category: string;
-};
+export type CustomDataSourceFeature = Feature | VariantWithCategory;

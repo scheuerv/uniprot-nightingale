@@ -14,6 +14,7 @@ export type ProteinsAPIVariation = {
 };
 
 export type VariantWithSources = Partial<Variant> & {
+    readonly type: string;
     readonly otherSources?: Record<string, OtherSourceData>;
     readonly tooltipContent?: TooltipContent;
     readonly description?: string;
@@ -37,4 +38,8 @@ export type VariationData = {
     readonly sequence: string;
     readonly customSources: string[];
     readonly variants: VariantWithSources[];
+};
+
+export type VariantWithCategory = VariantWithSources & {
+    readonly category: string;
 };

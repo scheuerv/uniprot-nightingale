@@ -3,13 +3,13 @@ import FragmentAligner from "./fragment-aligner";
 import TrackParser, { isErrorResponse } from "./track-parser";
 import TrackRenderer from "../renderers/track-renderer";
 import { config as trackConfig } from "protvista-track/src/config";
-import { Feature } from "protvista-feature-adapter/src/BasicHelper";
 import { TrackRow } from "../types/accession";
 import { FeatureFragmentConverter } from "./feature-fragment-converter";
 import { ProteinFeatureInfo } from "../types/feature-parser";
 import { ErrorResponse } from "../types/error-response";
 import { categoriesConfig } from "../config/feature-categories";
-export default class FeatureParser implements TrackParser {
+import { Feature } from "../types/feature";
+export default class FeatureParser implements TrackParser<ProteinFeatureInfo> {
     public readonly categoryName = "FEATURES";
     private readonly unique = "UNIQUE";
     private readonly nonUnique = "NON_UNIQUE";

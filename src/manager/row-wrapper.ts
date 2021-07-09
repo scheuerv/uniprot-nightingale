@@ -8,7 +8,10 @@ export class RowWrapper {
     public readonly onHighlightChange = this.emitOnHighlightChange.event;
     private readonly markedFragments = new Set<FragmentWrapper>();
     private readonly higlightedFragments = new Set<FragmentWrapper>();
-    constructor(readonly arrowElement: Element, readonly fragmentWrappers: FragmentWrapper[]) {
+    constructor(
+        private readonly arrowElement: Element,
+        private readonly fragmentWrappers: FragmentWrapper[]
+    ) {
         $(arrowElement).on("click", this.arrowClick());
         fragmentWrappers.forEach((fragmentWrapper) => {
             fragmentWrapper.onClick.on(() => {
@@ -55,7 +58,7 @@ export class RowWrapper {
     public clearHighlightedTrackFragments(): void {
         this.higlightedFragments.clear();
     }
-    private arrowClick() {
+    private arrowClick(): () => boolean {
         return () => {
             if (this.arrowElement.classList.contains("clicked")) {
                 this.fragmentWrappers.forEach((fragment) => {

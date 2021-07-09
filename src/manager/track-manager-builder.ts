@@ -13,8 +13,9 @@ import CustomLoader from "../loaders/custom-loader";
 import { Config, CustomDataSourceFeature } from "../types/config";
 import TrackManager from "./track-manager";
 import { createEmitter } from "ts-typed-events";
+import { VariantWithCategory, VariantWithSources } from "src/types/variants";
 export default class TrackManagerBuilder {
-    private readonly tracks: Track[] = [];
+    private readonly tracks: Track<any>[] = [];
     private readonly uniprotId: string;
     private readonly emitOnRendered = createEmitter<void>();
     public readonly onRendered = this.emitOnRendered.event;
@@ -97,11 +98,11 @@ export default class TrackManagerBuilder {
                 );
             }
             if (customDataSource.data) {
-                const variationFeatures: CustomDataSourceFeature[] = [];
+                const variationFeatures: VariantWithSources[] = [];
                 const otherFeatures: CustomDataSourceFeature[] = [];
                 customDataSource.data.features.forEach((feature) => {
                     if (feature.category == "VARIATION") {
-                        variationFeatures.push(feature);
+                        variationFeatures.push(feature as VariantWithCategory);
                     } else {
                         otherFeatures.push(feature);
                     }
@@ -172,19 +173,19 @@ export default class TrackManagerBuilder {
             });
     }
 
-    public addLoaderTrack<T>(dataLoader: Loader<T>, parser: TrackParser): void {
+    public addLoaderTrack<T>(dataLoader: Loader<T>, parser: TrackParser<T>): void {
         if (!this.config?.exclusions?.includes(parser.categoryName)) {
             this.tracks.push({ dataLoader: dataLoader, parser });
         }
     }
 
-    public addCustomTrack<T>(dataLoader: (uniprotId: string) => T, parser: TrackParser): void {
+    public addCustomTrack<T>(dataLoader: (uniprotId: string) => T, parser: TrackParser<T>): void {
         this.addLoaderTrack(new CustomLoader(dataLoader), parser);
     }
 
     public addFetchTrack<T>(
         urlGenerator: (uniprotId: string) => string,
-        parser: TrackParser,
+        parser: TrackParser<T>,
         mapper?: (data: any) => T
     ): void {
         this.addLoaderTrack(new FetchLoader(urlGenerator, mapper), parser);
@@ -218,7 +219,7 @@ export default class TrackManagerBuilder {
     }
 }
 
-type Track = {
-    readonly dataLoader: Loader<any>;
-    readonly parser: TrackParser;
+type Track<T> = {
+    readonly dataLoader: Loader<T>;
+    readonly parser: TrackParser<T>;
 };
