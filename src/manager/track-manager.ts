@@ -19,8 +19,8 @@ export default class TrackManager {
     public readonly onSelectedStructure = this.emitOnSelectedStructure.event;
     private readonly emitOnFragmentMouseOut = createEmitter<void>();
     public readonly onFragmentMouseOut = this.emitOnFragmentMouseOut.event;
-    private readonly emitOnHighlightChange = createEmitter<TrackFragment[]>();
-    public readonly onHighlightChange = this.emitOnHighlightChange.event;
+    private readonly emitOnMarkChange = createEmitter<TrackFragment[]>();
+    public readonly onMarkChange = this.emitOnMarkChange.event;
     private lastClickedFragment:
         | {
               fragment: HTMLElementWithData;
@@ -128,7 +128,7 @@ export default class TrackManager {
                     })
                     .join(",");
                 this.applyHighlights();
-                this.emitOnHighlightChange.emit(
+                this.emitOnMarkChange.emit(
                     this.categoryContainers.flatMap((categoryContainer) =>
                         categoryContainer.getMarkedTrackFragments()
                     )
