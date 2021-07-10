@@ -13,7 +13,7 @@ import CustomLoader from "../loaders/custom-loader";
 import { Config, CustomDataSourceFeature } from "../types/config";
 import TrackManager from "./track-manager";
 import { createEmitter } from "ts-typed-events";
-import { VariantWithCategory, VariantWithSources } from "src/types/variants";
+import { VariantWithCategory, VariantWithSources } from "../types/variants";
 export default class TrackManagerBuilder {
     private readonly tracks: Track<any>[] = [];
     private readonly uniprotId: string;

@@ -383,7 +383,7 @@ describe("PDBParser tests", function () {
         await expect(instance.parse("P37840", loadedData)).resolves.toEqual(expectedResult);
     });
 
-    it("data and uri provided", async () => {
+    it("data and url provided", async () => {
         instance = new PdbParser();
         const parserChainMapping: ParserChainMapping = {
             struct_asym_id: "A",
@@ -527,12 +527,12 @@ describe("PDBParser tests", function () {
         const restoreConsole = mockConsole();
         await expect(instance.parse("P37840", loadedData)).resolves.toEqual(expectedResult);
         expect(console.warn).toHaveBeenCalledWith(
-            "Structure parameter provides information about both uri and data. Uri will be used."
+            "Structure parameter provides information about both url and data. Url will be used."
         );
         restoreConsole();
     });
 
-    it("no data nor uri provided", async () => {
+    it("no data nor url provided", async () => {
         instance = new PdbParser();
         const parserChainMapping: ParserChainMapping = {
             struct_asym_id: "A",
@@ -591,7 +591,7 @@ describe("PDBParser tests", function () {
             }
         ];
         await expect(instance.parse("P37840", loadedData)).rejects.toThrowError(
-            "Structure parameter requires information about uri or data."
+            "Structure parameter requires information about url or data."
         );
     });
 
@@ -704,7 +704,7 @@ describe("PDBParser tests", function () {
         const restoreConsole = mockConsole();
         await expect(instance.parse("P37840", loadedData)).resolves.toEqual(expectedResult);
         expect(console.warn).toHaveBeenCalledWith(
-            "Structure parameter provides information about both uri and data. Uri will be used."
+            "Structure parameter provides information about both url and data. Url will be used."
         );
         restoreConsole();
     });
