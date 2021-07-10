@@ -54,21 +54,21 @@ export default class PdbParser implements TrackParser<PDBParserData> {
                         const uniprotStart: number = pdbParserItem.unp_start;
                         const uniprotEnd: number = pdbParserItem.unp_end;
                         const structure: StructureData = pdbParserItem.structure;
-                        if (structure.uri && structure.data) {
+                        if (structure.url && structure.data) {
                             console.warn(
-                                "Structure parameter provides information about both uri and data. Uri will be used."
+                                "Structure parameter provides information about both url and data. Url will be used."
                             );
-                        } else if (!structure.uri && !structure.data) {
+                        } else if (!structure.url && !structure.data) {
                             throw Error(
-                                "Structure parameter requires information about uri or data."
+                                "Structure parameter requires information about url or data."
                             );
                         }
                         const output: Output = {
                             pdbId: pdbId,
                             chain: chainId,
                             mapping: sortedMappings,
-                            url: structure.uri ?? undefined,
-                            data: !structure.uri ? structure.data : undefined,
+                            url: structure.url ?? undefined,
+                            data: !structure.url ? structure.data : undefined,
                             format: structure.format
                         };
                         const observedFragments: Fragment[] = [];

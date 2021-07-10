@@ -152,7 +152,7 @@ export default class PdbLoader implements Loader<PDBParserItem[]> {
                         ),
                         structure: {
                             format: "mmcif",
-                            uri: `https://www.ebi.ac.uk/pdbe/static/entry/${pdbLoaderItemAgg.pdb_id}_updated.cif`
+                            url: `https://www.ebi.ac.uk/pdbe/static/entry/${pdbLoaderItemAgg.pdb_id}_updated.cif`
                         },
                         mappings: pdbMappings.get(pdbLoaderItemAgg.pdb_id) ?? {}
                     });

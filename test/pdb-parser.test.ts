@@ -93,7 +93,7 @@ describe("PDBParser tests", function () {
                 start: 372,
                 structure: {
                     format: "mmcif",
-                    uri: "https://www.ebi.ac.uk/pdbe/static/entry/3q26_updated.cif"
+                    url: "https://www.ebi.ac.uk/pdbe/static/entry/3q26_updated.cif"
                 },
                 tax_ids: [562, 9606],
                 unp_end: 42,
@@ -183,7 +183,7 @@ describe("PDBParser tests", function () {
                 chain_id: "A",
                 structure: {
                     format: "mmcif",
-                    uri: "https://www.ebi.ac.uk/pdbe/static/entry/5uig_updated.cif"
+                    url: "https://www.ebi.ac.uk/pdbe/static/entry/5uig_updated.cif"
                 },
                 start: 27,
                 end: 438,
@@ -417,7 +417,7 @@ describe("PDBParser tests", function () {
                 structure: {
                     format: "mmcif",
                     data: "structure data",
-                    uri: "https://www.ebi.ac.uk/pdbe/static/entry/5uig_updated.cif"
+                    url: "https://www.ebi.ac.uk/pdbe/static/entry/5uig_updated.cif"
                 },
                 start: 27,
                 end: 438,
@@ -631,7 +631,7 @@ describe("PDBParser tests", function () {
                 structure: {
                     format: "mmcif",
                     data: "Structure data",
-                    uri: "https://www.ebi.ac.uk/pdbe/static/entry/5uig_updated.cif"
+                    url: "https://www.ebi.ac.uk/pdbe/static/entry/5uig_updated.cif"
                 },
                 start: 27,
                 end: 438,

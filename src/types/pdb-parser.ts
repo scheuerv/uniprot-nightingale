@@ -21,7 +21,7 @@ export type PDBParserItem = {
 export type StructureData = {
     format: "mmcif" | "pdb";
     data?: string;
-    uri?: string;
+    url?: string;
 };
 
 export type PolymerCoverage = Record<

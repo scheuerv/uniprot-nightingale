@@ -287,7 +287,7 @@ describe("PDBLoader tests", function () {
                 start: 1,
                 structure: {
                     format: "mmcif",
-                    uri: "https://www.ebi.ac.uk/pdbe/static/entry/1xk4_updated.cif"
+                    url: "https://www.ebi.ac.uk/pdbe/static/entry/1xk4_updated.cif"
                 },
                 tax_id: 9606,
                 tax_ids: [9606],
@@ -335,7 +335,7 @@ describe("PDBLoader tests", function () {
                 start: 1,
                 structure: {
                     format: "mmcif",
-                    uri: "https://www.ebi.ac.uk/pdbe/static/entry/1xk4_updated.cif"
+                    url: "https://www.ebi.ac.uk/pdbe/static/entry/1xk4_updated.cif"
                 },
                 tax_id: 9606,
                 tax_ids: [9606],
@@ -632,7 +632,7 @@ describe("PDBLoader tests", function () {
                 start: 1,
                 structure: {
                     format: "mmcif",
-                    uri: "https://www.ebi.ac.uk/pdbe/static/entry/4ggf_updated.cif"
+                    url: "https://www.ebi.ac.uk/pdbe/static/entry/4ggf_updated.cif"
                 },
                 tax_id: 9606,
                 tax_ids: [9606],
@@ -813,7 +813,7 @@ describe("PDBLoader tests", function () {
                 start: 1,
                 structure: {
                     format: "mmcif",
-                    uri: "https://www.ebi.ac.uk/pdbe/static/entry/4ggf_updated.cif"
+                    url: "https://www.ebi.ac.uk/pdbe/static/entry/4ggf_updated.cif"
                 },
                 tax_id: 9606,
                 tax_ids: [9606],
@@ -1000,7 +1000,7 @@ describe("PDBLoader tests", function () {
                 start: 372,
                 structure: {
                     format: "mmcif",
-                    uri: "https://www.ebi.ac.uk/pdbe/static/entry/3q26_updated.cif"
+                    url: "https://www.ebi.ac.uk/pdbe/static/entry/3q26_updated.cif"
                 },
                 tax_id: 562,
                 tax_ids: [562, 9606],
