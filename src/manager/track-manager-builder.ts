@@ -24,14 +24,14 @@ export default class TrackManagerBuilder {
         private readonly sequenceUrlGenerator: (
             url: string
         ) => Promise<{ sequence: string; startRow: number }>,
-        private readonly config?: Config
+        private readonly config: Config
     ) {
-        if (config?.uniprotId) {
-            if (config?.sequence) {
+        if (config.uniprotId) {
+            if (config.sequence) {
                 throw new Error("UniProt ID and sequence are mutually exclusive!");
             }
             this.uniprotId = config.uniprotId;
-        } else if (!config?.sequence) {
+        } else if (!config.sequence) {
             throw new Error("UniProt ID or sequence is missing!");
         }
         if (config?.sequence && !config.sequenceStructureMapping) {
@@ -42,9 +42,9 @@ export default class TrackManagerBuilder {
     public static createDefault(config: Config): TrackManagerBuilder {
         const trackManagerBuilder = new TrackManagerBuilder(
             (uniProtId) =>
-                config?.sequence
+                config.sequence
                     ? Promise.resolve({
-                          sequence: config?.sequence,
+                          sequence: config.sequence,
                           startRow: 0
                       })
                     : fetchWithTimeout(`https://www.uniprot.org/uniprot/${uniProtId}.fasta`, {
@@ -59,7 +59,7 @@ export default class TrackManagerBuilder {
                           }),
             config
         );
-        if (config?.sequenceStructureMapping) {
+        if (config.sequenceStructureMapping) {
             trackManagerBuilder.addCustomTrack(() => {
                 return config.sequenceStructureMapping;
             }, new PdbParser("User provided structures", "USER_PROVIDED_STRUCTURES"));
@@ -69,32 +69,32 @@ export default class TrackManagerBuilder {
         trackManagerBuilder.addFetchTrack(
             (uniProtId) =>
                 `https://swissmodel.expasy.org/repository/uniprot/${uniProtId}.json?provider=swissmodel`,
-            new SMRParser(config?.smrIds)
+            new SMRParser(config.smrIds)
         );
         trackManagerBuilder.addFetchTrack(
             (uniProtId) => `https://www.ebi.ac.uk/proteins/api/features/${uniProtId}`,
-            new FeatureParser(config?.exclusions)
+            new FeatureParser(config.exclusions)
         );
         trackManagerBuilder.addFetchTrack(
             (uniProtId) => `https://www.ebi.ac.uk/proteins/api/proteomics/${uniProtId}`,
-            new FeatureParser(config?.exclusions)
+            new FeatureParser(config.exclusions)
         );
         trackManagerBuilder.addFetchTrack(
             (uniProtId) => `https://www.ebi.ac.uk/proteins/api/antigen/${uniProtId}`,
-            new FeatureParser(config?.exclusions)
+            new FeatureParser(config.exclusions)
         );
         trackManagerBuilder.addFetchTrack(
             (uniProtId) => `https://www.ebi.ac.uk/proteins/api/variation/${uniProtId}`,
-            new VariationParser(config?.overwritePredictions)
+            new VariationParser(config.overwritePredictions)
         );
-        config?.customDataSources?.forEach((customDataSource) => {
+        config.customDataSources?.forEach((customDataSource) => {
             if (customDataSource.url) {
                 trackManagerBuilder.addFetchTrack(
                     (uniProtId) =>
                         `${customDataSource.url}${uniProtId}${
                             customDataSource.useExtension ? ".json" : ""
                         }`,
-                    new FeatureParser(config?.exclusions, customDataSource.source)
+                    new FeatureParser(config.exclusions, customDataSource.source)
                 );
             }
             if (customDataSource.data) {
@@ -112,13 +112,13 @@ export default class TrackManagerBuilder {
                         sequence: customDataSource.data.sequence,
                         features: variationFeatures
                     };
-                }, new VariationParser(config?.overwritePredictions, customDataSource.source));
+                }, new VariationParser(config.overwritePredictions, customDataSource.source));
                 trackManagerBuilder.addCustomTrack(() => {
                     return {
                         sequence: customDataSource.data.sequence,
                         features: otherFeatures
                     };
-                }, new FeatureParser(config?.exclusions, customDataSource.source));
+                }, new FeatureParser(config.exclusions, customDataSource.source));
             }
         });
         return trackManagerBuilder;

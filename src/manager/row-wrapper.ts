@@ -38,8 +38,8 @@ export class RowWrapper {
     public getMarkedTrackFragments(): TrackFragment[] {
         return [...this.markedFragments].map((fragmentWrapper) => {
             return {
-                start: fragmentWrapper.fragmentData.start,
-                end: fragmentWrapper.fragmentData.end,
+                sequenceStart: fragmentWrapper.fragmentData.start,
+                sequenceEnd: fragmentWrapper.fragmentData.end,
                 color: fragmentWrapper.fragmentData.color
             };
         });
@@ -48,8 +48,8 @@ export class RowWrapper {
     public getHighlightedTrackFragments(): TrackFragment[] {
         return [...this.higlightedFragments].map((fragmentWrapper) => {
             return {
-                start: fragmentWrapper.fragmentData.start,
-                end: fragmentWrapper.fragmentData.end,
+                sequenceStart: fragmentWrapper.fragmentData.start,
+                sequenceEnd: fragmentWrapper.fragmentData.end,
                 color: fragmentWrapper.fragmentData.color
             };
         });

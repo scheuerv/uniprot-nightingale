@@ -1,5 +1,5 @@
 export type Highlight = {
-    readonly start: number;
-    readonly end: number;
+    readonly sequenceStart: number;
+    readonly sequenceEnd: number;
     readonly color?: string;
 };

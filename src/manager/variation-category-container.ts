@@ -80,8 +80,8 @@ export default class VariationCategoryContainer implements CategoryContainer {
                 const variant = event.detail.feature as VariantWithSources;
                 const color = safeHexColor(variant.color);
                 const trackFragment: TrackFragment = {
-                    start: parseInt(variant.begin),
-                    end: parseInt(variant.end),
+                    sequenceStart: parseInt(variant.begin),
+                    sequenceEnd: parseInt(variant.end),
                     color: color
                 };
                 const key = `${variant.begin}:${variant.end}:${color}:${variant.alternativeSequence}`;
@@ -159,13 +159,13 @@ export default class VariationCategoryContainer implements CategoryContainer {
         const relativeHist = histogram.map(function (x) {
             return x / max;
         });
-        const fragments = [...relativeHist].map((relative, index) => {
+        const fragments: TrackFragment[] = [...relativeHist].map((relative, index) => {
             const color =
                 this.variationColors.min +
                 (this.variationColors.max - this.variationColors.min) * relative;
             return {
-                start: index,
-                end: index,
+                sequenceStart: index,
+                sequenceEnd: index,
                 color: "#" + ColorConvert.rgb.hex([color, color, color])
             };
         });

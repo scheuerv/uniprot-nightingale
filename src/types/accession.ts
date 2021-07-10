@@ -38,7 +38,7 @@ export class TrackRow {
 }
 
 export type TrackFragment = {
-    readonly start: number;
-    readonly end: number;
+    readonly sequenceStart: number;
+    readonly sequenceEnd: number;
     readonly color: string;
 };

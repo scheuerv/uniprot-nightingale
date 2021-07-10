@@ -120,7 +120,7 @@ export default class TrackManager {
                 );
                 this.clickedHighlights = highligtedFragments
                     .map((fragment) => {
-                        return `${fragment.start}:${fragment.end}:${
+                        return `${fragment.sequenceStart}:${fragment.sequenceEnd}:${
                             fragment.color.length >= 7
                                 ? fragment.color.slice(0, 7).concat("66")
                                 : fragment.color
@@ -228,7 +228,7 @@ export default class TrackManager {
     public setHighlights(highlights: Highlight[]): void {
         this.publicHighlights = highlights
             .map((highlight) => {
-                return `${highlight.start}:${highlight.end}${
+                return `${highlight.sequenceStart}:${highlight.sequenceEnd}${
                     highlight.color ? ":" + highlight.color : ""
                 }`;
             })
@@ -251,10 +251,10 @@ export default class TrackManager {
         if (chainMapping) {
             this.setFixedHighlights([
                 {
-                    start: Math.min(
+                    sequenceStart: Math.min(
                         ...chainMapping.fragmentMappings.map((mapping) => mapping.sequenceStart)
                     ),
-                    end: Math.max(
+                    sequenceEnd: Math.max(
                         ...chainMapping.fragmentMappings.map((mapping) => mapping.sequenceEnd)
                     ),
                     color: "#0000001A"
@@ -275,7 +275,7 @@ export default class TrackManager {
     private setFixedHighlights(highlights: Highlight[]): void {
         this.fixedHighlights = highlights
             .map((highlight) => {
-                return `${highlight.start}:${highlight.end}${
+                return `${highlight.sequenceStart}:${highlight.sequenceEnd}${
                     highlight.color ? ":" + highlight.color : ""
                 }`;
             })
