@@ -22,7 +22,7 @@ export default class TrackManagerBuilder {
 
     constructor(
         private readonly sequenceUrlGenerator: (
-            url: string
+            uniprotId: string
         ) => Promise<{ sequence: string; startRow: number }>,
         private readonly config: Config
     ) {
@@ -41,13 +41,13 @@ export default class TrackManagerBuilder {
 
     public static createDefault(config: Config): TrackManagerBuilder {
         const trackManagerBuilder = new TrackManagerBuilder(
-            (uniProtId) =>
+            (uniprotId) =>
                 config.sequence
                     ? Promise.resolve({
                           sequence: config.sequence,
                           startRow: 0
                       })
-                    : fetchWithTimeout(`https://www.uniprot.org/uniprot/${uniProtId}.fasta`, {
+                    : fetchWithTimeout(`https://www.uniprot.org/uniprot/${uniprotId}.fasta`, {
                           timeout: 8000
                       })
                           .then((data) => data.text())
@@ -67,31 +67,31 @@ export default class TrackManagerBuilder {
 
         trackManagerBuilder.addLoaderTrack(new PdbLoader(config.pdbIds), new PdbParser());
         trackManagerBuilder.addFetchTrack(
-            (uniProtId) =>
-                `https://swissmodel.expasy.org/repository/uniprot/${uniProtId}.json?provider=swissmodel`,
+            (uniprotId) =>
+                `https://swissmodel.expasy.org/repository/uniprot/${uniprotId}.json?provider=swissmodel`,
             new SMRParser(config.smrIds)
         );
         trackManagerBuilder.addFetchTrack(
-            (uniProtId) => `https://www.ebi.ac.uk/proteins/api/features/${uniProtId}`,
+            (uniprotId) => `https://www.ebi.ac.uk/proteins/api/features/${uniprotId}`,
             new FeatureParser(config.exclusions)
         );
         trackManagerBuilder.addFetchTrack(
-            (uniProtId) => `https://www.ebi.ac.uk/proteins/api/proteomics/${uniProtId}`,
+            (uniprotId) => `https://www.ebi.ac.uk/proteins/api/proteomics/${uniprotId}`,
             new FeatureParser(config.exclusions)
         );
         trackManagerBuilder.addFetchTrack(
-            (uniProtId) => `https://www.ebi.ac.uk/proteins/api/antigen/${uniProtId}`,
+            (uniprotId) => `https://www.ebi.ac.uk/proteins/api/antigen/${uniprotId}`,
             new FeatureParser(config.exclusions)
         );
         trackManagerBuilder.addFetchTrack(
-            (uniProtId) => `https://www.ebi.ac.uk/proteins/api/variation/${uniProtId}`,
+            (uniprotId) => `https://www.ebi.ac.uk/proteins/api/variation/${uniprotId}`,
             new VariationParser(config.overwritePredictions)
         );
         config.customDataSources?.forEach((customDataSource) => {
             if (customDataSource.url) {
                 trackManagerBuilder.addFetchTrack(
-                    (uniProtId) =>
-                        `${customDataSource.url}${uniProtId}${
+                    (uniprotId) =>
+                        `${customDataSource.url}${uniprotId}${
                             customDataSource.useExtension ? ".json" : ""
                         }`,
                     new FeatureParser(config.exclusions, customDataSource.source)
@@ -124,7 +124,7 @@ export default class TrackManagerBuilder {
         return trackManagerBuilder;
     }
 
-    public async load(element: HTMLElement): Promise<TrackManager | void> {
+    public async load(element: HTMLElement): Promise<TrackManager> {
         const sequence = await this.sequenceUrlGenerator(this.uniprotId).then((data) => {
             const tokens: string[] = data.sequence.split(/\r?\n/);
             let sequence = "";
@@ -146,37 +146,28 @@ export default class TrackManagerBuilder {
                     }
                 )
             )
-        )
-            .then((renderers) => {
-                const filteredRenderes: TrackRenderer[] = renderers
-                    .map((promiseSettled) => {
-                        if (promiseSettled.status == "fulfilled") {
-                            return promiseSettled.value;
-                        }
-                        console.warn(promiseSettled.reason);
-                        return null;
-                    })
-                    .flatMap((renderer) => renderer)
-                    .filter((renderer) => renderer != null)
-                    .map((renderer) => renderer!);
-                const trackRenderers = this.sortRenderers(
-                    filteredRenderes,
-                    this.config?.categoryOrder
-                );
+        ).then((renderers) => {
+            const filteredRenderes: TrackRenderer[] = renderers
+                .map((promiseSettled) => {
+                    if (promiseSettled.status == "fulfilled") {
+                        return promiseSettled.value;
+                    }
+                    console.warn(promiseSettled.reason);
+                    return null;
+                })
+                .flatMap((renderer) => renderer)
+                .filter((renderer) => renderer != null)
+                .map((renderer) => renderer!);
+            const trackRenderers = this.sortRenderers(filteredRenderes, this.config?.categoryOrder);
 
-                const trackManager = new TrackManager(
-                    element,
-                    sequence,
-                    trackRenderers.map((trackRenderer) =>
-                        trackRenderer.getCategoryContainer(sequence)
-                    )
-                );
-                this.emitOnRendered.emit();
-                return trackManager;
-            })
-            .catch((e) => {
-                console.log(e);
-            });
+            const trackManager = new TrackManager(
+                element,
+                sequence,
+                trackRenderers.map((trackRenderer) => trackRenderer.getCategoryContainer(sequence))
+            );
+            this.emitOnRendered.emit();
+            return trackManager;
+        });
     }
 
     public addLoaderTrack<T>(dataLoader: Loader<T>, parser: TrackParser<T>): void {
@@ -191,10 +182,9 @@ export default class TrackManagerBuilder {
 
     public addFetchTrack<T>(
         urlGenerator: (uniprotId: string) => string,
-        parser: TrackParser<T>,
-        mapper?: (data: any) => T
+        parser: TrackParser<T>
     ): void {
-        this.addLoaderTrack(new FetchLoader(urlGenerator, mapper), parser);
+        this.addLoaderTrack(new FetchLoader(urlGenerator), parser);
     }
 
     private sortRenderers(

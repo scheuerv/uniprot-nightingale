@@ -2,11 +2,11 @@ import { fetchWithTimeout } from "../utils/utils";
 import Loader from "./loader";
 import { ParserMapping } from "../types/parser-mapping";
 import { PDBMappingData, PDBLoaderData, PDBLoaderItemAgg } from "../types/pdb-loader";
-import { PDBParserItem, PolymerCoverage, Molecule, ChainData } from "../types/pdb-parser";
+import { PolymerCoverage, Molecule, ChainData, PDBParserData } from "../types/pdb-parser";
 
-export default class PdbLoader implements Loader<PDBParserItem[]> {
+export default class PdbLoader implements Loader<PDBParserData> {
     constructor(private readonly pdbIds?: string[]) {}
-    public async load(uniprotId: string): Promise<PDBParserItem[]> {
+    public async load(uniprotId: string): Promise<PDBParserData> {
         return fetchWithTimeout(
             `https://www.ebi.ac.uk/pdbe/api/mappings/best_structures/${uniprotId}`,
             {
@@ -66,7 +66,7 @@ export default class PdbLoader implements Loader<PDBParserItem[]> {
     private async prepareParserData(
         data: PDBLoaderData,
         uniprotId: string
-    ): Promise<PDBParserItem[]> {
+    ): Promise<PDBParserData> {
         const hash: Record<string, Record<string, PDBLoaderItemAgg>> = {};
         const dataDeduplicated: Record<string, PDBLoaderItemAgg[]> = {};
         for (const record of data[uniprotId]) {
@@ -106,7 +106,7 @@ export default class PdbLoader implements Loader<PDBParserItem[]> {
             );
         }
 
-        const pdbParserItems: PDBParserItem[] = [];
+        const pdbParserItems: PDBParserData = [];
         await Promise.allSettled(results).then(async (results) => {
             const filteredResults: { source: PDBLoaderItemAgg[]; data: PolymerCoverage }[] = results
                 .map((promiseSettled) => {

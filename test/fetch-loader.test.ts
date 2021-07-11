@@ -29,32 +29,13 @@ describe("FetchLoader tests", function () {
         expect(fetchMock.mock.calls.length).toEqual(1);
     });
 
-    it("with mapper", async () => {
-        const uniprotId = "P0123";
-        fetchMock.mockResponse((req) => {
-            if (req.url == `https://test/${uniprotId}`) {
-                return Promise.resolve(JSON.stringify({ test: 123 }));
-            }
-            return Promise.reject("error");
-        });
-        const instance = new FetchLoader(
-            (uniProtId) => `https://test/${uniProtId}`,
-            (data) => data.test
-        );
-        await expect(instance.load(uniprotId)).resolves.toEqual(123);
-        expect(fetchMock.mock.calls.length).toEqual(1);
-    });
-
     it("API unavailable", async () => {
         const uniprotId = "P0123";
         const errorMessage = "API error";
         fetchMock.mockResponse(() => {
             return Promise.reject(errorMessage);
         });
-        const instance = new FetchLoader(
-            (uniProtId) => `https://test/${uniProtId}`,
-            (data) => data.test
-        );
+        const instance = new FetchLoader((uniProtId) => `https://test/${uniProtId}`);
         const restoreConsole = mockConsole();
         await expect(instance.load(uniprotId)).rejects.toEqual(errorMessage);
         expect(console.error).toHaveBeenCalledWith("API unavailable!", errorMessage);
