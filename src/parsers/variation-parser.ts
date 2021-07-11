@@ -1,4 +1,3 @@
-import TrackRenderer from "../renderers/track-renderer";
 import VariationRenderer from "../renderers/variation-renderer";
 import TrackParser, { isErrorResponse } from "./track-parser";
 import { createVariantTooltip } from "../tooltip-content";
@@ -23,7 +22,7 @@ export default class VariationParser implements TrackParser<ProteinsAPIVariation
     public async parse(
         uniprotId: string,
         data: ProteinsAPIVariation | ErrorResponse
-    ): Promise<TrackRenderer[] | null> {
+    ): Promise<VariationRenderer[] | null> {
         if (isErrorResponse(data)) {
             return null;
         }
