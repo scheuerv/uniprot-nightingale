@@ -4,13 +4,13 @@ import { createVariantTooltip } from "../tooltip-content";
 import { variantsFill } from "../utils/variants-utils";
 import {
     OtherSourceData,
-    ProteinsAPIVariation,
+    VariationsData,
     VariantWithSources,
     VariationData
 } from "../types/variants";
 import { AminoAcid } from "protvista-variation-adapter/dist/es/variants";
 import { ErrorResponse } from "../types/error-response";
-export default class VariationParser implements TrackParser<ProteinsAPIVariation> {
+export default class VariationParser implements TrackParser<VariationsData> {
     private readonly categoryLabel = "Variation";
     public readonly categoryName = "VARIATION";
 
@@ -21,7 +21,7 @@ export default class VariationParser implements TrackParser<ProteinsAPIVariation
 
     public async parse(
         uniprotId: string,
-        data: ProteinsAPIVariation | ErrorResponse
+        data: VariationsData | ErrorResponse
     ): Promise<VariationRenderer[] | null> {
         if (isErrorResponse(data)) {
             return null;
@@ -47,7 +47,7 @@ export default class VariationParser implements TrackParser<ProteinsAPIVariation
     }
 
     private transformData(
-        data: ProteinsAPIVariation,
+        data: VariationsData,
         uniprotId: string,
         overwritePredictions?: boolean
     ): VariationData {

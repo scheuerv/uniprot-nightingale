@@ -8,7 +8,7 @@ import {
 } from "protvista-variation-adapter/dist/es/variants";
 import { TooltipContent } from "./tooltip-content";
 
-export type ProteinsAPIVariation = {
+export type VariationsData = {
     readonly sequence: string;
     readonly features: VariantWithSources[];
 };

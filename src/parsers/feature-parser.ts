@@ -5,11 +5,11 @@ import TrackRenderer from "../renderers/track-renderer";
 import { config as trackConfig } from "protvista-track/src/config";
 import { TrackRow } from "../types/accession";
 import { FeatureFragmentConverter } from "./feature-fragment-converter";
-import { ProteinFeatureInfo } from "../types/feature-parser";
+import { FeaturesData } from "../types/feature-parser";
 import { ErrorResponse } from "../types/error-response";
 import { categoriesConfig } from "../config/feature-categories";
 import { Feature } from "../types/feature";
-export default class FeatureParser implements TrackParser<ProteinFeatureInfo> {
+export default class FeatureParser implements TrackParser<FeaturesData> {
     public readonly categoryName = "FEATURES";
     private readonly unique = "UNIQUE";
     private readonly nonUnique = "NON_UNIQUE";
@@ -21,7 +21,7 @@ export default class FeatureParser implements TrackParser<ProteinFeatureInfo> {
 
     public async parse(
         uniprotId: string,
-        data: ProteinFeatureInfo | ErrorResponse
+        data: FeaturesData | ErrorResponse
     ): Promise<TrackRenderer[] | null> {
         if (isErrorResponse(data)) {
             return null;

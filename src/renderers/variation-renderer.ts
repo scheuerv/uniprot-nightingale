@@ -1,4 +1,3 @@
-import CategoryContainer from "../manager/category-container";
 import TrackRenderer from "./track-renderer";
 import ProtvistaVariationGraph from "protvista-variation-graph";
 import VariationTrackContainer from "../manager/variation-track-container";
@@ -45,7 +44,7 @@ export default class VariationRenderer implements TrackRenderer {
         }
     }
 
-    public getCategoryContainer(sequence: string): CategoryContainer {
+    public createCategoryContainer(sequence: string): VariationCategoryContainer {
         const variationGraph = $("<protvista-variation-graph/>")
             .attr("highlight-event", "none")
             .attr("id", "protvista-variation-graph")

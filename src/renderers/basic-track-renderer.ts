@@ -79,7 +79,7 @@ export default class BasicTrackRenderer implements TrackRenderer {
             throw new Error("Can't combine BasicTrackRenderer with: " + typeof other);
         }
     }
-    public getCategoryContainer(sequence: string): BasicCategoryContainer {
+    public createCategoryContainer(sequence: string): BasicCategoryContainer {
         [this.mainTrack, this.mainTrackRow] = this.getMainTrack(sequence);
         [this.subtracks, this.subtracksDiv] = this.getSubtracks(sequence);
         const trackContainers: TrackContainer[] = [];

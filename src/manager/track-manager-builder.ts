@@ -163,7 +163,9 @@ export default class TrackManagerBuilder {
             const trackManager = new TrackManager(
                 element,
                 sequence,
-                trackRenderers.map((trackRenderer) => trackRenderer.getCategoryContainer(sequence))
+                trackRenderers.map((trackRenderer) =>
+                    trackRenderer.createCategoryContainer(sequence)
+                )
             );
             this.emitOnRendered.emit();
             return trackManager;
