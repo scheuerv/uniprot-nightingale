@@ -1,7 +1,7 @@
-import BasicTrackRenderer from "../renderers/basic-track-renderer";
+import BasicCategoryRenderer from "../renderers/basic-category-renderer";
 import FragmentAligner from "./fragment-aligner";
-import TrackParser, { isErrorResponse } from "./track-parser";
-import TrackRenderer from "../renderers/track-renderer";
+import Parser, { isErrorResponse } from "./parser";
+import CategoryRenderer from "../renderers/category-renderer";
 import { config as trackConfig } from "protvista-track/src/config";
 import { TrackRow } from "../types/accession";
 import { FeatureFragmentConverter } from "./feature-fragment-converter";
@@ -9,7 +9,7 @@ import { FeaturesData } from "../types/feature-parser";
 import { ErrorResponse } from "../types/error-response";
 import { categoriesConfig } from "../config/feature-categories";
 import { Feature } from "../types/feature";
-export default class FeatureParser implements TrackParser<FeaturesData> {
+export default class FeatureParser implements Parser<FeaturesData> {
     public readonly categoryName = "FEATURES";
     private readonly unique = "UNIQUE";
     private readonly nonUnique = "NON_UNIQUE";
@@ -22,7 +22,7 @@ export default class FeatureParser implements TrackParser<FeaturesData> {
     public async parse(
         uniprotId: string,
         data: FeaturesData | ErrorResponse
-    ): Promise<TrackRenderer[] | null> {
+    ): Promise<CategoryRenderer[] | null> {
         if (isErrorResponse(data)) {
             return null;
         }
@@ -59,7 +59,7 @@ export default class FeatureParser implements TrackParser<FeaturesData> {
                 );
             }
         });
-        const categoryRenderers: BasicTrackRenderer[] = [];
+        const categoryRenderers: BasicCategoryRenderer[] = [];
         for (const [category, categoryData] of categories.entries()) {
             const typeTrackRows: Map<string, TrackRow> = new Map();
             for (const [type, fragmentAligner] of categoryData) {
@@ -72,7 +72,7 @@ export default class FeatureParser implements TrackParser<FeaturesData> {
                 );
             }
             categoryRenderers.push(
-                new BasicTrackRenderer(
+                new BasicCategoryRenderer(
                     typeTrackRows,
                     categoriesConfig[category]?.label
                         ? categoriesConfig[category]?.label

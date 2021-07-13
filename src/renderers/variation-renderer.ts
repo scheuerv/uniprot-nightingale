@@ -1,4 +1,4 @@
-import TrackRenderer from "./track-renderer";
+import CategoryRenderer from "./category-renderer";
 import ProtvistaVariationGraph from "protvista-variation-graph";
 import VariationTrackContainer from "../manager/variation-track-container";
 import { createRow } from "../utils/utils";
@@ -16,7 +16,7 @@ import {
 import { VariationData, VariantWithSources, OtherSourceData } from "../types/variants";
 import { FilterCase, FilterVariationData } from "../types/variation-filter";
 import { filterCases } from "../config/filter-cases";
-export default class VariationRenderer implements TrackRenderer {
+export default class VariationRenderer implements CategoryRenderer {
     private variationGraph: VariationGraphTrackContainer;
     private variation: VariationTrackContainer;
     private subtracksDiv: JQuery<HTMLElement>;
@@ -30,7 +30,7 @@ export default class VariationRenderer implements TrackRenderer {
         private readonly overwritePredictions?: boolean
     ) {}
 
-    public combine(other: TrackRenderer): TrackRenderer {
+    public combine(other: CategoryRenderer): CategoryRenderer {
         if (other instanceof VariationRenderer) {
             return new VariationRenderer(
                 this.combineVariants(this.data, other.data),

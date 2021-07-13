@@ -1,7 +1,7 @@
 import { ErrorResponse } from "../types/error-response";
-import TrackRenderer from "../renderers/track-renderer";
-export default interface TrackParser<T> {
-    parse(uniprotId: string, data: T): Promise<TrackRenderer[] | null>;
+import CategoryRenderer from "../renderers/category-renderer";
+export default interface Parser<T> {
+    parse(uniprotId: string, data: T): Promise<CategoryRenderer[] | null>;
     readonly categoryName: string;
 }
 

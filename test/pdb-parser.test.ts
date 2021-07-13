@@ -2,7 +2,7 @@
  * @jest-environment jest-environment-jsdom
  */
 import PdbParser from "../src/parsers/pdb-parser";
-import BasicTrackRenderer from "../src/renderers/basic-track-renderer";
+import BasicCategoryRenderer from "../src/renderers/basic-category-renderer";
 import { Accession, Fragment, Location, Output, TrackRow } from "../src/types/accession";
 
 import mockConsole from "jest-mock-console";
@@ -108,8 +108,8 @@ describe("PDBParser tests", function () {
             pdbId: "3q26",
             url: "https://www.ebi.ac.uk/pdbe/static/entry/3q26_updated.cif"
         };
-        const expectedResult: BasicTrackRenderer[] = [
-            new BasicTrackRenderer(
+        const expectedResult: BasicCategoryRenderer[] = [
+            new BasicCategoryRenderer(
                 new Map([
                     [
                         "3q26 a",
@@ -316,8 +316,8 @@ describe("PDBParser tests", function () {
             pdbId: "5uig",
             url: undefined
         };
-        const expectedResult: BasicTrackRenderer[] = [
-            new BasicTrackRenderer(
+        const expectedResult: BasicCategoryRenderer[] = [
+            new BasicCategoryRenderer(
                 new Map([
                     [
                         "5uig a",
@@ -460,8 +460,8 @@ describe("PDBParser tests", function () {
             pdbId: "5uig",
             url: "https://www.ebi.ac.uk/pdbe/static/entry/5uig_updated.cif"
         };
-        const expectedResult: BasicTrackRenderer[] = [
-            new BasicTrackRenderer(
+        const expectedResult: BasicCategoryRenderer[] = [
+            new BasicCategoryRenderer(
                 new Map([
                     [
                         "5uig a",
@@ -666,7 +666,7 @@ describe("PDBParser tests", function () {
             url: "https://www.ebi.ac.uk/pdbe/static/entry/5uig_updated.cif"
         };
         const expectedResult = [
-            new BasicTrackRenderer(
+            new BasicCategoryRenderer(
                 new Map([
                     [
                         "5uig a",

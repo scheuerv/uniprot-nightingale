@@ -1,19 +1,19 @@
-import BasicTrackRenderer from "../renderers/basic-track-renderer";
+import BasicCategoryRenderer from "../renderers/basic-category-renderer";
 import { getDarkerColor } from "../utils/utils";
 import TooltipContentBuilder, { createBlast } from "../tooltip-content";
-import TrackParser from "./track-parser";
+import Parser from "./parser";
 import FragmentAligner from "./fragment-aligner";
 import { Fragment, Output, TrackRow } from "../types/accession";
 import { ChainMapping } from "../types/mapping";
 import { SMRData, SMRResult, SMRChain, SMRSegment } from "../types/SMR-parser";
-export default class SMRParser implements TrackParser<SMRData> {
+export default class SMRParser implements Parser<SMRData> {
     private readonly categorylabel = "Predicted structures";
     public readonly categoryName = "PREDICTED_STRUCTURES";
     private readonly color = "#2e86c1";
 
     constructor(private readonly smrIds?: string[]) {}
 
-    public async parse(uniprotId: string, data: SMRData): Promise<BasicTrackRenderer[] | null> {
+    public async parse(uniprotId: string, data: SMRData): Promise<BasicCategoryRenderer[] | null> {
         const result: SMRResult = data.result;
         const trackRows: Map<string, TrackRow> = new Map();
         const fragmentForTemplate: Record<string, Fragment[]> = {};
@@ -109,7 +109,7 @@ export default class SMRParser implements TrackParser<SMRData> {
         }
         if (trackRows.size > 0) {
             return [
-                new BasicTrackRenderer(trackRows, this.categorylabel, false, this.categoryName)
+                new BasicCategoryRenderer(trackRows, this.categorylabel, false, this.categoryName)
             ];
         } else {
             return null;

@@ -1,7 +1,7 @@
 /**
  * @jest-environment jest-environment-jsdom
  */
-import BasicTrackRenderer from "../src/renderers/basic-track-renderer";
+import BasicCategoryRenderer from "../src/renderers/basic-category-renderer";
 import FeatureParser from "../src/parsers/feature-parser";
 import { Accession, Fragment, Location, TrackRow } from "../src/types/accession";
 import { FeaturesData } from "../src/types/feature-parser";
@@ -109,7 +109,7 @@ describe("FeatureParser tests", function () {
         const promise = instance.parse("P37840", oneFeatureData);
 
         const expectedResult = [
-            new BasicTrackRenderer(
+            new BasicCategoryRenderer(
                 new Map([
                     [
                         "CATALYTIC_SITE",
@@ -151,7 +151,7 @@ describe("FeatureParser tests", function () {
         const promise = instance.parse("P37840", featuresData);
 
         const expectedResult = [
-            new BasicTrackRenderer(
+            new BasicCategoryRenderer(
                 new Map([
                     [
                         "CATALYTIC_SITE",
@@ -198,7 +198,7 @@ describe("FeatureParser tests", function () {
                 true,
                 "DOMAINS_AND_SITES"
             ),
-            new BasicTrackRenderer(
+            new BasicCategoryRenderer(
                 new Map([
                     [
                         "ANTIGEN",
@@ -241,7 +241,7 @@ describe("FeatureParser tests", function () {
         const promise = instance.parse("P37840", featuresData);
 
         const expectedResult = [
-            new BasicTrackRenderer(
+            new BasicCategoryRenderer(
                 new Map([
                     [
                         "UNIQUE_MAXQ",
@@ -370,7 +370,7 @@ describe("FeatureParser tests", function () {
                 true,
                 "PROTEOMICS"
             ),
-            new BasicTrackRenderer(
+            new BasicCategoryRenderer(
                 new Map([
                     [
                         "CATALYTIC_SITE",
@@ -417,7 +417,7 @@ describe("FeatureParser tests", function () {
                 true,
                 "DOMAINS_AND_SITES"
             ),
-            new BasicTrackRenderer(
+            new BasicCategoryRenderer(
                 new Map([
                     [
                         "ANTIGEN",

@@ -1,6 +1,6 @@
-import BasicTrackRenderer from "../renderers/basic-track-renderer";
+import BasicCategoryRenderer from "../renderers/basic-category-renderer";
 import TooltipContentBuilder, { createBlast } from "../tooltip-content";
-import TrackParser from "./track-parser";
+import Parser from "./parser";
 import { Accession, Fragment, Location, Output, TrackRow } from "../types/accession";
 import { TooltipContent } from "../types/tooltip-content";
 import { ChainMapping, FragmentMapping } from "../types/mapping";
@@ -10,7 +10,7 @@ import {
 } from "../utils/fragment-mapping-utils";
 import { PDBParserData, StructureData } from "../types/pdb-parser";
 
-export default class PdbParser implements TrackParser<PDBParserData> {
+export default class PdbParser implements Parser<PDBParserData> {
     private readonly observedColor = "#2e86c1";
     private readonly unobservedColor = "#bdbfc1";
     private id = 1;
@@ -23,7 +23,7 @@ export default class PdbParser implements TrackParser<PDBParserData> {
     public async parse(
         uniprotId: string,
         data: PDBParserData
-    ): Promise<BasicTrackRenderer[] | null> {
+    ): Promise<BasicCategoryRenderer[] | null> {
         const trackRows: Map<string, TrackRow> = new Map();
         for (const pdbParserItem of data) {
             const sortedMappings: Record<string, ChainMapping> = {};
@@ -125,7 +125,7 @@ export default class PdbParser implements TrackParser<PDBParserData> {
         }
         if (trackRows.size > 0) {
             return [
-                new BasicTrackRenderer(trackRows, this.categoryLabel, false, this.categoryName)
+                new BasicCategoryRenderer(trackRows, this.categoryLabel, false, this.categoryName)
             ];
         }
 

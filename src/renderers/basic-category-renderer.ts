@@ -1,4 +1,4 @@
-import TrackRenderer from "./track-renderer";
+import CategoryRenderer from "./category-renderer";
 import $ from "jquery";
 import { createRow } from "../utils/utils";
 import ProtvistaTrack from "protvista-track";
@@ -9,7 +9,7 @@ import BasicTrackContainer from "../manager/basic-track-container";
 import MainTrackContainer from "../manager/main-track-container";
 import { Accession, Fragment, Location, TrackRow } from "../types/accession";
 
-export default class BasicTrackRenderer implements TrackRenderer {
+export default class BasicCategoryRenderer implements CategoryRenderer {
     private mainTrack: MainTrackContainer<Accession[]>;
     private subtracks: BasicTrackContainer[];
     private subtracksDiv: HTMLElement;
@@ -20,8 +20,8 @@ export default class BasicTrackRenderer implements TrackRenderer {
         private readonly displayArrow: boolean,
         public readonly categoryName: string
     ) {}
-    public combine(other: TrackRenderer): TrackRenderer {
-        if (other instanceof BasicTrackRenderer) {
+    public combine(other: CategoryRenderer): CategoryRenderer {
+        if (other instanceof BasicCategoryRenderer) {
             const combined: Map<string, TrackRow> = new Map();
             let maxId = Math.max(
                 ...[...other.rows.values()]
@@ -69,14 +69,14 @@ export default class BasicTrackRenderer implements TrackRenderer {
                     combined.set(type, otherTypeRow);
                 }
             });
-            return new BasicTrackRenderer(
+            return new BasicCategoryRenderer(
                 combined,
                 other.mainTrackLabel,
                 other.displayArrow,
                 other.categoryName
             );
         } else {
-            throw new Error("Can't combine BasicTrackRenderer with: " + typeof other);
+            throw new Error("Can't combine BasicCategoryRenderer with: " + typeof other);
         }
     }
     public createCategoryContainer(sequence: string): BasicCategoryContainer {

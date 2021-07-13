@@ -1,7 +1,7 @@
 /**
  * @jest-environment jest-environment-jsdom
  */
-import BasicTrackRenderer from "../src/renderers/basic-track-renderer";
+import BasicCategoryRenderer from "../src/renderers/basic-category-renderer";
 import SMRParser from "../src/parsers/SMR-parser";
 import { Accession, Fragment, Location, Output, TrackRow } from "../src/types/accession";
 import { ChainMapping } from "../src/types/mapping";
@@ -112,8 +112,8 @@ describe("SMRParser tests", function () {
             pdbId: "6ssx",
             url: "https://swissmodel.expasy.org/repository/uniprot/P37840.pdb?range=14-96&template=6ssx.1.I&provider=swissmodel"
         };
-        const expectedResult: BasicTrackRenderer[] = [
-            new BasicTrackRenderer(
+        const expectedResult: BasicCategoryRenderer[] = [
+            new BasicCategoryRenderer(
                 new Map([
                     [
                         "6ssx.1 i",
@@ -205,8 +205,8 @@ describe("SMRParser tests", function () {
             pdbId: "6ssx",
             url: "https://swissmodel.expasy.org/repository/uniprot/P37840.pdb?range=14-120&template=6ssx.1.I&provider=swissmodel"
         };
-        const expectedResult: BasicTrackRenderer[] = [
-            new BasicTrackRenderer(
+        const expectedResult: BasicCategoryRenderer[] = [
+            new BasicCategoryRenderer(
                 new Map([
                     [
                         "6ssx.1 i",
@@ -312,8 +312,8 @@ describe("SMRParser tests", function () {
             pdbId: "6ssx",
             url: "https://swissmodel.expasy.org/repository/uniprot/P37840.pdb?range=14-96&template=6ssx.1.I&provider=swissmodel"
         };
-        const expectedResult: BasicTrackRenderer[] = [
-            new BasicTrackRenderer(
+        const expectedResult: BasicCategoryRenderer[] = [
+            new BasicCategoryRenderer(
                 new Map([
                     [
                         "6ssx.1 i",
@@ -428,8 +428,8 @@ describe("SMRParser tests", function () {
             pdbId: "6ssx",
             url: "https://swissmodel.expasy.org/repository/uniprot/P37840.pdb?range=14-100&template=6ssx.1.I&provider=swissmodel"
         };
-        const expectedResult: BasicTrackRenderer[] = [
-            new BasicTrackRenderer(
+        const expectedResult: BasicCategoryRenderer[] = [
+            new BasicCategoryRenderer(
                 new Map([
                     [
                         "6ssx.1 i",
@@ -542,8 +542,8 @@ describe("SMRParser tests", function () {
             pdbId: "6ssx",
             url: "https://swissmodel.expasy.org/repository/uniprot/P37840.pdb?range=14-120&template=6ssx.1.I&provider=swissmodel"
         };
-        const expectedResult: BasicTrackRenderer[] = [
-            new BasicTrackRenderer(
+        const expectedResult: BasicCategoryRenderer[] = [
+            new BasicCategoryRenderer(
                 new Map([
                     [
                         "6ssx.1 i",
@@ -665,8 +665,8 @@ describe("SMRParser tests", function () {
             pdbId: "6ssx",
             url: "https://swissmodel.expasy.org/repository/uniprot/P37840.pdb?range=80-100&template=6ssx.1.I&provider=swissmodel"
         };
-        const expectedResult: BasicTrackRenderer[] = [
-            new BasicTrackRenderer(
+        const expectedResult: BasicCategoryRenderer[] = [
+            new BasicCategoryRenderer(
                 new Map([
                     [
                         "6ssx.1 i",
@@ -792,8 +792,8 @@ describe("SMRParser tests", function () {
             pdbId: "6ssx",
             url: "https://swissmodel.expasy.org/repository/uniprot/P37840.pdb?range=80-100&template=6ssx.1.J&provider=swissmodel"
         };
-        const expectedResult: BasicTrackRenderer[] = [
-            new BasicTrackRenderer(
+        const expectedResult: BasicCategoryRenderer[] = [
+            new BasicCategoryRenderer(
                 new Map([
                     [
                         "6ssx.1 i",
@@ -917,8 +917,8 @@ describe("SMRParser tests", function () {
             pdbId: "6ssx",
             url: "https://swissmodel.expasy.org/repository/uniprot/P37840.pdb?range=1-1&template=6ssx.1.I&provider=swissmodel"
         };
-        const expectedResult: BasicTrackRenderer[] = [
-            new BasicTrackRenderer(
+        const expectedResult: BasicCategoryRenderer[] = [
+            new BasicCategoryRenderer(
                 new Map([
                     [
                         "6ssx.1 i",
