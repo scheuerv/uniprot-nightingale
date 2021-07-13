@@ -10,7 +10,7 @@ import MainTrackContainer from "../../track-containers/main-track-container";
 import { Accession, Fragment, Location, TrackRow } from "../../../types/accession";
 
 export default class BasicCategoryRenderer implements CategoryRenderer {
-    private mainTrack: MainTrackContainer<Accession[]>;
+    private mainTrack: MainTrackContainer;
     private subtracks: BasicTrackContainer[];
     private subtracksDiv: HTMLElement;
     private mainTrackRow: JQuery<HTMLElement>;
@@ -112,7 +112,7 @@ export default class BasicCategoryRenderer implements CategoryRenderer {
                 .removeClass("arrow-down");
         }
     }
-    private getMainTrack(sequence: string): [MainTrackContainer<Accession[]>, JQuery<HTMLElement>] {
+    private getMainTrack(sequence: string): [MainTrackContainer, JQuery<HTMLElement>] {
         const mainTrackData = [...this.rows.values()].flatMap((row) => row.rowData);
         const fragmentAligner = new FragmentAligner();
         mainTrackData.forEach((accession) =>
@@ -146,7 +146,11 @@ export default class BasicCategoryRenderer implements CategoryRenderer {
             .removeClass("arrow-down")
             .on("click", () => this.toggle());
         return [
-            new MainTrackContainer<Accession[]>(track, emptyTrack, mainTrackDataAligned),
+            new MainTrackContainer(
+                track,
+                emptyTrack,
+                new TrackRow(mainTrackDataAligned, this.mainTrackLabel)
+            ),
             mainTrackRow
         ];
     }

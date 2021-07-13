@@ -1,16 +1,16 @@
 import ProtvistaTrack from "protvista-track";
-import { Output } from "../../types/accession";
+import { Output, TrackRow } from "../../types/accession";
 import { createEmitter } from "ts-typed-events";
 import TrackContainer from "./track-container";
 
-export default class MainTrackContainer<T> implements TrackContainer {
+export default class MainTrackContainer implements TrackContainer {
     private readonly emitOnLabelClick = createEmitter<Output>();
     public readonly onLabelClick = this.emitOnLabelClick.event;
 
     constructor(
         public readonly track: ProtvistaTrack,
         private readonly emptyTrack: ProtvistaTrack,
-        private readonly data: T
+        private readonly trackRow: TrackRow
     ) {}
 
     public getOutput(): undefined {
@@ -26,7 +26,7 @@ export default class MainTrackContainer<T> implements TrackContainer {
     }
 
     public addData(): void {
-        this.track.data = this.data;
+        this.track.data = this.trackRow.rowData;
         this.emptyTrack.data = [];
     }
 }
