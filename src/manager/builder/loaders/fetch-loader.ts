@@ -1,4 +1,4 @@
-import { fetchWithTimeout } from "../utils/utils";
+import { fetchWithTimeout } from "../../../utils/utils";
 import Loader from "./loader";
 
 export default class FetchLoader<T> implements Loader<T> {

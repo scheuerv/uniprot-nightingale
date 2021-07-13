@@ -3,12 +3,12 @@ import FragmentAligner from "./fragment-aligner";
 import Parser, { isErrorResponse } from "./parser";
 import CategoryRenderer from "../renderers/category-renderer";
 import { config as trackConfig } from "protvista-track/src/config";
-import { TrackRow } from "../types/accession";
+import { TrackRow } from "../../../types/accession";
 import { FeatureFragmentConverter } from "./feature-fragment-converter";
-import { FeaturesData } from "../types/feature-parser";
-import { ErrorResponse } from "../types/error-response";
-import { categoriesConfig } from "../config/feature-categories";
-import { Feature } from "../types/feature";
+import { FeaturesData } from "../../../types/feature-parser";
+import { ErrorResponse } from "../../../types/error-response";
+import { categoriesConfig } from "../../../config/feature-categories";
+import { Feature } from "../../../types/feature";
 export default class FeatureParser implements Parser<FeaturesData> {
     public readonly categoryName = "FEATURES";
     private readonly unique = "UNIQUE";

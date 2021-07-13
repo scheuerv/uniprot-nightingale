@@ -1,15 +1,15 @@
 import VariationRenderer from "../renderers/variation-renderer";
 import Parser, { isErrorResponse } from "./parser";
-import { createVariantTooltip } from "../tooltip-content";
-import { variantsFill } from "../utils/variants-utils";
+import { createVariantTooltip } from "../../tooltip-content";
+import { variantsFill } from "../../../utils/variants-utils";
 import {
     OtherSourceData,
     VariationsData,
     VariantWithSources,
     VariationData
-} from "../types/variants";
+} from "../../../types/variants";
 import { AminoAcid } from "protvista-variation-adapter/dist/es/variants";
-import { ErrorResponse } from "../types/error-response";
+import { ErrorResponse } from "../../../types/error-response";
 export default class VariationParser implements Parser<VariationsData> {
     private readonly categoryLabel = "Variation";
     public readonly categoryName = "VARIATION";

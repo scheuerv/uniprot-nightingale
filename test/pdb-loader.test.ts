@@ -1,7 +1,7 @@
 /**
  * @jest-environment jest-environment-jsdom
  */
-import PdbLoader from "../src/loaders/pdb-loader";
+import PdbLoader from "../src/manager/builder/loaders/pdb-loader";
 import fetchMock from "jest-fetch-mock";
 import mockConsole from "jest-mock-console";
 import { ParserChainMapping } from "../src/types/parser-mapping";

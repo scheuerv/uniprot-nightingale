@@ -1,14 +1,14 @@
 import BasicCategoryRenderer from "../renderers/basic-category-renderer";
-import TooltipContentBuilder, { createBlast } from "../tooltip-content";
+import TooltipContentBuilder, { createBlast } from "../../tooltip-content";
 import Parser from "./parser";
-import { Accession, Fragment, Location, Output, TrackRow } from "../types/accession";
-import { TooltipContent } from "../types/tooltip-content";
-import { ChainMapping, FragmentMapping } from "../types/mapping";
+import { Accession, Fragment, Location, Output, TrackRow } from "../../../types/accession";
+import { TooltipContent } from "../../../types/tooltip-content";
+import { ChainMapping, FragmentMapping } from "../../../types/mapping";
 import {
     findUniprotIntervalsFromStructureResidues,
     findUniprotIntervalsFromUniprotSequence
-} from "../utils/fragment-mapping-utils";
-import { PDBParserData, StructureData } from "../types/pdb-parser";
+} from "../../../utils/fragment-mapping-utils";
+import { PDBParserData, StructureData } from "../../../types/pdb-parser";
 
 export default class PdbParser implements Parser<PDBParserData> {
     private readonly observedColor = "#2e86c1";

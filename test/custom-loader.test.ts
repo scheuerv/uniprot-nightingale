@@ -1,7 +1,7 @@
 /**
  * @jest-environment jest-environment-jsdom
  */
-import CustomLoader from "../src/loaders/custom-loader";
+import CustomLoader from "../src/manager/builder/loaders/custom-loader";
 
 describe("CustomLoader tests", function () {
     it("basic case", async () => {

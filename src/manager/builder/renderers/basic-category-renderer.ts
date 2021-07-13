@@ -1,13 +1,13 @@
 import CategoryRenderer from "./category-renderer";
 import $ from "jquery";
-import { createRow } from "../utils/utils";
+import { createRow } from "../../../utils/utils";
 import ProtvistaTrack from "protvista-track";
-import TrackContainer from "../manager/track-container";
-import BasicCategoryContainer from "../manager/basic-category-container";
+import TrackContainer from "../../track-containers/track-container";
+import BasicCategoryContainer from "../../category-containers/basic-category-container";
 import FragmentAligner from "../parsers/fragment-aligner";
-import BasicTrackContainer from "../manager/basic-track-container";
-import MainTrackContainer from "../manager/main-track-container";
-import { Accession, Fragment, Location, TrackRow } from "../types/accession";
+import BasicTrackContainer from "../../track-containers/basic-track-container";
+import MainTrackContainer from "../../track-containers/main-track-container";
+import { Accession, Fragment, Location, TrackRow } from "../../../types/accession";
 
 export default class BasicCategoryRenderer implements CategoryRenderer {
     private mainTrack: MainTrackContainer<Accession[]>;

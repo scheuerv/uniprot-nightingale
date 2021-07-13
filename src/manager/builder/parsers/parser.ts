@@ -1,4 +1,4 @@
-import { ErrorResponse } from "../types/error-response";
+import { ErrorResponse } from "../../../types/error-response";
 import CategoryRenderer from "../renderers/category-renderer";
 export default interface Parser<T> {
     parse(uniprotId: string, data: T): Promise<CategoryRenderer[] | null>;

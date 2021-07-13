@@ -1,15 +1,15 @@
 import { createEmitter } from "ts-typed-events";
 import CategoryContainer from "./category-container";
-import VariationTrackContainer from "./variation-track-container";
+import VariationTrackContainer from "../track-containers/variation-track-container";
 import ProtvistaVariationGraph from "protvista-variation-graph";
 import ColorConvert from "color-convert";
-import VariationFilter from "../protvista/variation-filter";
+import VariationFilter from "../../protvista/variation-filter";
 import $ from "jquery";
 import * as d3 from "d3";
-import VariationGraphTrackContainer from "./variation-graph-track-container";
-import { TrackFragment } from "../types/accession";
-import { VariantWithSources } from "../types/variants";
-import { safeHexColor } from "../utils/color-utils";
+import VariationGraphTrackContainer from "../track-containers/variation-graph-track-container";
+import { TrackFragment } from "../../types/accession";
+import { VariantWithSources } from "../../types/variants";
+import { safeHexColor } from "../../utils/color-utils";
 
 export default class VariationCategoryContainer implements CategoryContainer {
     private readonly emitOnHighlightChange = createEmitter<TrackFragment[]>();

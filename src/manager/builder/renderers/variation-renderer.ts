@@ -1,21 +1,21 @@
 import CategoryRenderer from "./category-renderer";
 import ProtvistaVariationGraph from "protvista-variation-graph";
-import VariationTrackContainer from "../manager/variation-track-container";
-import { createRow } from "../utils/utils";
+import VariationTrackContainer from "../../track-containers/variation-track-container";
+import { createRow } from "../../../utils/utils";
 import $ from "jquery";
-import VariationFilter from "../protvista/variation-filter";
-import VariationCategoryContainer from "../manager/variation-category-container";
-import { createVariantTooltip } from "../tooltip-content";
-import FixedProtvistaVariation from "../protvista/variation";
-import VariationGraphTrackContainer from "../manager/variation-graph-track-container";
+import VariationFilter from "../../../protvista/variation-filter";
+import VariationCategoryContainer from "../../category-containers/variation-category-container";
+import { createVariantTooltip } from "../../tooltip-content";
+import FixedProtvistaVariation from "../../../protvista/variation";
+import VariationGraphTrackContainer from "../../track-containers/variation-graph-track-container";
 import {
     filterDataVariation,
     filterDataVariationGraph,
     variantsFill
-} from "../utils/variants-utils";
-import { VariationData, VariantWithSources, OtherSourceData } from "../types/variants";
-import { FilterCase, FilterVariationData } from "../types/variation-filter";
-import { filterCases } from "../config/filter-cases";
+} from "../../../utils/variants-utils";
+import { VariationData, VariantWithSources, OtherSourceData } from "../../../types/variants";
+import { FilterCase, FilterVariationData } from "../../../types/variation-filter";
+import { filterCases } from "../../../config/filter-cases";
 export default class VariationRenderer implements CategoryRenderer {
     private variationGraph: VariationGraphTrackContainer;
     private variation: VariationTrackContainer;

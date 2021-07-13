@@ -2,8 +2,8 @@
  * @jest-environment jest-environment-jsdom
  */
 import mockConsole from "jest-mock-console";
-import VariationRenderer from "../src/renderers/variation-renderer";
-import VariationParser from "../src/parsers/variation-parser";
+import VariationRenderer from "../src/manager/builder/renderers/variation-renderer";
+import VariationParser from "../src/manager/builder/parsers/variation-parser";
 import { AminoAcid, ConsequenceType, SourceType } from "protvista-variation-adapter/src/variants";
 import { ErrorResponse } from "../src/types/error-response";
 describe("VariationParser tests", function () {

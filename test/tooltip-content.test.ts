@@ -2,7 +2,7 @@
  * @jest-environment jest-environment-jsdom
  */
 import { OtherSourceData, VariantWithSources } from "../src/types/variants";
-import { createFeatureTooltip, createVariantTooltip } from "../src/tooltip-content";
+import { createFeatureTooltip, createVariantTooltip } from "../src/manager/tooltip-content";
 import {
     AminoAcid,
     ConsequenceType,

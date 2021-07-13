@@ -1,4 +1,4 @@
-import CategoryContainer from "../manager/category-container";
+import CategoryContainer from "../../category-containers/category-container";
 export default interface CategoryRenderer {
     readonly categoryName: string;
     createCategoryContainer(sequence: string): CategoryContainer;

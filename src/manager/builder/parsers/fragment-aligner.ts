@@ -1,4 +1,4 @@
-import { Fragment, Accession, Location } from "../types/accession";
+import { Fragment, Accession, Location } from "../../../types/accession";
 
 export default class FragmentAligner {
     private fragments: Fragment[] = [];

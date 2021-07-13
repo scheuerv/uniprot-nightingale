@@ -1,11 +1,11 @@
 import $ from "jquery";
 import CategoryContainer from "./category-container";
-import TrackContainer from "./track-container";
+import TrackContainer from "../track-containers/track-container";
 import { createEmitter } from "ts-typed-events";
-import { Fragment, TrackFragment } from "../types/accession";
-import { HTMLElementWithData, FragmentWrapper } from "./fragment-wrapper";
-import { RowWrapper, RowWrapperBuilder } from "./row-wrapper";
-import { safeHexColor } from "../utils/color-utils";
+import { Fragment, TrackFragment } from "../../types/accession";
+import { HTMLElementWithData, FragmentWrapper } from "../fragment-wrapper";
+import { RowWrapper, RowWrapperBuilder } from "../row-wrapper";
+import { safeHexColor } from "../../utils/color-utils";
 
 export default class BasicCategoryContainer implements CategoryContainer {
     private _rowWrappers: RowWrapper[];

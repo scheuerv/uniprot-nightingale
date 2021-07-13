@@ -1,8 +1,8 @@
 /**
  * @jest-environment jest-environment-jsdom
  */
-import BasicCategoryRenderer from "../src/renderers/basic-category-renderer";
-import FeatureParser from "../src/parsers/feature-parser";
+import BasicCategoryRenderer from "../src/manager/builder/renderers/basic-category-renderer";
+import FeatureParser from "../src/manager/builder/parsers/feature-parser";
 import { Accession, Fragment, Location, TrackRow } from "../src/types/accession";
 import { FeaturesData } from "../src/types/feature-parser";
 describe("FeatureParser tests", function () {

@@ -2,7 +2,7 @@
  * @jest-environment jest-environment-jsdom
  */
 import { Accession, Fragment, Location } from "../src/types/accession";
-import FragmentAligner from "../src/parsers/fragment-aligner";
+import FragmentAligner from "../src/manager/builder/parsers/fragment-aligner";
 describe("FragmentAligner tests", function () {
     let instance: FragmentAligner;
 

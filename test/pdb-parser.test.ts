@@ -1,8 +1,8 @@
 /**
  * @jest-environment jest-environment-jsdom
  */
-import PdbParser from "../src/parsers/pdb-parser";
-import BasicCategoryRenderer from "../src/renderers/basic-category-renderer";
+import PdbParser from "../src/manager/builder/parsers/pdb-parser";
+import BasicCategoryRenderer from "../src/manager/builder/renderers/basic-category-renderer";
 import { Accession, Fragment, Location, Output, TrackRow } from "../src/types/accession";
 
 import mockConsole from "jest-mock-console";

@@ -1,7 +1,7 @@
 /**
  * @jest-environment jest-environment-jsdom
  */
-import FetchLoader from "../src/loaders/fetch-loader";
+import FetchLoader from "../src/manager/builder/loaders/fetch-loader";
 import fetchMock from "jest-fetch-mock";
 import mockConsole from "jest-mock-console";
 

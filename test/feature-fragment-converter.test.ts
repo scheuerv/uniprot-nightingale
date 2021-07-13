@@ -2,7 +2,7 @@
  * @jest-environment jest-environment-jsdom
  */
 import { Fragment } from "../src/types/accession";
-import { FeatureFragmentConverter } from "../src/parsers/feature-fragment-converter";
+import { FeatureFragmentConverter } from "../src/manager/builder/parsers/feature-fragment-converter";
 
 describe("FeatureFragmentConverter tests", function () {
     let instance: FeatureFragmentConverter;

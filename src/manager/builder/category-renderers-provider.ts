@@ -1,6 +1,6 @@
-import Loader from "../loaders/loader";
-import Parser from "../parsers/parser";
-import CategoryRenderer from "../renderers/category-renderer";
+import Loader from "./loaders/loader";
+import Parser from "./parsers/parser";
+import CategoryRenderer from "./renderers/category-renderer";
 
 export class CategoryRenderersProvider<T> {
     constructor(private readonly dataLoader: Loader<T>, private readonly parser: Parser<T>) {}

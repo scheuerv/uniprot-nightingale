@@ -1,8 +1,8 @@
 /**
  * @jest-environment jest-environment-jsdom
  */
-import BasicCategoryRenderer from "../src/renderers/basic-category-renderer";
-import SMRParser from "../src/parsers/SMR-parser";
+import BasicCategoryRenderer from "../src/manager/builder/renderers/basic-category-renderer";
+import SMRParser from "../src/manager/builder/parsers/SMR-parser";
 import { Accession, Fragment, Location, Output, TrackRow } from "../src/types/accession";
 import { ChainMapping } from "../src/types/mapping";
 import { SMRData } from "../src/types/SMR-parser";

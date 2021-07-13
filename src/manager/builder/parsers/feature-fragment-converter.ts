@@ -1,8 +1,8 @@
-import { getDarkerColor } from "../utils/utils";
-import { createFeatureTooltip } from "../tooltip-content";
-import { Fragment } from "../types/accession";
+import { getDarkerColor } from "../../../utils/utils";
+import { createFeatureTooltip } from "../../tooltip-content";
+import { Fragment } from "../../../types/accession";
 import { config as trackConfig } from "protvista-track/src/config";
-import { Feature } from "../types/feature";
+import { Feature } from "../../../types/feature";
 
 export class FeatureFragmentConverter {
     constructor(private readonly dataSource?: string) {}

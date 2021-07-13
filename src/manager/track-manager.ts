@@ -1,13 +1,13 @@
 import * as d3 from "d3";
 import $ from "jquery";
-import CategoryContainer from "./category-container";
+import CategoryContainer from "./category-containers/category-container";
 import { createRow } from "../utils/utils";
 import ProtvistaManager from "protvista-manager";
 import { createEmitter } from "ts-typed-events";
 import ProtvistaNavigation from "protvista-navigation";
 import OverlayScrollbars from "overlayscrollbars";
 import "overlayscrollbars/css/OverlayScrollbars.min.css";
-import TrackContainer from "./track-container";
+import TrackContainer from "./track-containers/track-container";
 import { Fragment, Output, TrackFragment } from "../types/accession";
 import { HTMLElementWithData } from "./fragment-wrapper";
 import { ChainMapping } from "../types/mapping";

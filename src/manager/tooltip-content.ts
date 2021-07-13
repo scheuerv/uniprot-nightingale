@@ -1,14 +1,14 @@
 import { config } from "protvista-track/src/config";
 import ecoMap from "protvista-feature-adapter/src/evidences";
-import { groupBy } from "./utils/utils";
+import { groupBy } from "../utils/utils";
 import { Association, Prediction, SourceType } from "protvista-variation-adapter/dist/es/variants";
-import { existAssociation } from "./utils/variants-utils";
-import { TooltipContent } from "./types/tooltip-content";
-import { OtherSourceData, VariantWithSources } from "./types/variants";
-import { noBlastTypes } from "./config/no-blast-types";
+import { existAssociation } from "../utils/variants-utils";
+import { TooltipContent } from "../types/tooltip-content";
+import { OtherSourceData, VariantWithSources } from "../types/variants";
+import { noBlastTypes } from "../config/no-blast-types";
 import { Evidence } from "protvista-variation-adapter/dist/es/variants";
 import { Xref } from "protvista-variation-adapter/dist/es/variants";
-import { Feature } from "./types/feature";
+import { Feature } from "../types/feature";
 
 export interface TooltipData {
     render(): string;

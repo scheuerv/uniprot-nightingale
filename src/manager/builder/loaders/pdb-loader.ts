@@ -1,8 +1,8 @@
-import { fetchWithTimeout } from "../utils/utils";
+import { fetchWithTimeout } from "../../../utils/utils";
 import Loader from "./loader";
-import { ParserMapping } from "../types/parser-mapping";
-import { PDBMappingData, PDBLoaderData, PDBLoaderItemAgg } from "../types/pdb-loader";
-import { PolymerCoverage, Molecule, ChainData, PDBParserData } from "../types/pdb-parser";
+import { ParserMapping } from "../../../types/parser-mapping";
+import { PDBMappingData, PDBLoaderData, PDBLoaderItemAgg } from "../../../types/pdb-loader";
+import { PolymerCoverage, Molecule, ChainData, PDBParserData } from "../../../types/pdb-parser";
 
 export default class PdbLoader implements Loader<PDBParserData> {
     constructor(private readonly pdbIds?: string[]) {}

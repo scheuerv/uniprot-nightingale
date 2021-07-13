@@ -1,8 +1,8 @@
-import FixedProtvistaVariation from "../protvista/variation";
+import FixedProtvistaVariation from "../../protvista/variation";
 import { createEmitter } from "ts-typed-events";
 import TrackContainer from "./track-container";
-import { Output } from "../types/accession";
-import { VariationData } from "../types/variants";
+import { Output } from "../../types/accession";
+import { VariationData } from "../../types/variants";
 
 export default class VariationTrackContainer implements TrackContainer {
     private readonly emitOnLabelClick = createEmitter<Output>();

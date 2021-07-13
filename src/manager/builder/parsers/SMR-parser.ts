@@ -1,11 +1,11 @@
 import BasicCategoryRenderer from "../renderers/basic-category-renderer";
-import { getDarkerColor } from "../utils/utils";
-import TooltipContentBuilder, { createBlast } from "../tooltip-content";
+import { getDarkerColor } from "../../../utils/utils";
+import TooltipContentBuilder, { createBlast } from "../../tooltip-content";
 import Parser from "./parser";
 import FragmentAligner from "./fragment-aligner";
-import { Fragment, Output, TrackRow } from "../types/accession";
-import { ChainMapping } from "../types/mapping";
-import { SMRData, SMRResult, SMRChain, SMRSegment } from "../types/SMR-parser";
+import { Fragment, Output, TrackRow } from "../../../types/accession";
+import { ChainMapping } from "../../../types/mapping";
+import { SMRData, SMRResult, SMRChain, SMRSegment } from "../../../types/SMR-parser";
 export default class SMRParser implements Parser<SMRData> {
     private readonly categorylabel = "Predicted structures";
     public readonly categoryName = "PREDICTED_STRUCTURES";

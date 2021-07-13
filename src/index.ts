@@ -13,7 +13,7 @@ import "./main.css";
 import FixedVariationGraph from "./protvista/variation-graph";
 import FixedProtvistaVariation from "./protvista/variation";
 import "@fortawesome/fontawesome-free/css/all.css";
-import TrackManagerBuilder from "./manager/track-manager-builder";
+import TrackManagerBuilder from "./manager/builder/track-manager-builder";
 
 const registerWebComponents = function () {
     loadComponent("protvista-manager", ProtvistaManager);
