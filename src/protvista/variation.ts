@@ -22,6 +22,6 @@ export default class FixedProtvistaVariation extends ProtvistaVariation {
 
     public updateData(data: Variant): void {
         super.updateData(data);
-        this.emitOnDataUpdated();
+        this.emitOnDataUpdated.emit();
     }
 }

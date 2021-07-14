@@ -61,39 +61,36 @@ export default class TrackManagerBuilder {
             config
         );
         if (config.sequenceStructureMapping) {
-            trackManagerBuilder.addCustomCategoryRendererProvider(() => {
+            trackManagerBuilder.addCustom(() => {
                 return config.sequenceStructureMapping;
             }, new PdbParser("User provided structures", "USER_PROVIDED_STRUCTURES"));
         }
 
-        trackManagerBuilder.addLoaderCategoryRendererProvider(
-            new PdbLoader(config.pdbIds),
-            new PdbParser()
-        );
-        trackManagerBuilder.addFetchCategoryRendererProvider(
+        trackManagerBuilder.add(new PdbLoader(config.pdbIds), new PdbParser());
+        trackManagerBuilder.addFetch(
             (uniprotId) =>
                 `https://swissmodel.expasy.org/repository/uniprot/${uniprotId}.json?provider=swissmodel`,
             new SMRParser(config.smrIds)
         );
-        trackManagerBuilder.addFetchCategoryRendererProvider(
+        trackManagerBuilder.addFetch(
             (uniprotId) => `https://www.ebi.ac.uk/proteins/api/features/${uniprotId}`,
             new FeatureParser(config.exclusions)
         );
-        trackManagerBuilder.addFetchCategoryRendererProvider(
+        trackManagerBuilder.addFetch(
             (uniprotId) => `https://www.ebi.ac.uk/proteins/api/proteomics/${uniprotId}`,
             new FeatureParser(config.exclusions)
         );
-        trackManagerBuilder.addFetchCategoryRendererProvider(
+        trackManagerBuilder.addFetch(
             (uniprotId) => `https://www.ebi.ac.uk/proteins/api/antigen/${uniprotId}`,
             new FeatureParser(config.exclusions)
         );
-        trackManagerBuilder.addFetchCategoryRendererProvider(
+        trackManagerBuilder.addFetch(
             (uniprotId) => `https://www.ebi.ac.uk/proteins/api/variation/${uniprotId}`,
             new VariationParser(config.overwritePredictions)
         );
         config.customDataSources?.forEach((customDataSource) => {
             if (customDataSource.url) {
-                trackManagerBuilder.addFetchCategoryRendererProvider(
+                trackManagerBuilder.addFetch(
                     (uniprotId) =>
                         `${customDataSource.url}${uniprotId}${
                             customDataSource.useExtension ? ".json" : ""
@@ -111,13 +108,13 @@ export default class TrackManagerBuilder {
                         otherFeatures.push(feature);
                     }
                 });
-                trackManagerBuilder.addCustomCategoryRendererProvider(() => {
+                trackManagerBuilder.addCustom(() => {
                     return {
                         sequence: customDataSource.data.sequence,
                         features: variationFeatures
                     };
                 }, new VariationParser(config.overwritePredictions, customDataSource.source));
-                trackManagerBuilder.addCustomCategoryRendererProvider(() => {
+                trackManagerBuilder.addCustom(() => {
                     return {
                         sequence: customDataSource.data.sequence,
                         features: otherFeatures
@@ -171,24 +168,18 @@ export default class TrackManagerBuilder {
         });
     }
 
-    public addLoaderCategoryRendererProvider<T>(dataLoader: Loader<T>, parser: Parser<T>): void {
+    public add<T>(dataLoader: Loader<T>, parser: Parser<T>): void {
         if (!this.config?.exclusions?.includes(parser.categoryName)) {
             this.categoryRenderersProviders.push(new CategoryRenderersProvider(dataLoader, parser));
         }
     }
 
-    public addCustomCategoryRendererProvider<T>(
-        dataLoader: (uniprotId: string) => T,
-        parser: Parser<T>
-    ): void {
-        this.addLoaderCategoryRendererProvider(new CustomLoader(dataLoader), parser);
+    public addCustom<T>(dataLoader: (uniprotId: string) => T, parser: Parser<T>): void {
+        this.add(new CustomLoader(dataLoader), parser);
     }
 
-    public addFetchCategoryRendererProvider<T>(
-        urlGenerator: (uniprotId: string) => string,
-        parser: Parser<T>
-    ): void {
-        this.addLoaderCategoryRendererProvider(new FetchLoader(urlGenerator), parser);
+    public addFetch<T>(urlGenerator: (uniprotId: string) => string, parser: Parser<T>): void {
+        this.add(new FetchLoader(urlGenerator), parser);
     }
 
     private sortRenderers(
