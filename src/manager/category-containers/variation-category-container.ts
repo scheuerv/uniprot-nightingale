@@ -66,13 +66,13 @@ export default class VariationCategoryContainer implements CategoryContainer {
         });
         this.variation.track.onDataUpdated.on(() => {
             this.unmarkVariants();
-            this.emitOnHighlightChange([]);
+            this.emitOnHighlightChange.emit([]);
         });
         $(protvistaFilter.parentElement!.parentElement!)
             .find(".fas.fa-redo")
             .on("click", () => {
                 this.unmarkVariants();
-                this.emitOnHighlightChange([]);
+                this.emitOnHighlightChange.emit([]);
             });
         this.variation.track.addEventListener("change", (e) => {
             const event = e as CustomEvent;
@@ -104,7 +104,7 @@ export default class VariationCategoryContainer implements CategoryContainer {
                         this.highlightedVariants.set(key, trackFragment);
                     }
                 }
-                this.emitOnHighlightChange([trackFragment]);
+                this.emitOnHighlightChange.emit([trackFragment]);
             }
         });
     }

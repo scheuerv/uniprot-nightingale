@@ -19,7 +19,7 @@ export class FragmentWrapper {
                 } else {
                     this.mark(e.shiftKey);
                 }
-                this.emitOnClick(this.isMarked);
+                this.emitOnClick.emit(this.isMarked);
             });
         });
     }
@@ -29,7 +29,7 @@ export class FragmentWrapper {
                 fragmentElement.classList.add("clicked");
             });
             this.isMarked = true;
-            this.emitOnMarkedChange({ isMarked: this.isMarked, highlight });
+            this.emitOnMarkedChange.emit({ isMarked: this.isMarked, highlight });
         }
     }
     public unmark(): void {
@@ -38,7 +38,7 @@ export class FragmentWrapper {
                 fragmentElement.classList.remove("clicked");
             });
             this.isMarked = false;
-            this.emitOnMarkedChange({ isMarked: this.isMarked, highlight: false });
+            this.emitOnMarkedChange.emit({ isMarked: this.isMarked, highlight: false });
         }
     }
 }

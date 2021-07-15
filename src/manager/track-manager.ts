@@ -56,7 +56,6 @@ export default class TrackManager {
                 this.activeStructure?.trackContainer.activate();
                 const chainMapping = output.mapping[output.chain];
                 this.setChainHighlights(chainMapping);
-                this.emitOnSelectedStructure(output);
             }
             this.protvistaManager.append(categoryContainer.content);
         });
@@ -79,7 +78,7 @@ export default class TrackManager {
                     this.activeStructure.trackContainer.activate();
                     const chainMapping = output.mapping[output.chain];
                     this.setChainHighlights(chainMapping);
-                    this.emitOnSelectedStructure(output);
+                    this.emitOnSelectedStructure.emit(output);
                 });
                 trackContainer.track.addEventListener("click", (e) => {
                     if (!(e.target as Element).closest(".feature")) {
@@ -109,7 +108,7 @@ export default class TrackManager {
                             this.activeStructure.trackContainer.activate();
                             const chainMapping = output.mapping[output.chain];
                             this.setChainHighlights(chainMapping);
-                            this.emitOnSelectedStructure(output);
+                            this.emitOnSelectedStructure.emit(output);
                         }
                     }
                 });
@@ -223,6 +222,10 @@ export default class TrackManager {
                 this.applyHighlights();
                 this.emitOnFragmentMouseOut.emit();
             });
+    }
+
+    public getActiveOutput(): Output | undefined {
+        return this.activeStructure?.output;
     }
 
     public setHighlights(highlights: Highlight[]): void {

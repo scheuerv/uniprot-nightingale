@@ -37,9 +37,12 @@ export default class VariationFilter extends ProtvistaFilter {
                     };`}
                 ></span>
                 <div>
-                    ${labels.map((label: string) => {
-                        return html`<div class="protvista_checkbox_label">${label}</div>`;
-                    })}
+                    ${
+                        //puts labels on separate lines
+                        labels.map((label: string) => {
+                            return html`<div class="protvista_checkbox_label">${label}</div>`;
+                        })
+                    }
                 </div>
             </label>
         `;
@@ -49,6 +52,7 @@ export default class VariationFilter extends ProtvistaFilter {
     public static get styles(): (CSSResultOrNative | CSSResultArray)[] {
         return [
             ProtvistaFilter.styles,
+            //stretches the checkbox icon so it covers all labels
             css`
                 .protvista_checkbox.compound .checkmark {
                     align-self: stretch;
