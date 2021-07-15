@@ -27,6 +27,7 @@ export type Output = {
     readonly url?: string;
     readonly format: "mmcif" | "cifCore" | "pdb" | "pdbqt" | "gro" | "xyz" | "mol" | "sdf" | "mol2";
     readonly data?: string;
+    readonly idType: "label" | "auth";
 };
 
 export class TrackRow {

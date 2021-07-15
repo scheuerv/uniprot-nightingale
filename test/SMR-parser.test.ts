@@ -110,7 +110,8 @@ describe("SMRParser tests", function () {
                 I: chainMapping14_96
             },
             pdbId: "6ssx",
-            url: "https://swissmodel.expasy.org/repository/uniprot/P37840.pdb?range=14-96&template=6ssx.1.I&provider=swissmodel"
+            url: "https://swissmodel.expasy.org/repository/uniprot/P37840.pdb?range=14-96&template=6ssx.1.I&provider=swissmodel",
+            idType: "auth"
         };
         const expectedResult: BasicCategoryRenderer[] = [
             new BasicCategoryRenderer(
@@ -194,7 +195,8 @@ describe("SMRParser tests", function () {
                 I: chainMapping14_96
             },
             pdbId: "6ssx",
-            url: "https://swissmodel.expasy.org/repository/uniprot/P37840.pdb?range=14-120&template=6ssx.1.I&provider=swissmodel"
+            url: "https://swissmodel.expasy.org/repository/uniprot/P37840.pdb?range=14-120&template=6ssx.1.I&provider=swissmodel",
+            idType: "auth"
         };
         const output2: Output = {
             chain: "I",
@@ -203,7 +205,8 @@ describe("SMRParser tests", function () {
                 I: chainMapping100_120
             },
             pdbId: "6ssx",
-            url: "https://swissmodel.expasy.org/repository/uniprot/P37840.pdb?range=14-120&template=6ssx.1.I&provider=swissmodel"
+            url: "https://swissmodel.expasy.org/repository/uniprot/P37840.pdb?range=14-120&template=6ssx.1.I&provider=swissmodel",
+            idType: "auth"
         };
         const expectedResult: BasicCategoryRenderer[] = [
             new BasicCategoryRenderer(
@@ -301,7 +304,8 @@ describe("SMRParser tests", function () {
                 I: chainMapping14_96
             },
             pdbId: "6ssx",
-            url: "https://swissmodel.expasy.org/repository/uniprot/P37840.pdb?range=14-96&template=6ssx.1.I&provider=swissmodel"
+            url: "https://swissmodel.expasy.org/repository/uniprot/P37840.pdb?range=14-96&template=6ssx.1.I&provider=swissmodel",
+            idType: "auth"
         };
         const output2: Output = {
             chain: "I",
@@ -310,7 +314,8 @@ describe("SMRParser tests", function () {
                 I: chainMapping20_50
             },
             pdbId: "6ssx",
-            url: "https://swissmodel.expasy.org/repository/uniprot/P37840.pdb?range=14-96&template=6ssx.1.I&provider=swissmodel"
+            url: "https://swissmodel.expasy.org/repository/uniprot/P37840.pdb?range=14-96&template=6ssx.1.I&provider=swissmodel",
+            idType: "auth"
         };
         const expectedResult: BasicCategoryRenderer[] = [
             new BasicCategoryRenderer(
@@ -417,7 +422,8 @@ describe("SMRParser tests", function () {
                 I: chainMapping14_96
             },
             pdbId: "6ssx",
-            url: "https://swissmodel.expasy.org/repository/uniprot/P37840.pdb?range=14-100&template=6ssx.1.I&provider=swissmodel"
+            url: "https://swissmodel.expasy.org/repository/uniprot/P37840.pdb?range=14-100&template=6ssx.1.I&provider=swissmodel",
+            idType: "auth"
         };
         const output2: Output = {
             chain: "J",
@@ -426,7 +432,8 @@ describe("SMRParser tests", function () {
                 J: { ...chainMapping80_100, structAsymId: "J" }
             },
             pdbId: "6ssx",
-            url: "https://swissmodel.expasy.org/repository/uniprot/P37840.pdb?range=14-100&template=6ssx.1.I&provider=swissmodel"
+            url: "https://swissmodel.expasy.org/repository/uniprot/P37840.pdb?range=14-100&template=6ssx.1.I&provider=swissmodel",
+            idType: "auth"
         };
         const expectedResult: BasicCategoryRenderer[] = [
             new BasicCategoryRenderer(
@@ -533,14 +540,16 @@ describe("SMRParser tests", function () {
                 I: chainMapping14_96
             },
             pdbId: "6ssx",
-            url: "https://swissmodel.expasy.org/repository/uniprot/P37840.pdb?range=14-120&template=6ssx.1.I&provider=swissmodel"
+            url: "https://swissmodel.expasy.org/repository/uniprot/P37840.pdb?range=14-120&template=6ssx.1.I&provider=swissmodel",
+            idType: "auth"
         };
         const output2: Output = {
             chain: "J",
             format: "pdb",
             mapping: { J: { ...chainMapping100_120, structAsymId: "J" } },
             pdbId: "6ssx",
-            url: "https://swissmodel.expasy.org/repository/uniprot/P37840.pdb?range=14-120&template=6ssx.1.I&provider=swissmodel"
+            url: "https://swissmodel.expasy.org/repository/uniprot/P37840.pdb?range=14-120&template=6ssx.1.I&provider=swissmodel",
+            idType: "auth"
         };
         const expectedResult: BasicCategoryRenderer[] = [
             new BasicCategoryRenderer(
@@ -654,7 +663,8 @@ describe("SMRParser tests", function () {
                 I: chainMapping14_96
             },
             pdbId: "6ssx",
-            url: "https://swissmodel.expasy.org/repository/uniprot/P37840.pdb?range=14-96&template=6ssx.1.I&provider=swissmodel"
+            url: "https://swissmodel.expasy.org/repository/uniprot/P37840.pdb?range=14-96&template=6ssx.1.I&provider=swissmodel",
+            idType: "auth"
         };
         const output2: Output = {
             chain: "I",
@@ -663,7 +673,8 @@ describe("SMRParser tests", function () {
                 I: chainMapping80_100
             },
             pdbId: "6ssx",
-            url: "https://swissmodel.expasy.org/repository/uniprot/P37840.pdb?range=80-100&template=6ssx.1.I&provider=swissmodel"
+            url: "https://swissmodel.expasy.org/repository/uniprot/P37840.pdb?range=80-100&template=6ssx.1.I&provider=swissmodel",
+            idType: "auth"
         };
         const expectedResult: BasicCategoryRenderer[] = [
             new BasicCategoryRenderer(
@@ -781,7 +792,8 @@ describe("SMRParser tests", function () {
                 I: chainMapping14_96
             },
             pdbId: "6ssx",
-            url: "https://swissmodel.expasy.org/repository/uniprot/P37840.pdb?range=14-96&template=6ssx.1.I&provider=swissmodel"
+            url: "https://swissmodel.expasy.org/repository/uniprot/P37840.pdb?range=14-96&template=6ssx.1.I&provider=swissmodel",
+            idType: "auth"
         };
         const output2: Output = {
             chain: "J",
@@ -790,7 +802,8 @@ describe("SMRParser tests", function () {
                 J: { ...chainMapping80_100, structAsymId: "J" }
             },
             pdbId: "6ssx",
-            url: "https://swissmodel.expasy.org/repository/uniprot/P37840.pdb?range=80-100&template=6ssx.1.J&provider=swissmodel"
+            url: "https://swissmodel.expasy.org/repository/uniprot/P37840.pdb?range=80-100&template=6ssx.1.J&provider=swissmodel",
+            idType: "auth"
         };
         const expectedResult: BasicCategoryRenderer[] = [
             new BasicCategoryRenderer(
@@ -915,7 +928,8 @@ describe("SMRParser tests", function () {
             format: "pdb",
             mapping: { I: chainMapping1_1 },
             pdbId: "6ssx",
-            url: "https://swissmodel.expasy.org/repository/uniprot/P37840.pdb?range=1-1&template=6ssx.1.I&provider=swissmodel"
+            url: "https://swissmodel.expasy.org/repository/uniprot/P37840.pdb?range=1-1&template=6ssx.1.I&provider=swissmodel",
+            idType: "auth"
         };
         const expectedResult: BasicCategoryRenderer[] = [
             new BasicCategoryRenderer(

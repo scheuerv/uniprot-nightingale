@@ -69,7 +69,8 @@ export default class PdbParser implements Parser<PDBParserData> {
                             mapping: sortedMappings,
                             url: structure.url ?? undefined,
                             data: !structure.url ? structure.data : undefined,
-                            format: structure.format
+                            format: structure.format,
+                            idType: "label"
                         };
                         const observedFragments: Fragment[] = [];
                         chain.observed.forEach((observedFragment) => {

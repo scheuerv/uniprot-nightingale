@@ -106,7 +106,8 @@ describe("PDBParser tests", function () {
             data: undefined,
             mapping: mapping,
             pdbId: "3q26",
-            url: "https://www.ebi.ac.uk/pdbe/static/entry/3q26_updated.cif"
+            url: "https://www.ebi.ac.uk/pdbe/static/entry/3q26_updated.cif",
+            idType: "label"
         };
         const expectedResult: BasicCategoryRenderer[] = [
             new BasicCategoryRenderer(
@@ -314,7 +315,8 @@ describe("PDBParser tests", function () {
             data: "structure data",
             mapping: mapping,
             pdbId: "5uig",
-            url: undefined
+            url: undefined,
+            idType: "label"
         };
         const expectedResult: BasicCategoryRenderer[] = [
             new BasicCategoryRenderer(
@@ -458,7 +460,8 @@ describe("PDBParser tests", function () {
             data: undefined,
             mapping: mapping,
             pdbId: "5uig",
-            url: "https://www.ebi.ac.uk/pdbe/static/entry/5uig_updated.cif"
+            url: "https://www.ebi.ac.uk/pdbe/static/entry/5uig_updated.cif",
+            idType: "label"
         };
         const expectedResult: BasicCategoryRenderer[] = [
             new BasicCategoryRenderer(
@@ -663,7 +666,8 @@ describe("PDBParser tests", function () {
             data: undefined,
             mapping: mapping,
             pdbId: "5uig",
-            url: "https://www.ebi.ac.uk/pdbe/static/entry/5uig_updated.cif"
+            url: "https://www.ebi.ac.uk/pdbe/static/entry/5uig_updated.cif",
+            idType: "label"
         };
         const expectedResult = [
             new BasicCategoryRenderer(

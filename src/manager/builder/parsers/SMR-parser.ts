@@ -49,7 +49,8 @@ export default class SMRParser implements Parser<SMRData> {
                                 chain: chain.id,
                                 url: coordinatesFile,
                                 format: "pdb",
-                                mapping: mapping
+                                mapping: mapping,
+                                idType: "auth"
                             };
                             const tooltipContent: TooltipContentBuilder = new TooltipContentBuilder(
                                 `${smrId.toUpperCase()}_${chain.id} ${segment.uniprot.from}${
