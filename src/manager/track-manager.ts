@@ -267,7 +267,6 @@ export default class TrackManager {
     }
 
     private highlightOff(): void {
-        this.publicHighlights = "";
         this.clickedHighlights = "";
         this.categoryContainers.forEach((trackContainer) =>
             trackContainer.clearHighlightedTrackFragments()
