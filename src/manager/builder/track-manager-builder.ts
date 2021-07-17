@@ -10,7 +10,7 @@ import PdbLoader from "./loaders/pdb-loader";
 import Loader from "./loaders/loader";
 import FetchLoader from "./loaders/fetch-loader";
 import CustomLoader from "./loaders/custom-loader";
-import { Config, CustomDataSourceFeature } from "../../types/config";
+import { SequenceConfig, CustomDataSourceFeature } from "../../types/config";
 import TrackManager from "../track-manager";
 import { createEmitter } from "ts-typed-events";
 import { VariantWithCategory, VariantWithSources } from "../../types/variants";
@@ -25,7 +25,7 @@ export default class TrackManagerBuilder {
         private readonly sequenceUrlGenerator: (
             uniprotId: string
         ) => Promise<{ sequence: string; startRow: number }>,
-        private readonly config: Config
+        private readonly config: SequenceConfig
     ) {
         if (config.uniprotId) {
             if (config.sequence) {
@@ -40,7 +40,7 @@ export default class TrackManagerBuilder {
         }
     }
 
-    public static createDefault(config: Config): TrackManagerBuilder {
+    public static createDefault(config: SequenceConfig): TrackManagerBuilder {
         const trackManagerBuilder = new TrackManagerBuilder(
             (uniprotId) =>
                 config.sequence

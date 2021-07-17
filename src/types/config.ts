@@ -2,7 +2,7 @@ import { Feature } from "./feature";
 import { PDBParserData } from "./pdb-parser";
 import { VariantWithCategory } from "./variants";
 
-export type Config = {
+export type SequenceConfig = {
     readonly uniprotId?: string;
     readonly pdbIds?: string[];
     readonly smrIds?: string[];
