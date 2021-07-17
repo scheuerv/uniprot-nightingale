@@ -3,11 +3,11 @@ import { PDBParserData } from "./pdb-parser";
 import { VariantWithCategory } from "./variants";
 
 export type Config = {
-    readonly uniprotId: string;
+    readonly uniprotId?: string;
     readonly pdbIds?: string[];
     readonly smrIds?: string[];
     readonly categoryOrder?: string[];
-    readonly exclusions?: string[];
+    readonly categoryExclusions?: string[];
     readonly customDataSources?: CustomDataSource[];
     readonly overwritePredictions?: boolean;
     readonly sequence?: string;
@@ -18,7 +18,7 @@ export type CustomDataSource = {
     readonly source: string;
     readonly useExtension?: boolean;
     readonly url?: string;
-    readonly data: CustomDataSourceData;
+    readonly data?: CustomDataSourceData;
 };
 
 export type CustomDataSourceData = {

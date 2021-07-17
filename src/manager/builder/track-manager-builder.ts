@@ -74,34 +74,38 @@ export default class TrackManagerBuilder {
         );
         trackManagerBuilder.addFetch(
             (uniprotId) => `https://www.ebi.ac.uk/proteins/api/features/${uniprotId}`,
-            new FeatureParser(config.exclusions)
+            new FeatureParser(config.categoryExclusions)
         );
         trackManagerBuilder.addFetch(
             (uniprotId) => `https://www.ebi.ac.uk/proteins/api/proteomics/${uniprotId}`,
-            new FeatureParser(config.exclusions)
+            new FeatureParser(config.categoryExclusions)
         );
         trackManagerBuilder.addFetch(
             (uniprotId) => `https://www.ebi.ac.uk/proteins/api/antigen/${uniprotId}`,
-            new FeatureParser(config.exclusions)
+            new FeatureParser(config.categoryExclusions)
         );
         trackManagerBuilder.addFetch(
             (uniprotId) => `https://www.ebi.ac.uk/proteins/api/variation/${uniprotId}`,
             new VariationParser(config.overwritePredictions)
         );
         config.customDataSources?.forEach((customDataSource) => {
+            if (!customDataSource.url && !customDataSource.data) {
+                throw new Error("Url or data is missing in custom data source!");
+            }
             if (customDataSource.url) {
                 trackManagerBuilder.addFetch(
                     (uniprotId) =>
                         `${customDataSource.url}${uniprotId}${
                             customDataSource.useExtension ? ".json" : ""
                         }`,
-                    new FeatureParser(config.exclusions, customDataSource.source)
+                    new FeatureParser(config.categoryExclusions, customDataSource.source)
                 );
             }
-            if (customDataSource.data) {
+            const customData = customDataSource.data;
+            if (customData) {
                 const variationFeatures: VariantWithSources[] = [];
                 const otherFeatures: CustomDataSourceFeature[] = [];
-                customDataSource.data.features.forEach((feature) => {
+                customData.features.forEach((feature) => {
                     if (feature.category == "VARIATION") {
                         variationFeatures.push(feature as VariantWithCategory);
                     } else {
@@ -110,16 +114,16 @@ export default class TrackManagerBuilder {
                 });
                 trackManagerBuilder.addCustom(() => {
                     return {
-                        sequence: customDataSource.data.sequence,
+                        sequence: customData.sequence,
                         features: variationFeatures
                     };
                 }, new VariationParser(config.overwritePredictions, customDataSource.source));
                 trackManagerBuilder.addCustom(() => {
                     return {
-                        sequence: customDataSource.data.sequence,
+                        sequence: customData.sequence,
                         features: otherFeatures
                     };
-                }, new FeatureParser(config.exclusions, customDataSource.source));
+                }, new FeatureParser(config.categoryExclusions, customDataSource.source));
             }
         });
         return trackManagerBuilder;
@@ -169,7 +173,7 @@ export default class TrackManagerBuilder {
     }
 
     public add<T>(dataLoader: Loader<T>, parser: Parser<T>): void {
-        if (!this.config?.exclusions?.includes(parser.categoryName)) {
+        if (!this.config?.categoryExclusions?.includes(parser.categoryName)) {
             this.categoryRenderersProviders.push(new CategoryRenderersProvider(dataLoader, parser));
         }
     }

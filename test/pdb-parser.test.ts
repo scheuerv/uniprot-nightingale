@@ -107,7 +107,17 @@ describe("PDBParser tests", function () {
             mapping: mapping,
             pdbId: "3q26",
             url: "https://www.ebi.ac.uk/pdbe/static/entry/3q26_updated.cif",
-            idType: "label"
+            idType: "label",
+            observedIntervals: [
+                {
+                    end: 11,
+                    start: 10
+                },
+                {
+                    end: 42,
+                    start: 20
+                }
+            ]
         };
         const expectedResult: BasicCategoryRenderer[] = [
             new BasicCategoryRenderer(
@@ -258,6 +268,7 @@ describe("PDBParser tests", function () {
             structAsymId: "A",
             fragmentMappings: [
                 {
+                    entityId: undefined,
                     structureEnd: 438,
                     structureStart: 27,
                     sequenceEnd: 316,
@@ -316,7 +327,13 @@ describe("PDBParser tests", function () {
             mapping: mapping,
             pdbId: "5uig",
             url: undefined,
-            idType: "label"
+            idType: "label",
+            observedIntervals: [
+                {
+                    end: 122,
+                    start: 4
+                }
+            ]
         };
         const expectedResult: BasicCategoryRenderer[] = [
             new BasicCategoryRenderer(
@@ -461,7 +478,13 @@ describe("PDBParser tests", function () {
             mapping: mapping,
             pdbId: "5uig",
             url: "https://www.ebi.ac.uk/pdbe/static/entry/5uig_updated.cif",
-            idType: "label"
+            idType: "label",
+            observedIntervals: [
+                {
+                    end: 122,
+                    start: 4
+                }
+            ]
         };
         const expectedResult: BasicCategoryRenderer[] = [
             new BasicCategoryRenderer(
@@ -667,7 +690,8 @@ describe("PDBParser tests", function () {
             mapping: mapping,
             pdbId: "5uig",
             url: "https://www.ebi.ac.uk/pdbe/static/entry/5uig_updated.cif",
-            idType: "label"
+            idType: "label",
+            observedIntervals: []
         };
         const expectedResult = [
             new BasicCategoryRenderer(

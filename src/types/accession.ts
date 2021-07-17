@@ -1,3 +1,4 @@
+import { Interval } from "./interval";
 import { Mapping } from "./mapping";
 import { TooltipContent } from "./tooltip-content";
 
@@ -28,6 +29,7 @@ export type Output = {
     readonly format: "mmcif" | "cifCore" | "pdb" | "pdbqt" | "gro" | "xyz" | "mol" | "sdf" | "mol2";
     readonly data?: string;
     readonly idType: "label" | "auth";
+    readonly observedIntervals: Interval[];
 };
 
 export class TrackRow {

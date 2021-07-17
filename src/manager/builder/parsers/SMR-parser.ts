@@ -6,6 +6,7 @@ import FragmentAligner from "./fragment-aligner";
 import { Fragment, Output, TrackRow } from "../../../types/accession";
 import { ChainMapping } from "../../../types/mapping";
 import { SMRData, SMRResult, SMRChain, SMRSegment } from "../../../types/SMR-parser";
+import { Interval } from "../../../types/interval";
 export default class SMRParser implements Parser<SMRData> {
     private readonly categorylabel = "Predicted structures";
     public readonly categoryName = "PREDICTED_STRUCTURES";
@@ -17,18 +18,40 @@ export default class SMRParser implements Parser<SMRData> {
         const result: SMRResult = data.result;
         const trackRows: Map<string, TrackRow> = new Map();
         const fragmentForTemplate: Record<string, Fragment[]> = {};
+        const observedIntervalsForTemplate: Record<string, Interval[]> = {};
         let id = 1;
+        result.structures.forEach((structure) => {
+            const sTemplate: RegExpMatchArray | null =
+                structure.template.match(/(.+)\.(.+)+\.(.+)/);
+            if (sTemplate !== null) {
+                const smrId = sTemplate[1] + "." + sTemplate[2];
+                const templateChain = sTemplate[3];
+                if (this.smrIds?.includes(smrId) || !this.smrIds) {
+                    const key = `${smrId} ${templateChain.toLowerCase()}`;
+                    structure.chains.forEach((chain: SMRChain) => {
+                        chain.segments.forEach((segment: SMRSegment) => {
+                            if (!observedIntervalsForTemplate[key]) {
+                                observedIntervalsForTemplate[key] = [];
+                            }
+                            observedIntervalsForTemplate[key].push({
+                                start: segment.uniprot.from,
+                                end: segment.uniprot.to
+                            });
+                        });
+                    });
+                }
+            }
+        });
         result.structures.forEach((structure) => {
             const sTemplate: RegExpMatchArray | null =
                 structure.template.match(/(.+)\.(.+)+\.(.+)/);
             const experimentalMethod: string = structure.provider + " (" + structure.method + ")";
             const coordinatesFile: string = structure.coordinates;
-            let smrId = "";
-            let templateChain = "";
             if (sTemplate !== null) {
-                smrId = sTemplate[1] + "." + sTemplate[2];
-                templateChain = sTemplate[3];
+                const smrId = sTemplate[1] + "." + sTemplate[2];
+                const templateChain = sTemplate[3];
                 if (this.smrIds?.includes(smrId) || !this.smrIds) {
+                    const key = `${smrId} ${templateChain.toLowerCase()}`;
                     structure.chains.forEach((chain: SMRChain) => {
                         chain.segments.map((segment: SMRSegment) => {
                             let output: Output | undefined = undefined;
@@ -50,7 +73,8 @@ export default class SMRParser implements Parser<SMRData> {
                                 url: coordinatesFile,
                                 format: "pdb",
                                 mapping: mapping,
-                                idType: "auth"
+                                idType: "auth",
+                                observedIntervals: observedIntervalsForTemplate[key]
                             };
                             const tooltipContent: TooltipContentBuilder = new TooltipContentBuilder(
                                 `${smrId.toUpperCase()}_${chain.id} ${segment.uniprot.from}${
@@ -59,7 +83,7 @@ export default class SMRParser implements Parser<SMRData> {
                                         : "-" + segment.uniprot.to
                                 }`
                             );
-                            const key = `${smrId} ${templateChain.toLowerCase()}`;
+
                             tooltipContent
                                 .addDataTable()
                                 .addRowIfContentDefined(

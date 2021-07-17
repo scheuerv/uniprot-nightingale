@@ -13,8 +13,13 @@ export default class PdbLoader implements Loader<PDBParserData> {
                 timeout: 8000
             }
         ).then(
-            async (data) => {
-                return this.prepareParserData(await data.json(), uniprotId);
+            async (response) => {
+                const data = await response.json();
+                if (data[uniprotId]) {
+                    return this.prepareParserData(data, uniprotId);
+                } else {
+                    return [];
+                }
             },
             (err) => {
                 console.error(`Best structures API unavailable!`, err);

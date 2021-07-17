@@ -63,6 +63,14 @@ export default class PdbParser implements Parser<PDBParserData> {
                                 "Structure parameter requires information about url or data."
                             );
                         }
+
+                        const observedIntervals = chain.observed.flatMap((observedFragment) => {
+                            return findUniprotIntervalsFromStructureResidues(
+                                observedFragment.start.residue_number,
+                                observedFragment.end.residue_number,
+                                chainMapping.fragmentMappings
+                            );
+                        });
                         const output: Output = {
                             pdbId: pdbId,
                             chain: chainId,
@@ -70,36 +78,27 @@ export default class PdbParser implements Parser<PDBParserData> {
                             url: structure.url ?? undefined,
                             data: !structure.url ? structure.data : undefined,
                             format: structure.format,
-                            idType: "label"
+                            idType: "label",
+                            observedIntervals: observedIntervals
                         };
-                        const observedFragments: Fragment[] = [];
-                        chain.observed.forEach((observedFragment) => {
-                            const intervals = findUniprotIntervalsFromStructureResidues(
-                                observedFragment.start.residue_number,
-                                observedFragment.end.residue_number,
-                                chainMapping.fragmentMappings
+                        const observedFragments = observedIntervals.map((interval) => {
+                            return new Fragment(
+                                this.id++,
+                                interval.start,
+                                interval.end,
+                                this.observedColor,
+                                this.observedColor,
+                                undefined,
+                                this.createTooltip(
+                                    uniprotId,
+                                    pdbId,
+                                    chainId,
+                                    interval.start,
+                                    interval.end,
+                                    pdbParserItem.experimental_method
+                                ),
+                                output
                             );
-                            intervals.forEach((interval) => {
-                                observedFragments.push(
-                                    new Fragment(
-                                        this.id++,
-                                        interval.start,
-                                        interval.end,
-                                        this.observedColor,
-                                        this.observedColor,
-                                        undefined,
-                                        this.createTooltip(
-                                            uniprotId,
-                                            pdbId,
-                                            chainId,
-                                            interval.start,
-                                            interval.end,
-                                            pdbParserItem.experimental_method
-                                        ),
-                                        output
-                                    )
-                                );
-                            });
                         });
 
                         const unobservedFragments: Fragment[] = this.getUnobservedFragments(
