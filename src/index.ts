@@ -4,7 +4,6 @@ import ProtvistaSequence from "protvista-sequence";
 
 import VariationFilter from "./protvista/variation-filter";
 import ProtvistaNavigation from "protvista-navigation";
-import ProtvistaTooltip from "protvista-tooltip";
 import LimitedTrack from "./protvista/limited-track";
 
 import { loadComponent } from "./utils/utils";
@@ -14,6 +13,7 @@ import FixedVariationGraph from "./protvista/variation-graph";
 import FixedProtvistaVariation from "./protvista/variation";
 import "@fortawesome/fontawesome-free/css/all.css";
 import TrackManagerBuilder from "./manager/builder/track-manager-builder";
+import CloseableTooltip from "./protvista/closeable-tooltip";
 
 const registerWebComponents = function () {
     loadComponent("protvista-manager", ProtvistaManager);
@@ -21,7 +21,7 @@ const registerWebComponents = function () {
     loadComponent("protvista-sequence", ProtvistaSequence);
     loadComponent("protvista-track", LimitedTrack);
     loadComponent("protvista-navigation", ProtvistaNavigation);
-    loadComponent("protvista-tooltip", ProtvistaTooltip);
+    loadComponent("protvista-tooltip", CloseableTooltip);
     loadComponent("protvista-variation-graph", FixedVariationGraph);
     loadComponent("protvista-variation", FixedProtvistaVariation);
 };

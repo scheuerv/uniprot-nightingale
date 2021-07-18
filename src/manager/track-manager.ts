@@ -82,7 +82,6 @@ export default class TrackManager {
                 });
                 trackContainer.track.addEventListener("click", (e) => {
                     if (!(e.target as Element).closest(".feature")) {
-                        this.removeAllTooltips();
                         this.highlightOff();
                     }
                 });
@@ -316,7 +315,6 @@ export default class TrackManager {
             }
             return;
         }
-        this.removeAllTooltips();
     }
 
     private createTooltip(
@@ -336,6 +334,7 @@ export default class TrackManager {
                 .attr("title", fragment.tooltipContent?.title ?? "")
                 .attr("visible", "true")
                 .html(fragment.tooltipContent?.content ?? "");
+
             if (closeable) {
                 const fragment: HTMLElementWithData = detail.target;
                 const boundingRect: DOMRect = fragment.getBoundingClientRect();
