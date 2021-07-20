@@ -52,7 +52,6 @@ describe("TooltipContent tests", function () {
                 ],
                 consequenceType: ConsequenceType.Missense,
                 wildType: AminoAcid.L,
-                mutatedType: AminoAcid.V,
                 predictions: [
                     {
                         predictionValType: PredictionValType.Benign,
@@ -88,7 +87,6 @@ describe("TooltipContent tests", function () {
                 end: "5",
                 consequenceType: ConsequenceType.Missense,
                 wildType: AminoAcid.L,
-                mutatedType: AminoAcid.V,
                 predictions: [
                     {
                         predictionValType: PredictionValType.Benign,
@@ -142,7 +140,6 @@ describe("TooltipContent tests", function () {
                 end: "5",
                 consequenceType: ConsequenceType.Missense,
                 wildType: AminoAcid.L,
-                mutatedType: AminoAcid.V,
                 sourceType: SourceType.UniProt,
                 variant: AminoAcid.V,
                 start: "5"
@@ -168,7 +165,6 @@ describe("TooltipContent tests", function () {
                 end: "5",
                 consequenceType: ConsequenceType.Missense,
                 wildType: AminoAcid.L,
-                mutatedType: AminoAcid.V,
                 variant: AminoAcid.V,
                 start: "5",
                 customSource: "Custom"
@@ -212,7 +208,6 @@ describe("TooltipContent tests", function () {
                 end: "5",
                 consequenceType: ConsequenceType.Missense,
                 wildType: AminoAcid.L,
-                mutatedType: AminoAcid.V,
                 predictions: [
                     {
                         predictionValType: PredictionValType.Benign,

@@ -43,7 +43,6 @@ describe("VariationParser tests", function () {
                     end: "2",
                     consequenceType: "missense",
                     wildType: "D",
-                    mutatedType: "Y",
                     sourceType: "large_scale_study"
                 },
                 {
@@ -69,7 +68,6 @@ describe("VariationParser tests", function () {
                             consequenceType: ConsequenceType.Missense,
                             customSource: undefined,
                             end: "2",
-                            mutatedType: AminoAcid.Y,
                             otherSources: {},
                             sourceType: SourceType.LargeScaleStudy,
                             start: "2",
@@ -132,8 +130,7 @@ describe("VariationParser tests", function () {
                     begin: "2",
                     end: "2",
                     consequenceType: "missense",
-                    wildType: "D",
-                    mutatedType: "Y"
+                    wildType: "D"
                 }
             ]
         };
@@ -151,7 +148,6 @@ describe("VariationParser tests", function () {
                             consequenceType: ConsequenceType.Missense,
                             customSource: "Custom source",
                             end: "2",
-                            mutatedType: AminoAcid.Y,
                             otherSources: {
                                 "Custom source": {
                                     consequenceType: ConsequenceType.Missense,
