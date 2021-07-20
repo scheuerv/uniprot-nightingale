@@ -1,0 +1,25 @@
+{
+    "compilerOptions": {
+        "composite": false,
+        "target": "es2020",
+        "jsx": "react",
+        "outDir": "dist",
+        "sourceMap": false,
+        "declaration": true,
+        "strictNullChecks": true,
+        "module": "commonjs",
+        "moduleResolution": "node",
+        "baseUrl": ".",
+        "alwaysStrict": true,
+        "noImplicitAny": true,
+        "noImplicitThis": true,
+        "noUnusedLocals": true,
+        "strictFunctionTypes": true,
+        "allowUmdGlobalAccess": true,
+        "allowJs": true,
+        "allowSyntheticDefaultImports": true,
+        "esModuleInterop": true
+    },
+    "include": ["src/**/*"],
+    "exclude": ["node_modules"]
+}

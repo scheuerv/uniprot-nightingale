@@ -5,9 +5,9 @@
     "main": "index.ts",
     "scripts": {
         "build": "npm run build-webpack",
-        "build-webpack": "webpack --mode development",
-        "watch": "npm run watch-webpack",
-        "watch-webpack": "webpack -w --mode development",
+        "build-webpack": "webpack --config webpack.prod.js",
+        "build-dev": "npm run build-webpack",
+        "build-dev-webpack": "webpack --mode development",
         "serve": "http-server -p 1340 ./dist",
         "start": "webpack serve",
         "lint": "eslint . --ext .html,.ts",
