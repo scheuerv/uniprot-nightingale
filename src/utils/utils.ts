@@ -23,15 +23,15 @@ export function createRow(
         labelWrapper.append($("<i/>", { class: "fas fa-arrow-circle-right" }));
     }
     return $("<div/>")
-        .addClass("track-row")
+        .addClass("un-track-row")
         .append(
             $("<div/>")
-                .addClass("track-label " + customClass)
+                .addClass("un-track-label " + customClass)
                 .append(labelWrapper.append(label))
         )
         .append(
             $("<div/>")
-                .addClass("track-content " + customClass)
+                .addClass("un-track-content " + customClass)
                 .append(content)
         );
 }

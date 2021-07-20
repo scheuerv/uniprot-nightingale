@@ -1,33 +1,33 @@
-div.track-row {
+div.un-track-row {
     display: table;
     width: 100%;
     height: 40px;
 }
 
-div.track-row.main,
-.subtracks-container .track-row {
+div.un-track-row.main,
+.un-subtracks-container .un-track-row {
     margin-bottom: 0.1em;
     border-bottom: 0.1em solid #b2f5ff;
 }
-.subtracks-container.scrollable {
+.un-subtracks-container.scrollable {
     overflow-y: scroll;
     min-height: 50px;
     height: 200px;
 }
-div.track-content {
+div.un-track-content {
     display: block;
     width: 100%;
 }
-div.track-content.empty .empty {
+div.un-track-content.empty .empty {
     display: block;
 }
-div.track-content.main .main {
+div.un-track-content.main .main {
     display: block;
 }
-div.track-content.empty .main {
+div.un-track-content.empty .main {
     display: none !important;
 }
-div.track-content.main .empty {
+div.un-track-content.main .empty {
     display: none !important;
 }
 .rectangle.feature {
@@ -53,7 +53,7 @@ protvista-variation svg {
     width: 100%;
 }
 
-div.track-label {
+div.un-track-label {
     display: table-cell;
     text-overflow: ellipsis;
     white-space: nowrap;
@@ -65,23 +65,23 @@ div.track-label {
     padding: 0.5em;
     vertical-align: middle;
 }
-div.track-label div.bold {
+div.un-track-label div.bold {
     font-weight: bold;
 }
-div.track-label.main {
+div.un-track-label.main {
     background-color: #b2f5ff;
     cursor: pointer;
 }
 
-div.track-label.sub {
+div.un-track-label.sub {
     background-color: #d9faff;
 }
 
-div.track-label.main:hover {
+div.un-track-label.main:hover {
     background-color: #80eeff;
 }
 
-div.track-label.arrow-right:before {
+div.un-track-label.arrow-right:before {
     content: " ";
     display: inline-block;
     width: 0;
@@ -92,25 +92,25 @@ div.track-label.arrow-right:before {
     margin-right: 5px;
 }
 
-div.track-label .fas.fa-arrow-circle-right {
+div.un-track-label .fas.fa-arrow-circle-right {
     cursor: pointer;
     color: rgba(0, 0, 0, 0.5);
     float: right;
 }
-div.track-label .fas.fa-arrow-circle-right.clicked {
+div.un-track-label .fas.fa-arrow-circle-right.clicked {
     color: rgb(0, 0, 0);
 }
-div.track-label .fas.fa-redo {
+div.un-track-label .fas.fa-redo {
     cursor: pointer;
     float: right;
 }
 
-div.track-label div {
+div.un-track-label div {
     overflow: hidden;
     text-overflow: ellipsis;
 }
 
-div.track-label.arrow-down:before {
+div.un-track-label.arrow-down:before {
     content: " ";
     display: inline-block;
     width: 0;

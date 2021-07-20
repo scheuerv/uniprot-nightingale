@@ -69,16 +69,16 @@ export default class VariationRenderer implements CategoryRenderer {
         );
         this.mainTrackRow.addClass("main");
         $(this.mainTrackRow)
-            .find(".track-label")
+            .find(".un-track-label")
             .addClass("arrow-right")
             .on("click", () => this.toggle());
 
         categoryDiv.append(this.mainTrackRow);
-        this.subtracksDiv = $("<div/>").addClass("subtracks-container").css("display", "none");
+        this.subtracksDiv = $("<div/>").addClass("un-subtracks-container").css("display", "none");
         const protvistaFilter = $("<protvista-filter/>")[0] as VariationFilter;
         const trackRowDiv = createRow($(protvistaFilter), $(this.variation.track), "sub");
         $(trackRowDiv)
-            .find(".track-label")
+            .find(".un-track-label")
             .prepend($("<i/>", { class: "fas fa-redo" }));
         this.subtracksDiv.append(trackRowDiv);
         categoryDiv.append(this.subtracksDiv);
@@ -235,13 +235,13 @@ export default class VariationRenderer implements CategoryRenderer {
         if (this.subtracksDiv.css("display") === "none") {
             this.subtracksDiv.css("display", "block");
             $(this.mainTrackRow)
-                .find(".track-label.main")
+                .find(".un-track-label.main")
                 .removeClass("arrow-right")
                 .addClass("arrow-down");
         } else {
             this.subtracksDiv.css("display", "none");
             $(this.mainTrackRow)
-                .find(".track-label.main")
+                .find(".un-track-label.main")
                 .removeClass("arrow-down")
                 .addClass("arrow-right");
         }

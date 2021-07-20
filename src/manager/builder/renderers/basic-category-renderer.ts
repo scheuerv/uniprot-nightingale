@@ -92,14 +92,14 @@ export default class BasicCategoryRenderer implements CategoryRenderer {
         categoryDiv.append(this.subtracksDiv);
         return new BasicCategoryContainer(trackContainers, categoryDiv[0]);
     }
-    private toggle() {
+    private toggle(): void {
         const parent = $(this.mainTrack.track).parent();
         if (this.subtracksDiv.style.display === "none") {
             this.subtracksDiv.style.display = "block";
             parent.removeClass("main");
             parent.addClass("empty");
             this.mainTrackRow
-                .find(".track-label.main")
+                .find(".un-track-label.main")
                 .addClass("arrow-down")
                 .removeClass("arrow-right");
         } else {
@@ -107,7 +107,7 @@ export default class BasicCategoryRenderer implements CategoryRenderer {
             parent.removeClass("empty");
             parent.addClass("main");
             this.mainTrackRow
-                .find(".track-label.main")
+                .find(".un-track-label.main")
                 .addClass("arrow-right")
                 .removeClass("arrow-down");
         }
@@ -141,7 +141,7 @@ export default class BasicCategoryRenderer implements CategoryRenderer {
         track.parentElement!.appendChild(emptyTrack);
         mainTrackRow.addClass("main");
         mainTrackRow
-            .find(".track-label")
+            .find(".un-track-label")
             .addClass("arrow-right")
             .removeClass("arrow-down")
             .on("click", () => this.toggle());
@@ -157,7 +157,7 @@ export default class BasicCategoryRenderer implements CategoryRenderer {
 
     private getSubtracks(sequence: string): [BasicTrackContainer[], HTMLElement] {
         const subtrackContainers: BasicTrackContainer[] = [];
-        const subtracksDiv = $("<div/>").addClass("subtracks-container").css("display", "none");
+        const subtracksDiv = $("<div/>").addClass("un-subtracks-container").css("display", "none");
         if (this.rows.size >= 5) {
             subtracksDiv.addClass("scrollable");
             subtracksDiv.css("maxHeight", this.rows.size * 43 + "px");

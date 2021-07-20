@@ -152,7 +152,7 @@ export default class TrackManager {
                 }
             }
         });
-        OverlayScrollbars(document.querySelectorAll(".subtracks-container.scrollable"), {
+        OverlayScrollbars(document.querySelectorAll(".un-subtracks-container.scrollable"), {
             resize: "vertical",
             paddingAbsolute: true,
             scrollbars: {
@@ -202,8 +202,6 @@ export default class TrackManager {
                         parseInt(protvistaNavigation._displayend) + 1
                     ]);
 
-                // console.log(e.offsetX - protvistaNavigation._padding);
-                // console.log(e.offsetX);
                 const residueNumber = Math.max(
                     Math.min(xScale(e.offsetX - protvistaNavigation._padding), feature.end),
                     feature.start

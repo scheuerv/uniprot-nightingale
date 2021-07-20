@@ -45,7 +45,7 @@ export default class BasicCategoryContainer implements CategoryContainer {
     public addData(): void {
         this._tracks.forEach((track) => track.addData());
         const map: Map<number, ElementAndBuilder[]> = new Map();
-        const mainRowElement = $(this._categoryDiv).find(".track-row.main");
+        const mainRowElement = $(this._categoryDiv).find(".un-track-row.main");
         const rowWrapperBuilders: RowWrapperBuilder[] = [];
         const arrowElement = mainRowElement.find(".fa-arrow-circle-right");
         if (arrowElement.length > 0) {
@@ -65,7 +65,7 @@ export default class BasicCategoryContainer implements CategoryContainer {
                 });
         }
         $(this._categoryDiv)
-            .find(".subtracks-container .track-row")
+            .find(".un-subtracks-container .un-track-row")
             .get()
             .forEach((row: Element) => {
                 const rowSelection = $(row);
