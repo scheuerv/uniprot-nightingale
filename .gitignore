@@ -3,3 +3,4 @@ dist/**
 coverage
 uniprot-nightingale-*.tgz
 lib
+src/test.ts

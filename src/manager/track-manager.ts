@@ -1,6 +1,5 @@
 import * as d3 from "d3";
 import $ from "jquery";
-import ResizeObserver from "resize-observer-polyfill";
 import CategoryContainer from "./category-containers/category-container";
 import { createRow } from "../utils/utils";
 import ProtvistaManager from "protvista-manager";
@@ -202,7 +201,8 @@ export default class TrackManager {
                         parseInt(protvistaNavigation._displaystart),
                         parseInt(protvistaNavigation._displayend) + 1
                     ]);
-
+                // console.log(e.offsetX - protvistaNavigation._padding);
+                // console.log(e.offsetX);
                 const residueNumber = Math.max(
                     Math.min(xScale(e.offsetX - protvistaNavigation._padding), feature.end),
                     feature.start

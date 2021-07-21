@@ -4,7 +4,6 @@ import PdbParser from "./parsers/pdb-parser";
 import FeatureParser from "./parsers/feature-parser";
 import SMRParser from "./parsers/SMR-parser";
 import VariationParser from "./parsers/variation-parser";
-import "overlayscrollbars/css/OverlayScrollbars.min.css";
 import CategoryRenderer from "./renderers/category-renderer";
 import PdbLoader from "./loaders/pdb-loader";
 import Loader from "./loaders/loader";

@@ -9,26 +9,22 @@ npm i
 npm run start
 ```
 
-Open your browser on http://localhost:1340/.
+Open your browser on <http://localhost:1340/>.
 
 ## Usage
 
 ```typescript
-import { TrackManagerBuilder } from "uniprot-nightingale/lib/index";
+import { TrackManagerBuilder } from "uniprot-nightingale/lib/manager/builder/track-manager-builder";
 const trackManagerBuilder: TrackManagerBuilder = TrackManagerBuilder.createDefault({
-    sequence: {
-        uniprotId: "P37840"
-    }
+    uniprotId: "P37840"
 });
-const root = document.getElementById("root");
-const trackManager = await trackManagerBuilder.load(this.nightingaleWrapper);
+const root = document.getElementById("root")!;
+trackManagerBuilder.load(root).then((trackManager) => {
+    trackManager.onSelectedStructure.on(async (output) => console.log(output.pdbId));
 
-this.trackManager.onSelectedStructure.on(async (output) =>
-    console.log(output.pdbId);
-);
-
-this.trackManager.onResidueMouseOver.on(async (resNum) => {
-    console.log(resNum);
+    trackManager.onResidueMouseOver.on(async (resNum) => {
+        console.log(resNum);
+    });
 });
 ```
 
