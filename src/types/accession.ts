@@ -17,11 +17,11 @@ export class Fragment {
         public readonly fill?: string,
         public readonly shape?: string,
         public readonly tooltipContent?: TooltipContent,
-        public readonly output?: Output
+        public readonly structureInfo?: StructureInfo
     ) {}
 }
 
-export type Output = {
+export type StructureInfo = {
     readonly pdbId: string;
     readonly chain: string;
     readonly mapping: Mapping;
@@ -36,7 +36,7 @@ export class TrackRow {
     constructor(
         public readonly rowData: Accession[],
         public readonly label: string,
-        public readonly output?: Output
+        public readonly structureInfo?: StructureInfo
     ) {}
 }
 

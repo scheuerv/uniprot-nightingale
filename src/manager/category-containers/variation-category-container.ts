@@ -109,7 +109,7 @@ export default class VariationCategoryContainer implements CategoryContainer {
         });
     }
 
-    public getFirstTrackContainerWithOutput(): undefined {
+    public getFirstTrackContainerWithStructureInfo(): undefined {
         return undefined;
     }
 

@@ -42,7 +42,7 @@ export default class BasicCategoryRenderer implements CategoryRenderer {
                                     fragment.fill,
                                     fragment.shape,
                                     fragment.tooltipContent,
-                                    fragment.output
+                                    fragment.structureInfo
                                 );
                             } else {
                                 return fragment;
@@ -53,7 +53,11 @@ export default class BasicCategoryRenderer implements CategoryRenderer {
                 });
                 combined.set(
                     type,
-                    new TrackRow(accessionsWithFixedId, thisTypeRow.label, thisTypeRow.output)
+                    new TrackRow(
+                        accessionsWithFixedId,
+                        thisTypeRow.label,
+                        thisTypeRow.structureInfo
+                    )
                 );
             });
             other.rows.forEach((otherTypeRow, type) => {
@@ -62,7 +66,7 @@ export default class BasicCategoryRenderer implements CategoryRenderer {
                     const combinedTrackRow = new TrackRow(
                         otherTypeRow.rowData.concat(thisTypeRow.rowData),
                         otherTypeRow.label,
-                        otherTypeRow.output
+                        otherTypeRow.structureInfo
                     );
                     combined.set(type, combinedTrackRow);
                 } else {

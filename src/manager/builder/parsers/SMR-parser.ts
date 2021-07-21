@@ -3,7 +3,7 @@ import { getDarkerColor } from "../../../utils/utils";
 import TooltipContentBuilder, { createBlast } from "../../tooltip-content";
 import Parser from "./parser";
 import FragmentAligner from "./fragment-aligner";
-import { Fragment, Output, TrackRow } from "../../../types/accession";
+import { Fragment, StructureInfo, TrackRow } from "../../../types/accession";
 import { ChainMapping } from "../../../types/mapping";
 import { SMRData, SMRResult, SMRChain, SMRSegment } from "../../../types/SMR-parser";
 import { Interval } from "../../../types/interval";
@@ -54,7 +54,7 @@ export default class SMRParser implements Parser<SMRData> {
                     const key = `${smrId} ${templateChain.toLowerCase()}`;
                     structure.chains.forEach((chain: SMRChain) => {
                         chain.segments.map((segment: SMRSegment) => {
-                            let output: Output | undefined = undefined;
+                            let structureInfo: StructureInfo | undefined = undefined;
                             const mapping: Record<string, ChainMapping> = {};
                             mapping[chain.id] = {
                                 structAsymId: chain.id,
@@ -67,7 +67,7 @@ export default class SMRParser implements Parser<SMRData> {
                                     }
                                 ]
                             };
-                            output = {
+                            structureInfo = {
                                 pdbId: sTemplate[1],
                                 chain: chain.id,
                                 url: coordinatesFile,
@@ -113,7 +113,7 @@ export default class SMRParser implements Parser<SMRData> {
                                     this.color,
                                     undefined,
                                     tooltipContent.build(),
-                                    output
+                                    structureInfo
                                 )
                             );
                         });
@@ -129,7 +129,7 @@ export default class SMRParser implements Parser<SMRData> {
             });
             trackRows.set(
                 key,
-                new TrackRow(fragmentAligner.getAccessions(), key, fragments[0].output)
+                new TrackRow(fragmentAligner.getAccessions(), key, fragments[0].structureInfo)
             );
         }
         if (trackRows.size > 0) {

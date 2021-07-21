@@ -10,5 +10,5 @@ export default interface CategoryContainer {
     getMarkedTrackFragments(): TrackFragment[];
     getHighlightedTrackFragments(): TrackFragment[];
     clearHighlightedTrackFragments(): void;
-    getFirstTrackContainerWithOutput(): TrackContainer | undefined;
+    getFirstTrackContainerWithStructureInfo(): TrackContainer | undefined;
 }

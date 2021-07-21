@@ -1,11 +1,11 @@
 import { createEmitter } from "ts-typed-events";
 import TrackContainer from "./track-container";
 import ProtvistaVariationGraph from "protvista-variation-graph";
-import { Output } from "../../types/accession";
+import { StructureInfo } from "../../types/accession";
 import { VariationData } from "../../types/variants";
 
 export default class VariationGraphTrackContainer implements TrackContainer {
-    private readonly emitOnLabelClick = createEmitter<Output>();
+    private readonly emitOnLabelClick = createEmitter<StructureInfo>();
     public readonly onLabelClick = this.emitOnLabelClick.event;
 
     constructor(
@@ -13,7 +13,7 @@ export default class VariationGraphTrackContainer implements TrackContainer {
         private readonly rowData: VariationData
     ) {}
 
-    public getOutput(): undefined {
+    public getStructureInfo(): undefined {
         return undefined;
     }
 

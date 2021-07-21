@@ -1,10 +1,10 @@
 import ProtvistaTrack from "protvista-track";
 import { createEmitter } from "ts-typed-events";
 import TrackContainer from "./track-container";
-import { Output, TrackRow } from "../../types/accession";
+import { StructureInfo, TrackRow } from "../../types/accession";
 
 export default class BasicTrackContainer implements TrackContainer {
-    private readonly emitOnLabelClick = createEmitter<Output>();
+    private readonly emitOnLabelClick = createEmitter<StructureInfo>();
     public readonly onLabelClick = this.emitOnLabelClick.event;
     private active = false;
 
@@ -13,7 +13,7 @@ export default class BasicTrackContainer implements TrackContainer {
         private readonly trackRow: TrackRow,
         private readonly labelElement: JQuery<HTMLElement>
     ) {
-        if (trackRow.output) {
+        if (trackRow.structureInfo) {
             labelElement.css("cursor", "pointer");
             labelElement.on("mouseover", () => {
                 labelElement.addClass("bold");
@@ -24,13 +24,13 @@ export default class BasicTrackContainer implements TrackContainer {
                 }
             });
             labelElement.on("click", () => {
-                this.emitOnLabelClick?.emit(trackRow.output!);
+                this.emitOnLabelClick?.emit(trackRow.structureInfo!);
             });
         }
     }
 
-    public getOutput(): Output | undefined {
-        return this.trackRow.output;
+    public getStructureInfo(): StructureInfo | undefined {
+        return this.trackRow.structureInfo;
     }
 
     public activate(): void {

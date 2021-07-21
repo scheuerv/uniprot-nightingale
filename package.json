@@ -1,6 +1,6 @@
 {
     "name": "uniprot-nightingale",
-    "version": "0.9.4",
+    "version": "0.9.5",
     "description": "A tool for visualization of protein sequence and its annotations.",
     "main": "index.js",
     "scripts": {

@@ -8,14 +8,14 @@ import ProtvistaNavigation from "protvista-navigation";
 import OverlayScrollbars from "overlayscrollbars";
 import "overlayscrollbars/css/OverlayScrollbars.min.css";
 import TrackContainer from "./track-containers/track-container";
-import { Fragment, Output, TrackFragment } from "../types/accession";
+import { Fragment, StructureInfo, TrackFragment } from "../types/accession";
 import { HTMLElementWithData } from "./fragment-wrapper";
 import { ChainMapping } from "../types/mapping";
 import { Highlight } from "../types/highlight";
 export default class TrackManager {
     private readonly emitOnResidueMouseOver = createEmitter<number>();
     public readonly onResidueMouseOver = this.emitOnResidueMouseOver.event;
-    private readonly emitOnSelectedStructure = createEmitter<Output>();
+    private readonly emitOnSelectedStructure = createEmitter<StructureInfo>();
     public readonly onSelectedStructure = this.emitOnSelectedStructure.event;
     private readonly emitOnFragmentMouseOut = createEmitter<void>();
     public readonly onFragmentMouseOut = this.emitOnFragmentMouseOut.event;
@@ -49,12 +49,12 @@ export default class TrackManager {
             .attr("numberofticks", 10);
         this.protvistaManager.append(createRow($("<div/>"), sequenceElement));
         this.categoryContainers.forEach((categoryContainer) => {
-            const trackContainer = categoryContainer.getFirstTrackContainerWithOutput();
+            const trackContainer = categoryContainer.getFirstTrackContainerWithStructureInfo();
             if (trackContainer && !this.activeStructure) {
-                const output = trackContainer.getOutput()!;
-                this.activeStructure = { trackContainer, output };
+                const structureInfo = trackContainer.getStructureInfo()!;
+                this.activeStructure = { trackContainer, structureInfo: structureInfo };
                 this.activeStructure?.trackContainer.activate();
-                const chainMapping = output.mapping[output.chain];
+                const chainMapping = structureInfo.mapping[structureInfo.chain];
                 this.setChainHighlights(chainMapping);
             }
             this.protvistaManager.append(categoryContainer.content);
@@ -63,22 +63,22 @@ export default class TrackManager {
         $(element).append(this.protvistaManager);
         this.categoryContainers.forEach((categoryContainer) => {
             categoryContainer.trackContainers.forEach((trackContainer) => {
-                trackContainer.onLabelClick.on((output) => {
+                trackContainer.onLabelClick.on((structureInfo) => {
                     if (
                         this.activeStructure?.trackContainer == trackContainer &&
-                        this.activeStructure.output == output
+                        this.activeStructure.structureInfo == structureInfo
                     ) {
                         return;
                     }
                     this.activeStructure?.trackContainer.deactivate();
                     this.activeStructure = {
                         trackContainer,
-                        output
+                        structureInfo: structureInfo
                     };
                     this.activeStructure.trackContainer.activate();
-                    const chainMapping = output.mapping[output.chain];
+                    const chainMapping = structureInfo.mapping[structureInfo.chain];
                     this.setChainHighlights(chainMapping);
-                    this.emitOnSelectedStructure.emit(output);
+                    this.emitOnSelectedStructure.emit(structureInfo);
                 });
                 trackContainer.track.addEventListener("click", (e) => {
                     if (!(e.target as Element).closest(".feature")) {
@@ -91,23 +91,23 @@ export default class TrackManager {
                     const detail: EventDetail = event.detail;
                     this.updateTooltip(detail, resizeObserver);
                     if (detail?.eventtype == "click") {
-                        const output = detail.target?.__data__?.output;
-                        if (output) {
+                        const structureInfo = detail.target?.__data__?.structureInfo;
+                        if (structureInfo) {
                             if (
                                 this.activeStructure?.trackContainer == trackContainer &&
-                                this.activeStructure.output == output
+                                this.activeStructure.structureInfo == structureInfo
                             ) {
                                 return;
                             }
                             this.activeStructure?.trackContainer.deactivate();
                             this.activeStructure = {
                                 trackContainer,
-                                output
+                                structureInfo: structureInfo
                             };
                             this.activeStructure.trackContainer.activate();
-                            const chainMapping = output.mapping[output.chain];
+                            const chainMapping = structureInfo.mapping[structureInfo.chain];
                             this.setChainHighlights(chainMapping);
-                            this.emitOnSelectedStructure.emit(output);
+                            this.emitOnSelectedStructure.emit(structureInfo);
                         }
                     }
                 });
@@ -222,8 +222,8 @@ export default class TrackManager {
             });
     }
 
-    public getActiveOutput(): Output | undefined {
-        return this.activeStructure?.output;
+    public getActiveStructureInfo(): StructureInfo | undefined {
+        return this.activeStructure?.structureInfo;
     }
 
     public setHighlights(highlights: Highlight[]): void {
@@ -365,7 +365,7 @@ export default class TrackManager {
 }
 type ActiveStructure = {
     readonly trackContainer: TrackContainer;
-    readonly output: Output;
+    readonly structureInfo: StructureInfo;
 };
 
 type EventDetail = {

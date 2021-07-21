@@ -1,12 +1,12 @@
 import ProtvistaTrack from "protvista-track";
-import { Output } from "../../types/accession";
+import { StructureInfo } from "../../types/accession";
 import { SealedEvent } from "ts-typed-events";
 
 export default interface TrackContainer {
     readonly track: ProtvistaTrack;
-    readonly onLabelClick: SealedEvent<Output>;
+    readonly onLabelClick: SealedEvent<StructureInfo>;
     addData(): void;
     activate(): void;
     deactivate(): void;
-    getOutput(): Output | undefined;
+    getStructureInfo(): StructureInfo | undefined;
 }

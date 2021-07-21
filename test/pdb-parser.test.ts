@@ -3,7 +3,7 @@
  */
 import PdbParser from "../src/manager/builder/parsers/pdb-parser";
 import BasicCategoryRenderer from "../src/manager/builder/renderers/basic-category-renderer";
-import { Accession, Fragment, Location, Output, TrackRow } from "../src/types/accession";
+import { Accession, Fragment, Location, StructureInfo, TrackRow } from "../src/types/accession";
 
 import mockConsole from "jest-mock-console";
 import { ChainMapping } from "../src/types/mapping";
@@ -100,7 +100,7 @@ describe("PDBParser tests", function () {
                 unp_start: 10
             }
         ];
-        const output: Output = {
+        const structureInfo: StructureInfo = {
             chain: "A",
             format: "mmcif",
             data: undefined,
@@ -140,7 +140,7 @@ describe("PDBParser tests", function () {
                                                     '<table><tr> <td>Description</td><td>Experimental method: X-ray diffraction</td></tr><tr> <td>BLAST</td><td><span><a href="http://www.uniprot.org/blast/?about=P37840[10-11]&key=3q26 a" target="_blank">BLAST</a></td></tr></table>',
                                                 title: "3Q26_A 10-11"
                                             },
-                                            output
+                                            structureInfo
                                         ),
                                         new Fragment(
                                             2,
@@ -154,7 +154,7 @@ describe("PDBParser tests", function () {
                                                     '<table><tr> <td>Description</td><td>Experimental method: X-ray diffraction</td></tr><tr> <td>BLAST</td><td><span><a href="http://www.uniprot.org/blast/?about=P37840[20-42]&key=3q26 a" target="_blank">BLAST</a></td></tr></table>',
                                                 title: "3Q26_A 20-42"
                                             },
-                                            output
+                                            structureInfo
                                         ),
                                         new Fragment(
                                             3,
@@ -174,7 +174,7 @@ describe("PDBParser tests", function () {
                                 ])
                             ],
                             "3q26 a",
-                            output
+                            structureInfo
                         )
                     ]
                 ]),
@@ -320,7 +320,7 @@ describe("PDBParser tests", function () {
                 }
             }
         ];
-        const output: Output = {
+        const structureInfo: StructureInfo = {
             chain: "A",
             format: "mmcif",
             data: "structure data",
@@ -356,7 +356,7 @@ describe("PDBParser tests", function () {
                                                     '<table><tr> <td>BLAST</td><td><span><a href="http://www.uniprot.org/blast/?about=P37840[4-122]&key=5uig a" target="_blank">BLAST</a></td></tr></table>',
                                                 title: "5UIG_A 4-122"
                                             },
-                                            output
+                                            structureInfo
                                         ),
                                         new Fragment(
                                             2,
@@ -390,7 +390,7 @@ describe("PDBParser tests", function () {
                                 ])
                             ],
                             "5uig a",
-                            output
+                            structureInfo
                         )
                     ]
                 ]),
@@ -471,7 +471,7 @@ describe("PDBParser tests", function () {
                 }
             }
         ];
-        const output: Output = {
+        const structureInfo: StructureInfo = {
             chain: "A",
             format: "mmcif",
             data: undefined,
@@ -507,7 +507,7 @@ describe("PDBParser tests", function () {
                                                     '<table><tr> <td>BLAST</td><td><span><a href="http://www.uniprot.org/blast/?about=P37840[4-122]&key=5uig a" target="_blank">BLAST</a></td></tr></table>',
                                                 title: "5UIG_A 4-122"
                                             },
-                                            output
+                                            structureInfo
                                         ),
                                         new Fragment(
                                             2,
@@ -541,7 +541,7 @@ describe("PDBParser tests", function () {
                                 ])
                             ],
                             "5uig a",
-                            output
+                            structureInfo
                         )
                     ]
                 ]),
@@ -683,7 +683,7 @@ describe("PDBParser tests", function () {
                 }
             }
         ];
-        const output: Output = {
+        const structureInfo: StructureInfo = {
             chain: "A",
             format: "mmcif",
             data: undefined,
@@ -720,7 +720,7 @@ describe("PDBParser tests", function () {
                                 ])
                             ],
                             "5uig a",
-                            output
+                            structureInfo
                         )
                     ]
                 ]),

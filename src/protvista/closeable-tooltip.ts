@@ -1,9 +1,10 @@
 import ProtvistaTooltip from "protvista-tooltip";
+import { TemplateResult } from "lit-html";
 import { html } from "lit-element";
 import $ from "jquery";
 
 export default class CloseableTooltip extends ProtvistaTooltip {
-    public render() {
+    public render(): TemplateResult {
         let visible = this.title && this.visible ? true : false;
         // only compute that if tooltip is visible
         const position = visible ? this._getPosition() : {};

@@ -21,10 +21,10 @@ export default class BasicCategoryContainer implements CategoryContainer {
         return this._categoryDiv;
     }
 
-    public getFirstTrackContainerWithOutput(): TrackContainer | undefined {
+    public getFirstTrackContainerWithStructureInfo(): TrackContainer | undefined {
         for (let i = 0; i < this.trackContainers.length; i++) {
-            const output = this.trackContainers[i].getOutput();
-            if (output) {
+            const structureInfo = this.trackContainers[i].getStructureInfo();
+            if (structureInfo) {
                 return this.trackContainers[i];
             }
         }
@@ -97,7 +97,7 @@ export default class BasicCategoryContainer implements CategoryContainer {
                     fragment.fill,
                     fragment.shape,
                     fragment.tooltipContent,
-                    fragment.output
+                    fragment.structureInfo
                 )
             );
             fragmentRowTuples.forEach((fragmentRowTuple) => {

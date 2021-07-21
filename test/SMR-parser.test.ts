@@ -3,7 +3,7 @@
  */
 import BasicCategoryRenderer from "../src/manager/builder/renderers/basic-category-renderer";
 import SMRParser from "../src/manager/builder/parsers/SMR-parser";
-import { Accession, Fragment, Location, Output, TrackRow } from "../src/types/accession";
+import { Accession, Fragment, Location, StructureInfo, TrackRow } from "../src/types/accession";
 import { ChainMapping } from "../src/types/mapping";
 import { SMRData } from "../src/types/SMR-parser";
 describe("SMRParser tests", function () {
@@ -103,7 +103,7 @@ describe("SMRParser tests", function () {
                 ]
             }
         };
-        const output: Output = {
+        const structureInfo: StructureInfo = {
             chain: "I",
             format: "pdb",
             mapping: {
@@ -140,13 +140,13 @@ describe("SMRParser tests", function () {
                                                     '<table><tr> <td>Description</td><td>Experimental method: SWISSMODEL (HOMOLOGY MODELLING)</td></tr><tr> <td>BLAST</td><td><span><a href="http://www.uniprot.org/blast/?about=P37840[14-96]&key=6ssx.1 i" target="_blank">BLAST</a></td></tr></table>',
                                                 title: "6SSX.1_I 14-96"
                                             },
-                                            output
+                                            structureInfo
                                         )
                                     ])
                                 ])
                             ],
                             "6ssx.1 i",
-                            output
+                            structureInfo
                         )
                     ]
                 ]),
@@ -194,7 +194,7 @@ describe("SMRParser tests", function () {
                 ]
             }
         };
-        const output1: Output = {
+        const structureInfo1: StructureInfo = {
             chain: "I",
             format: "pdb",
             mapping: {
@@ -214,7 +214,7 @@ describe("SMRParser tests", function () {
                 }
             ]
         };
-        const output2: Output = {
+        const structureInfo2: StructureInfo = {
             chain: "I",
             format: "pdb",
             mapping: {
@@ -255,7 +255,7 @@ describe("SMRParser tests", function () {
                                                     '<table><tr> <td>Description</td><td>Experimental method: SWISSMODEL (HOMOLOGY MODELLING)</td></tr><tr> <td>BLAST</td><td><span><a href="http://www.uniprot.org/blast/?about=P37840[14-96]&key=6ssx.1 i" target="_blank">BLAST</a></td></tr></table>',
                                                 title: "6SSX.1_I 14-96"
                                             },
-                                            output1
+                                            structureInfo1
                                         ),
                                         new Fragment(
                                             2,
@@ -269,13 +269,13 @@ describe("SMRParser tests", function () {
                                                     '<table><tr> <td>Description</td><td>Experimental method: SWISSMODEL (HOMOLOGY MODELLING)</td></tr><tr> <td>BLAST</td><td><span><a href="http://www.uniprot.org/blast/?about=P37840[100-120]&key=6ssx.1 i" target="_blank">BLAST</a></td></tr></table>',
                                                 title: "6SSX.1_I 100-120"
                                             },
-                                            output2
+                                            structureInfo2
                                         )
                                     ])
                                 ])
                             ],
                             "6ssx.1 i",
-                            output1
+                            structureInfo1
                         )
                     ]
                 ]),
@@ -323,7 +323,7 @@ describe("SMRParser tests", function () {
                 ]
             }
         };
-        const output1: Output = {
+        const structureInfo1: StructureInfo = {
             chain: "I",
             format: "pdb",
             mapping: {
@@ -343,7 +343,7 @@ describe("SMRParser tests", function () {
                 }
             ]
         };
-        const output2: Output = {
+        const structureInfo2: StructureInfo = {
             chain: "I",
             format: "pdb",
             mapping: {
@@ -384,7 +384,7 @@ describe("SMRParser tests", function () {
                                                     '<table><tr> <td>Description</td><td>Experimental method: SWISSMODEL (HOMOLOGY MODELLING)</td></tr><tr> <td>BLAST</td><td><span><a href="http://www.uniprot.org/blast/?about=P37840[14-96]&key=6ssx.1 i" target="_blank">BLAST</a></td></tr></table>',
                                                 title: "6SSX.1_I 14-96"
                                             },
-                                            output1
+                                            structureInfo1
                                         )
                                     ])
                                 ]),
@@ -402,13 +402,13 @@ describe("SMRParser tests", function () {
                                                     '<table><tr> <td>Description</td><td>Experimental method: SWISSMODEL (HOMOLOGY MODELLING)</td></tr><tr> <td>BLAST</td><td><span><a href="http://www.uniprot.org/blast/?about=P37840[20-50]&key=6ssx.1 i" target="_blank">BLAST</a></td></tr></table>',
                                                 title: "6SSX.1_I 20-50"
                                             },
-                                            output2
+                                            structureInfo2
                                         )
                                     ])
                                 ])
                             ],
                             "6ssx.1 i",
-                            output1
+                            structureInfo1
                         )
                     ]
                 ]),
@@ -461,7 +461,7 @@ describe("SMRParser tests", function () {
                 ]
             }
         };
-        const output1: Output = {
+        const structureInfo1: StructureInfo = {
             chain: "I",
             format: "pdb",
             mapping: {
@@ -481,7 +481,7 @@ describe("SMRParser tests", function () {
                 }
             ]
         };
-        const output2: Output = {
+        const structureInfo2: StructureInfo = {
             chain: "J",
             format: "pdb",
             mapping: {
@@ -522,7 +522,7 @@ describe("SMRParser tests", function () {
                                                     '<table><tr> <td>Description</td><td>Experimental method: SWISSMODEL (HOMOLOGY MODELLING)</td></tr><tr> <td>BLAST</td><td><span><a href="http://www.uniprot.org/blast/?about=P37840[14-96]&key=6ssx.1 i" target="_blank">BLAST</a></td></tr></table>',
                                                 title: "6SSX.1_I 14-96"
                                             },
-                                            output1
+                                            structureInfo1
                                         )
                                     ])
                                 ]),
@@ -540,13 +540,13 @@ describe("SMRParser tests", function () {
                                                     '<table><tr> <td>Description</td><td>Experimental method: SWISSMODEL (HOMOLOGY MODELLING)</td></tr><tr> <td>BLAST</td><td><span><a href="http://www.uniprot.org/blast/?about=P37840[80-100]&key=6ssx.1 i" target="_blank">BLAST</a></td></tr></table>',
                                                 title: "6SSX.1_J 80-100"
                                             },
-                                            output2
+                                            structureInfo2
                                         )
                                     ])
                                 ])
                             ],
                             "6ssx.1 i",
-                            output1
+                            structureInfo1
                         )
                     ]
                 ]),
@@ -599,7 +599,7 @@ describe("SMRParser tests", function () {
                 ]
             }
         };
-        const output1: Output = {
+        const structureInfo1: StructureInfo = {
             chain: "I",
             format: "pdb",
             mapping: {
@@ -619,7 +619,7 @@ describe("SMRParser tests", function () {
                 }
             ]
         };
-        const output2: Output = {
+        const structureInfo2: StructureInfo = {
             chain: "J",
             format: "pdb",
             mapping: { J: { ...chainMapping100_120, structAsymId: "J" } },
@@ -658,7 +658,7 @@ describe("SMRParser tests", function () {
                                                     '<table><tr> <td>Description</td><td>Experimental method: SWISSMODEL (HOMOLOGY MODELLING)</td></tr><tr> <td>BLAST</td><td><span><a href="http://www.uniprot.org/blast/?about=P37840[14-96]&key=6ssx.1 i" target="_blank">BLAST</a></td></tr></table>',
                                                 title: "6SSX.1_I 14-96"
                                             },
-                                            output1
+                                            structureInfo1
                                         ),
                                         new Fragment(
                                             2,
@@ -672,13 +672,13 @@ describe("SMRParser tests", function () {
                                                     '<table><tr> <td>Description</td><td>Experimental method: SWISSMODEL (HOMOLOGY MODELLING)</td></tr><tr> <td>BLAST</td><td><span><a href="http://www.uniprot.org/blast/?about=P37840[100-120]&key=6ssx.1 i" target="_blank">BLAST</a></td></tr></table>',
                                                 title: "6SSX.1_J 100-120"
                                             },
-                                            output2
+                                            structureInfo2
                                         )
                                     ])
                                 ])
                             ],
                             "6ssx.1 i",
-                            output1
+                            structureInfo1
                         )
                     ]
                 ]),
@@ -742,7 +742,7 @@ describe("SMRParser tests", function () {
                 ]
             }
         };
-        const output1: Output = {
+        const structureInfo1: StructureInfo = {
             chain: "I",
             format: "pdb",
             mapping: {
@@ -762,7 +762,7 @@ describe("SMRParser tests", function () {
                 }
             ]
         };
-        const output2: Output = {
+        const structureInfo2: StructureInfo = {
             chain: "I",
             format: "pdb",
             mapping: {
@@ -803,7 +803,7 @@ describe("SMRParser tests", function () {
                                                     '<table><tr> <td>Description</td><td>Experimental method: SWISSMODEL (HOMOLOGY MODELLING)</td></tr><tr> <td>BLAST</td><td><span><a href="http://www.uniprot.org/blast/?about=P37840[14-96]&key=6ssx.1 i" target="_blank">BLAST</a></td></tr></table>',
                                                 title: "6SSX.1_I 14-96"
                                             },
-                                            output1
+                                            structureInfo1
                                         )
                                     ])
                                 ]),
@@ -821,13 +821,13 @@ describe("SMRParser tests", function () {
                                                     '<table><tr> <td>Description</td><td>Experimental method: SWISSMODEL (HOMOLOGY MODELLING)</td></tr><tr> <td>BLAST</td><td><span><a href="http://www.uniprot.org/blast/?about=P37840[80-100]&key=6ssx.1 i" target="_blank">BLAST</a></td></tr></table>',
                                                 title: "6SSX.1_I 80-100"
                                             },
-                                            output2
+                                            structureInfo2
                                         )
                                     ])
                                 ])
                             ],
                             "6ssx.1 i",
-                            output1
+                            structureInfo1
                         )
                     ]
                 ]),
@@ -891,7 +891,7 @@ describe("SMRParser tests", function () {
                 ]
             }
         };
-        const output1: Output = {
+        const structureInfo1: StructureInfo = {
             chain: "I",
             format: "pdb",
             mapping: {
@@ -907,7 +907,7 @@ describe("SMRParser tests", function () {
                 }
             ]
         };
-        const output2: Output = {
+        const structureInfo2: StructureInfo = {
             chain: "J",
             format: "pdb",
             mapping: {
@@ -944,13 +944,13 @@ describe("SMRParser tests", function () {
                                                     '<table><tr> <td>Description</td><td>Experimental method: SWISSMODEL (HOMOLOGY MODELLING)</td></tr><tr> <td>BLAST</td><td><span><a href="http://www.uniprot.org/blast/?about=P37840[14-96]&key=6ssx.1 i" target="_blank">BLAST</a></td></tr></table>',
                                                 title: "6SSX.1_I 14-96"
                                             },
-                                            output1
+                                            structureInfo1
                                         )
                                     ])
                                 ])
                             ],
                             "6ssx.1 i",
-                            output1
+                            structureInfo1
                         )
                     ],
                     [
@@ -971,13 +971,13 @@ describe("SMRParser tests", function () {
                                                     '<table><tr> <td>Description</td><td>Experimental method: SWISSMODEL (HOMOLOGY MODELLING)</td></tr><tr> <td>BLAST</td><td><span><a href="http://www.uniprot.org/blast/?about=P37840[80-100]&key=6ssx.1 j" target="_blank">BLAST</a></td></tr></table>',
                                                 title: "6SSX.1_J 80-100"
                                             },
-                                            output2
+                                            structureInfo2
                                         )
                                     ])
                                 ])
                             ],
                             "6ssx.1 j",
-                            output2
+                            structureInfo2
                         )
                     ]
                 ]),
@@ -1041,7 +1041,7 @@ describe("SMRParser tests", function () {
             }
         };
 
-        const output1: Output = {
+        const structureInfo1: StructureInfo = {
             chain: "I",
             format: "pdb",
             mapping: { I: chainMapping1_1 },
@@ -1076,13 +1076,13 @@ describe("SMRParser tests", function () {
                                                     '<table><tr> <td>BLAST</td><td><span><a href="http://www.uniprot.org/blast/?about=P37840[1-1]&key=6ssx.1 i" target="_blank">BLAST</a></td></tr></table>',
                                                 title: "6SSX.1_I 1"
                                             },
-                                            output1
+                                            structureInfo1
                                         )
                                     ])
                                 ])
                             ],
                             "6ssx.1 i",
-                            output1
+                            structureInfo1
                         )
                     ]
                 ]),

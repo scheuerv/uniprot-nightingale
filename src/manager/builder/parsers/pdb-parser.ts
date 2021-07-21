@@ -1,7 +1,7 @@
 import BasicCategoryRenderer from "../renderers/basic-category-renderer";
 import TooltipContentBuilder, { createBlast } from "../../tooltip-content";
 import Parser from "./parser";
-import { Accession, Fragment, Location, Output, TrackRow } from "../../../types/accession";
+import { Accession, Fragment, Location, StructureInfo, TrackRow } from "../../../types/accession";
 import { TooltipContent } from "../../../types/tooltip-content";
 import { ChainMapping, FragmentMapping } from "../../../types/mapping";
 import {
@@ -71,7 +71,7 @@ export default class PdbParser implements Parser<PDBParserData> {
                                 chainMapping.fragmentMappings
                             );
                         });
-                        const output: Output = {
+                        const structureInfo: StructureInfo = {
                             pdbId: pdbId,
                             chain: chainId,
                             mapping: sortedMappings,
@@ -97,7 +97,7 @@ export default class PdbParser implements Parser<PDBParserData> {
                                     interval.end,
                                     pdbParserItem.experimental_method
                                 ),
-                                output
+                                structureInfo
                             );
                         });
 
@@ -115,7 +115,11 @@ export default class PdbParser implements Parser<PDBParserData> {
                         const accessions: Accession[] = [new Accession([new Location(fragments)])];
                         trackRows.set(
                             pdbId + " " + chainId.toLowerCase(),
-                            new TrackRow(accessions, pdbId + " " + chainId.toLowerCase(), output)
+                            new TrackRow(
+                                accessions,
+                                pdbId + " " + chainId.toLowerCase(),
+                                structureInfo
+                            )
                         );
                     } else {
                         console.warn(`Mapping for ${pdbId} ${chainId} not found.`);
