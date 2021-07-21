@@ -1,5 +1,6 @@
 import * as d3 from "d3";
 import $ from "jquery";
+import ResizeObserver from "resize-observer-polyfill";
 import CategoryContainer from "./category-containers/category-container";
 import { createRow } from "../utils/utils";
 import ProtvistaManager from "protvista-manager";

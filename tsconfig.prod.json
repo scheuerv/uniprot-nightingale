@@ -3,7 +3,7 @@
         "composite": false,
         "target": "es2020",
         "jsx": "react",
-        "outDir": "dist",
+        "outDir": "lib",
         "sourceMap": false,
         "declaration": true,
         "strictNullChecks": true,
