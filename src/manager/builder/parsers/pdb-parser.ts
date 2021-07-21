@@ -16,6 +16,7 @@ export default class PdbParser implements Parser<PDBParserData> {
     private id = 1;
 
     constructor(
+        private readonly custom: boolean = false,
         private readonly categoryLabel = "Experimental structures",
         public readonly categoryName = "EXPERIMENTAL_STRUCTURES"
     ) {}
@@ -79,7 +80,8 @@ export default class PdbParser implements Parser<PDBParserData> {
                             data: !structure.url ? structure.data : undefined,
                             format: structure.format,
                             idType: "label",
-                            observedIntervals: observedIntervals
+                            observedIntervals: observedIntervals,
+                            source: this.custom ? "USER" : "PDB"
                         };
                         const observedFragments = observedIntervals.map((interval) => {
                             return new Fragment(

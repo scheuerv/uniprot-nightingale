@@ -117,7 +117,8 @@ describe("PDBParser tests", function () {
                     end: 42,
                     start: 20
                 }
-            ]
+            ],
+            source: "PDB"
         };
         const expectedResult: BasicCategoryRenderer[] = [
             new BasicCategoryRenderer(
@@ -251,7 +252,7 @@ describe("PDBParser tests", function () {
     });
 
     it("data provided", async () => {
-        instance = new PdbParser();
+        instance = new PdbParser(true);
         const ParserChainMapping: ParserChainMapping = {
             struct_asym_id: "A",
             fragment_mappings: [
@@ -333,7 +334,8 @@ describe("PDBParser tests", function () {
                     end: 122,
                     start: 4
                 }
-            ]
+            ],
+            source: "USER"
         };
         const expectedResult: BasicCategoryRenderer[] = [
             new BasicCategoryRenderer(
@@ -403,7 +405,7 @@ describe("PDBParser tests", function () {
     });
 
     it("data and url provided", async () => {
-        instance = new PdbParser();
+        instance = new PdbParser(true);
         const parserChainMapping: ParserChainMapping = {
             struct_asym_id: "A",
             fragment_mappings: [
@@ -484,7 +486,8 @@ describe("PDBParser tests", function () {
                     end: 122,
                     start: 4
                 }
-            ]
+            ],
+            source: "USER"
         };
         const expectedResult: BasicCategoryRenderer[] = [
             new BasicCategoryRenderer(
@@ -691,7 +694,8 @@ describe("PDBParser tests", function () {
             pdbId: "5uig",
             url: "https://www.ebi.ac.uk/pdbe/static/entry/5uig_updated.cif",
             idType: "label",
-            observedIntervals: []
+            observedIntervals: [],
+            source: "PDB"
         };
         const expectedResult = [
             new BasicCategoryRenderer(

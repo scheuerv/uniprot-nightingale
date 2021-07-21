@@ -62,7 +62,7 @@ export default class TrackManagerBuilder {
         if (config.sequenceStructureMapping) {
             trackManagerBuilder.addCustom(() => {
                 return config.sequenceStructureMapping;
-            }, new PdbParser("User provided structures", "USER_PROVIDED_STRUCTURES"));
+            }, new PdbParser(true, "User provided structures", "USER_PROVIDED_STRUCTURES"));
         }
 
         trackManagerBuilder.add(new PdbLoader(config.pdbIds), new PdbParser());

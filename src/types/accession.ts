@@ -30,6 +30,7 @@ export type StructureInfo = {
     readonly data?: string;
     readonly idType: "label" | "auth";
     readonly observedIntervals: Interval[];
+    readonly source: "PDB" | "SMR" | "USER";
 };
 
 export class TrackRow {

@@ -74,7 +74,8 @@ export default class SMRParser implements Parser<SMRData> {
                                 format: "pdb",
                                 mapping: mapping,
                                 idType: "auth",
-                                observedIntervals: observedIntervalsForTemplate[key]
+                                observedIntervals: observedIntervalsForTemplate[key],
+                                source: "SMR"
                             };
                             const tooltipContent: TooltipContentBuilder = new TooltipContentBuilder(
                                 `${smrId.toUpperCase()}_${chain.id} ${segment.uniprot.from}${

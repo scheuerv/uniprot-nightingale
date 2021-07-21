@@ -117,7 +117,8 @@ describe("SMRParser tests", function () {
                     end: 96,
                     start: 14
                 }
-            ]
+            ],
+            source: "SMR"
         };
         const expectedResult: BasicCategoryRenderer[] = [
             new BasicCategoryRenderer(
@@ -212,7 +213,8 @@ describe("SMRParser tests", function () {
                     end: 120,
                     start: 100
                 }
-            ]
+            ],
+            source: "SMR"
         };
         const structureInfo2: StructureInfo = {
             chain: "I",
@@ -232,7 +234,8 @@ describe("SMRParser tests", function () {
                     end: 120,
                     start: 100
                 }
-            ]
+            ],
+            source: "SMR"
         };
         const expectedResult: BasicCategoryRenderer[] = [
             new BasicCategoryRenderer(
@@ -341,7 +344,8 @@ describe("SMRParser tests", function () {
                     end: 50,
                     start: 20
                 }
-            ]
+            ],
+            source: "SMR"
         };
         const structureInfo2: StructureInfo = {
             chain: "I",
@@ -361,7 +365,8 @@ describe("SMRParser tests", function () {
                     end: 50,
                     start: 20
                 }
-            ]
+            ],
+            source: "SMR"
         };
         const expectedResult: BasicCategoryRenderer[] = [
             new BasicCategoryRenderer(
@@ -479,7 +484,8 @@ describe("SMRParser tests", function () {
                     end: 100,
                     start: 80
                 }
-            ]
+            ],
+            source: "SMR"
         };
         const structureInfo2: StructureInfo = {
             chain: "J",
@@ -499,7 +505,8 @@ describe("SMRParser tests", function () {
                     end: 100,
                     start: 80
                 }
-            ]
+            ],
+            source: "SMR"
         };
         const expectedResult: BasicCategoryRenderer[] = [
             new BasicCategoryRenderer(
@@ -617,7 +624,8 @@ describe("SMRParser tests", function () {
                     end: 120,
                     start: 100
                 }
-            ]
+            ],
+            source: "SMR"
         };
         const structureInfo2: StructureInfo = {
             chain: "J",
@@ -635,7 +643,8 @@ describe("SMRParser tests", function () {
                     end: 120,
                     start: 100
                 }
-            ]
+            ],
+            source: "SMR"
         };
         const expectedResult: BasicCategoryRenderer[] = [
             new BasicCategoryRenderer(
@@ -760,7 +769,8 @@ describe("SMRParser tests", function () {
                     end: 100,
                     start: 80
                 }
-            ]
+            ],
+            source: "SMR"
         };
         const structureInfo2: StructureInfo = {
             chain: "I",
@@ -780,7 +790,8 @@ describe("SMRParser tests", function () {
                     end: 100,
                     start: 80
                 }
-            ]
+            ],
+            source: "SMR"
         };
         const expectedResult: BasicCategoryRenderer[] = [
             new BasicCategoryRenderer(
@@ -905,7 +916,8 @@ describe("SMRParser tests", function () {
                     end: 96,
                     start: 14
                 }
-            ]
+            ],
+            source: "SMR"
         };
         const structureInfo2: StructureInfo = {
             chain: "J",
@@ -921,7 +933,8 @@ describe("SMRParser tests", function () {
                     end: 100,
                     start: 80
                 }
-            ]
+            ],
+            source: "SMR"
         };
         const expectedResult: BasicCategoryRenderer[] = [
             new BasicCategoryRenderer(
@@ -1053,7 +1066,8 @@ describe("SMRParser tests", function () {
                     end: 1,
                     start: 1
                 }
-            ]
+            ],
+            source: "SMR"
         };
         const expectedResult: BasicCategoryRenderer[] = [
             new BasicCategoryRenderer(
