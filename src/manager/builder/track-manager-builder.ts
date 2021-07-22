@@ -110,7 +110,7 @@ export default class TrackManagerBuilder {
             if (customDataSource.url) {
                 trackManagerBuilder.addFetch(
                     (uniprotId) =>
-                        `${customDataSource.url}${uniprotId}${
+                        `${customDataSource.url}${uniprotId ?? ""}${
                             customDataSource.useExtension ? ".json" : ""
                         }`,
                     new FeatureParser(config.categoryExclusions, customDataSource.source)
