@@ -28,6 +28,10 @@ export default class BasicCategoryContainer implements CategoryContainer {
         return this._categoryDiv;
     }
 
+    /**
+     *
+     * @returns First track container which contains info about structure.
+     */
     public getFirstTrackContainerWithStructureInfo(): TrackContainer | undefined {
         for (let i = 0; i < this.trackContainers.length; i++) {
             const structureInfo = this.trackContainers[i].getStructureInfo();
@@ -37,14 +41,33 @@ export default class BasicCategoryContainer implements CategoryContainer {
         }
     }
 
+    /**
+     * Here we exploit the fact that main track is first and contains all
+     * fragments from all the other tracks and marking is synchronized
+     * between main track and subtracks
+     * @returns All marked fragments in this category.
+     */
     public getMarkedTrackFragments(): TrackFragment[] {
         return this._rowWrappers[0]?.getMarkedTrackFragments() ?? [];
     }
 
+    /**
+     * Here we exploit the fact that main track is first and contains all
+     * fragments from all the other tracks and highlighted is synchronized
+     * between main track and subtracks
+     * @returns All highlighted fragments in this category.
+     */
     public getHighlightedTrackFragments(): TrackFragment[] {
         return this._rowWrappers[0]?.getHighlightedTrackFragments() ?? [];
     }
 
+    /**
+     * Clears all highlights in this category.
+     *
+     * Here we exploit the fact that main track is first and contains all
+     * fragments from all the other tracks and highlighted is synchronized
+     * between main track and subtracks.
+     */
     public clearHighlightedTrackFragments(): void {
         this._rowWrappers[0]?.clearHighlightedTrackFragments();
     }
@@ -122,8 +145,10 @@ export default class BasicCategoryContainer implements CategoryContainer {
         this._rowWrappers = rowWrapperBuilders.map((builder) => {
             return builder.build();
         });
-        this._rowWrappers[0]?.onHighlightChange.on((trackFragments) => {
-            this.emitOnHighlightChange.emit(trackFragments);
+        this._rowWrappers.forEach((rowWrapper) => {
+            rowWrapper.onHighlightChange.on((trackFragments) => {
+                this.emitOnHighlightChange.emit(trackFragments);
+            });
         });
     }
 

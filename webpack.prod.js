@@ -10,7 +10,7 @@ const sharedConfig = {
                 test: /\.(ts|tsx)$/,
                 include: [path.resolve(__dirname, "src")],
                 options: {
-                    configFile: path.resolve(__dirname, "tsconfig.prod.json")
+                    configFile: path.resolve(__dirname, "tsconfig.json")
                 }
             },
             {
@@ -52,7 +52,6 @@ function createEntryPoint(name) {
         output: {
             filename: `${name}.js`,
             path: path.resolve(__dirname, `dist/`),
-            clean: true,
             publicPath: "/",
             library: {
                 type: "assign",
@@ -63,4 +62,26 @@ function createEntryPoint(name) {
     };
 }
 
-module.exports = [createEntryPoint("index")];
+function createExampleEntryPoint(name) {
+    return {
+        devtool: "inline-source-map",
+        entry: [path.resolve(__dirname, `src/examples/index.ts`)],
+        output: {
+            filename: `${name}.js`,
+            path: path.resolve(__dirname, `dist/examples`),
+            library: {
+                type: 'assign',
+                name: 'UniprotNightingaleExamples'
+            }
+        },
+        externals: {
+            "fs": 'require("fs")'
+        },
+        ...sharedConfig
+    }
+}
+
+module.exports = [
+    createEntryPoint("index"),
+    createExampleEntryPoint("example")
+];

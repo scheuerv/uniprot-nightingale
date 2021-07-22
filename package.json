@@ -1,15 +1,11 @@
 {
     "name": "uniprot-nightingale",
-    "version": "0.9.6",
+    "version": "1.0.0",
     "description": "A tool for visualization of protein sequence and its annotations.",
     "main": "index.js",
     "scripts": {
-        "build": "npm run build-webpack",
-        "build-webpack": "webpack --config webpack.prod.js",
-        "build-dev": "npm run build-webpack",
-        "build-dev-webpack": "webpack --mode development",
-        "serve": "http-server -p 1340 ./dist",
-        "start": "webpack serve",
+        "build": "webpack --config webpack.prod.js",
+        "start": "webpack serve  --config webpack.config.js",
         "lint": "eslint . --ext .html,.ts",
         "lint-fix": "eslint . --ext .html,.ts --fix",
         "test": "jest --no-cache "

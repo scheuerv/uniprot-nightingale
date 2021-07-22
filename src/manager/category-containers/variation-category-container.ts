@@ -120,10 +120,16 @@ export default class VariationCategoryContainer implements CategoryContainer {
         });
     }
 
+    /**
+     * Variation track containers don't have any structure info.
+     */
     public getFirstTrackContainerWithStructureInfo(): undefined {
         return undefined;
     }
 
+    /**
+     * Clears highlighted variants.
+     */
     public clearHighlightedTrackFragments(): void {
         this.highlightedVariants.clear();
     }

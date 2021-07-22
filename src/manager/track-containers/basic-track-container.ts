@@ -17,6 +17,8 @@ export default class BasicTrackContainer implements TrackContainer {
         private readonly trackRow: TrackRow,
         private readonly labelElement: JQuery<HTMLElement>
     ) {
+        // If track contains info about structure we can click on row's label
+        // to emit event with this info.
         if (trackRow.structureInfo) {
             labelElement.css("cursor", "pointer");
             labelElement.on("mouseover", () => {
@@ -37,11 +39,19 @@ export default class BasicTrackContainer implements TrackContainer {
         return this.trackRow.structureInfo;
     }
 
+    /**
+     * Set this track as active. It is called when
+     * clicked on this track's label.
+     */
     public activate(): void {
         this.active = true;
         this.labelElement.addClass("bold");
     }
 
+    /**
+     * Set this track as active. It is called when
+     * clicked on other track's label.
+     */
     public deactivate(): void {
         this.active = false;
         this.labelElement.removeClass("bold");

@@ -4,9 +4,6 @@ const MiniCssExtractPlugin = require("mini-css-extract-plugin");
 
 const sharedConfig = {
     mode: "development",
-    devServer: {
-        port: 1340
-    },
     module: {
         rules: [
             {
@@ -67,8 +64,12 @@ function createEntryPoint(name) {
                 name: "UniprotNightingale"
             }
         },
+        devServer: {
+            port: 1340
+        },
         ...sharedConfig
     };
 }
-
-module.exports = [createEntryPoint("index")];
+module.exports = [
+    createEntryPoint("index")
+];
