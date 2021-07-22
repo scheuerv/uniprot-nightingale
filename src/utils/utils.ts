@@ -12,6 +12,14 @@ export function loadComponent(name: string, className: CustomElementConstructor)
     }
 }
 
+/**
+ * Creates row containing label possibly with arrow and content.
+ * @param  {JQuery<Text>|JQuery<HTMLElement>} label Row label.
+ * @param  {JQuery<HTMLElement>} content Row content.
+ * @param  {string} customClass Custom class for content and label div container.
+ * @param  {boolean} arrow Should create arrow in label wrapper.
+ * @returns Created row element.
+ */
 export function createRow(
     label: JQuery<Text> | JQuery<HTMLElement>,
     content: JQuery<HTMLElement>,

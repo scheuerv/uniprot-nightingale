@@ -4,7 +4,7 @@
     "parserOptions": {
         "ecmaVersion": 2020
     },
-    "plugins": ["@typescript-eslint","eslint-plugin-html"],
+    "plugins": ["@typescript-eslint", "eslint-plugin-html"],
     "extends": [
         "eslint:recommended",
         "plugin:@typescript-eslint/eslint-recommended",

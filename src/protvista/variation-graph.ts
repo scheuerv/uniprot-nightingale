@@ -1,6 +1,11 @@
 import ProtvistaVariationGraph from "protvista-variation-graph";
 import * as d3 from "d3";
 import { VariationData } from "../types/variants";
+
+/**
+ * Adjusted VariationGraph so it can process filtrated data from ProtvistaFilter and
+ * also disables zooming on double click (which causes random issues).
+ */
 export default class FixedVariationGraph extends ProtvistaVariationGraph {
     public set data(data: VariationData) {
         this._originalData = data;

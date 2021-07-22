@@ -12,6 +12,16 @@ import { Fragment, StructureInfo, TrackFragment } from "../types/accession";
 import { HTMLElementWithData } from "./fragment-wrapper";
 import { ChainMapping } from "../types/mapping";
 import { Highlight } from "../types/highlight";
+
+/**
+ * Main class of uniprot-nightingale module. It manages all of its "runtime" components.
+ * The easiest way to create your very own TrackManager is to use TrackManagerBuilder.
+ *
+ * It manages tooltip (hides/displays and moves), different independent sources of
+ * highlights and contains ProtvistaManager into which it inserts all of its
+ * tracks containing other nightingale (ProtVista) components.
+ *
+ */
 export default class TrackManager {
     private readonly emitOnResidueMouseOver = createEmitter<number>();
     public readonly onResidueMouseOver = this.emitOnResidueMouseOver.event;
@@ -48,6 +58,7 @@ export default class TrackManager {
             .attr("sequence", sequence)
             .attr("numberofticks", 10);
         this.protvistaManager.append(createRow($("<div/>"), sequenceElement));
+        //find first category container containing structure info and sets it as active structure.
         this.categoryContainers.forEach((categoryContainer) => {
             const trackContainer = categoryContainer.getFirstTrackContainerWithStructureInfo();
             if (trackContainer && !this.activeStructure) {
@@ -63,6 +74,7 @@ export default class TrackManager {
         $(element).append(this.protvistaManager);
         this.categoryContainers.forEach((categoryContainer) => {
             categoryContainer.trackContainers.forEach((trackContainer) => {
+                //changes active structure to the last activated one using label click
                 trackContainer.onLabelClick.on((structureInfo) => {
                     if (
                         this.activeStructure?.trackContainer == trackContainer &&
@@ -86,6 +98,8 @@ export default class TrackManager {
                     }
                 });
 
+                //changes active structure to the last activated one using click on fragment
+                //changes active tooltip
                 trackContainer.track.addEventListener("change", (e) => {
                     const event = e as CustomEvent;
                     const detail: EventDetail = event.detail;
@@ -112,6 +126,10 @@ export default class TrackManager {
                     }
                 });
             });
+            //listens for any highlight change and if detected it gathers
+            //all highlights and applies them to protvista-manager
+            //it also gathers marked annotations and those are emitted
+            //as event
             categoryContainer.onHighlightChange.on(() => {
                 const highligtedFragments = this.categoryContainers.flatMap((categoryContainer) =>
                     categoryContainer.getHighlightedTrackFragments()
@@ -132,8 +150,11 @@ export default class TrackManager {
                     )
                 );
             });
+            //at this point the protvista components from categoryContainer are
+            //inserted into DOM tree so we can safely call addData method
             categoryContainer.addData();
         });
+        //moves with tooltip when main element changes size
         const resizeObserver = new ResizeObserver(() => {
             if (this.lastClickedFragment) {
                 const boundingRect = this.lastClickedFragment.fragment.getBoundingClientRect();
@@ -152,6 +173,9 @@ export default class TrackManager {
                 }
             }
         });
+        resizeObserver.observe(element);
+
+        //creates overlay scrollbars for every category
         OverlayScrollbars(document.querySelectorAll(".un-subtracks-container.scrollable"), {
             resize: "vertical",
             paddingAbsolute: true,
@@ -160,11 +184,12 @@ export default class TrackManager {
                 autoHide: "leave"
             }
         });
-        resizeObserver.observe(element);
         const protvistaNavigation = this.protvistaManager.find(
             "protvista-navigation"
         )[0] as ProtvistaNavigation;
         let lastFocusedResidue: number | undefined;
+
+        //show yellow residue highlight when hovering over variants
         this.protvistaManager
             .find("protvista-variation")
             .on("change", (e) => {
@@ -189,6 +214,7 @@ export default class TrackManager {
                 this.applyHighlights();
                 this.emitOnFragmentMouseOut.emit();
             });
+        //show yellow residue highlight when hovering over fragments
         this.protvistaManager
             .find("protvista-track g.fragment-group")
             .on("mousemove", (e) => {
@@ -201,8 +227,6 @@ export default class TrackManager {
                         parseInt(protvistaNavigation._displaystart),
                         parseInt(protvistaNavigation._displayend) + 1
                     ]);
-                // console.log(e.offsetX - protvistaNavigation._padding);
-                // console.log(e.offsetX);
                 const residueNumber = Math.max(
                     Math.min(xScale(e.offsetX - protvistaNavigation._padding), feature.end),
                     feature.start

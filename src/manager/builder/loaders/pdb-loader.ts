@@ -4,6 +4,15 @@ import { ParserMapping } from "../../../types/parser-mapping";
 import { PDBMappingData, PDBLoaderData, PDBLoaderItemAgg } from "../../../types/pdb-loader";
 import { PolymerCoverage, Molecule, ChainData, PDBParserData } from "../../../types/pdb-parser";
 
+/**
+ * Loads data from various sources and combines them into type accepted by PdbParser. It
+ * must be the same type as user data.
+ *
+ * First it loads list of structures from https://www.ebi.ac.uk/pdbe/api/mappings/best_structures/${uniprotId}
+ * then it loads polymer coverage for each not ignored structure (pdb id) from
+ * https://www.ebi.ac.uk/pdbe/api/pdb/entry/polymer_coverage/${pdbId} and
+ * as last resource it loads mapping from https://www.ebi.ac.uk/pdbe/api/mappings/${uniprotId}.
+ */
 export default class PdbLoader implements Loader<PDBParserData> {
     constructor(private readonly pdbIds?: string[]) {}
     public async load(uniprotId: string): Promise<PDBParserData> {
@@ -27,47 +36,13 @@ export default class PdbLoader implements Loader<PDBParserData> {
             }
         );
     }
-    private async loadMapping(uniprotId: string) {
-        return fetchWithTimeout(`https://www.ebi.ac.uk/pdbe/api/mappings/${uniprotId}`, {
-            timeout: 8000
-        })
-            .then(
-                (mappings) =>
-                    mappings.json().then((data) => {
-                        return data as PDBMappingData;
-                    }),
-                (err) => {
-                    console.error(`Mapping API unavailable!`, err);
-                    return Promise.reject(err);
-                }
-            )
-            .then((mappings) => {
-                const pdbMappings: Map<string, ParserMapping> = new Map();
-                for (const pdbId in mappings[uniprotId]["PDB"]) {
-                    if (!this.pdbIds || this.pdbIds.includes(pdbId)) {
-                        pdbMappings.set(pdbId, {});
-                        const pdbMapping = pdbMappings.get(pdbId)!;
-                        const pdbIdMapping = mappings[uniprotId]["PDB"][pdbId];
-                        for (const pdbChainMapping of pdbIdMapping) {
-                            if (!pdbMapping[pdbChainMapping.chain_id]) {
-                                pdbMapping[pdbChainMapping.chain_id] = {
-                                    struct_asym_id: pdbChainMapping.struct_asym_id,
-                                    fragment_mappings: []
-                                };
-                            }
-                            pdbMapping[pdbChainMapping.chain_id].fragment_mappings.push({
-                                entity_id: pdbChainMapping.entity_id,
-                                unp_end: pdbChainMapping.unp_end,
-                                start: { residue_number: pdbChainMapping.start.residue_number },
-                                end: { residue_number: pdbChainMapping.end.residue_number },
-                                unp_start: pdbChainMapping.unp_start
-                            });
-                        }
-                    }
-                }
-                return pdbMappings;
-            });
-    }
+
+    /**
+     * Deduplicates records so we have only one record for one pdbId.
+     * Then it loads polymer coverage for each pdbId and mapping for
+     * uniprot id and combines them all into PDBParserData (array of
+     * PDBParserItem).
+     */
     private async prepareParserData(
         data: PDBLoaderData,
         uniprotId: string
@@ -166,6 +141,56 @@ export default class PdbLoader implements Loader<PDBParserData> {
         });
         return pdbParserItems;
     }
+
+    /**
+     * Loads mapping and transforms it into a required format.
+     */
+    private async loadMapping(uniprotId: string) {
+        return fetchWithTimeout(`https://www.ebi.ac.uk/pdbe/api/mappings/${uniprotId}`, {
+            timeout: 8000
+        })
+            .then(
+                (mappings) =>
+                    mappings.json().then((data) => {
+                        return data as PDBMappingData;
+                    }),
+                (err) => {
+                    console.error(`Mapping API unavailable!`, err);
+                    return Promise.reject(err);
+                }
+            )
+            .then((mappings) => {
+                const pdbMappings: Map<string, ParserMapping> = new Map();
+                for (const pdbId in mappings[uniprotId]["PDB"]) {
+                    if (!this.pdbIds || this.pdbIds.includes(pdbId)) {
+                        const pdbMapping: ParserMapping = {};
+                        const pdbIdMapping = mappings[uniprotId]["PDB"][pdbId];
+                        for (const pdbChainMapping of pdbIdMapping) {
+                            if (!pdbMapping[pdbChainMapping.chain_id]) {
+                                pdbMapping[pdbChainMapping.chain_id] = {
+                                    struct_asym_id: pdbChainMapping.struct_asym_id,
+                                    fragment_mappings: []
+                                };
+                            }
+                            pdbMapping[pdbChainMapping.chain_id].fragment_mappings.push({
+                                entity_id: pdbChainMapping.entity_id,
+                                unp_end: pdbChainMapping.unp_end,
+                                start: { residue_number: pdbChainMapping.start.residue_number },
+                                end: { residue_number: pdbChainMapping.end.residue_number },
+                                unp_start: pdbChainMapping.unp_start
+                            });
+                        }
+                        pdbMappings.set(pdbId, pdbMapping);
+                    }
+                }
+                return pdbMappings;
+            });
+    }
+
+    /**
+     * Filters polymer coverage with given chain id and with given
+     * combination of entities and chain ids from mapping
+     */
     private transformPolymerCoverageData(
         data: PolymerCoverage,
         pdbId: string,

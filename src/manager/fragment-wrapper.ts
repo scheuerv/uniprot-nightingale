@@ -2,6 +2,10 @@ import $ from "jquery";
 import { Fragment } from "../types/accession";
 import { createEmitter } from "ts-typed-events";
 
+/**
+ * Contains several (usually two) html elements and manages and
+ * synchronizes their marked state.
+ */
 export class FragmentWrapper {
     private readonly emitOnClick = createEmitter<boolean>();
     public readonly onClick = this.emitOnClick.event;

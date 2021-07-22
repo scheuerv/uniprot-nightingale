@@ -30,7 +30,16 @@ export default class VariationRenderer implements CategoryRenderer {
         private readonly overwritePredictions?: boolean
     ) {}
 
-    public combine(other: CategoryRenderer): CategoryRenderer {
+    /**
+     * Creates VariationRenderer from the combined data of
+     * this VariationRenderer and other VariationRenderer.
+     *
+     * Data (consists of variants) are simply concatenated
+     * together but when some variants have the same key
+     * (begin, end and alternativeSequence) then these
+     * variants are merged.
+     */
+    public combine(other: CategoryRenderer): VariationRenderer {
         if (other instanceof VariationRenderer) {
             return new VariationRenderer(
                 this.combineVariants(this.data, other.data),
@@ -44,6 +53,19 @@ export default class VariationRenderer implements CategoryRenderer {
         }
     }
 
+    /**
+     * From data provided in constructor and using current sequence it assembles
+     * (sub)track (ProtvistaVariation), main track (ProtvistaVariationGraph) and
+     * VariationFilter puts them inside VariationCategoryContainer together with
+     * their data.
+     *
+     * ProtvistaVariationGraph is simply put together with label, but ProtvistaVariation
+     * is on the same row as VariationFilter.
+     *
+     * We also create consequence and sources filters from custom data (user) and
+     * put them together with default filters and assign them to the ProtvistaFilter.
+     *
+     */
     public createCategoryContainer(sequence: string): VariationCategoryContainer {
         const variationGraph = $("<protvista-variation-graph/>")
             .attr("highlight-event", "none")
@@ -178,6 +200,9 @@ export default class VariationRenderer implements CategoryRenderer {
         );
     }
 
+    /**
+     * Takes variants from both VariationData, merges their variants and custom sources.
+     */
     private combineVariants(variants1: VariationData, variants2: VariationData): VariationData {
         const map: Map<string, VariantWithSources> = new Map();
         this.combineAllSources(variants1.variants, map);
@@ -189,6 +214,9 @@ export default class VariationRenderer implements CategoryRenderer {
         };
     }
 
+    /**
+     * Merges variants with variants with the same key in the map.
+     */
     private combineAllSources(
         variants: VariantWithSources[],
         map: Map<string, VariantWithSources>
@@ -209,6 +237,11 @@ export default class VariationRenderer implements CategoryRenderer {
         });
     }
 
+    /**
+     * Takes two variants with same key (assumed) and merges them. It
+     * creates new color, updates tooltip and merges OtherSourceData
+     * from both variants.
+     */
     private combineSources(variant2: VariantWithSources, variant1: VariantWithSources) {
         if (variant1.customSource) {
             const newSources: Record<string, OtherSourceData> = {
@@ -231,6 +264,9 @@ export default class VariationRenderer implements CategoryRenderer {
         }
     }
 
+    /**
+     * Hides/opens subtrack (ProtvistaVariation with ProtvistaFilter)
+     */
     private toggle() {
         if (this.subtracksDiv.css("display") === "none") {
             this.subtracksDiv.css("display", "block");

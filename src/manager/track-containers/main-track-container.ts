@@ -3,6 +3,11 @@ import { StructureInfo, TrackRow } from "../../types/accession";
 import { createEmitter } from "ts-typed-events";
 import TrackContainer from "./track-container";
 
+/**
+ * Contains main track (ProtvistaTrack). Adds data to it when asked.
+ * It also contains empty track which is used when main track is
+ * hidden.
+ */
 export default class MainTrackContainer implements TrackContainer {
     private readonly emitOnLabelClick = createEmitter<StructureInfo>();
     public readonly onLabelClick = this.emitOnLabelClick.event;

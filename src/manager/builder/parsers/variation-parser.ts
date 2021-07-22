@@ -19,6 +19,12 @@ export default class VariationParser implements Parser<VariationsData> {
         private readonly customSource?: string
     ) {}
 
+    /**
+     * Takes raw variation data from api and creates objects of type
+     * VariationRenderer, which are used to create html element
+     * representing raw data.
+     *
+     */
     public async parse(
         uniprotId: string,
         data: VariationsData | ErrorResponse
@@ -27,11 +33,7 @@ export default class VariationParser implements Parser<VariationsData> {
             return null;
         }
         if (data.features.length > 0) {
-            const transformedData: VariationData = this.transformData(
-                data,
-                uniprotId,
-                this.overwritePredictions
-            );
+            const transformedData: VariationData = this.transformData(data, uniprotId);
             return [
                 new VariationRenderer(
                     transformedData,
@@ -46,11 +48,17 @@ export default class VariationParser implements Parser<VariationsData> {
         }
     }
 
-    private transformData(
-        data: VariationsData,
-        uniprotId: string,
-        overwritePredictions?: boolean
-    ): VariationData {
+    /**
+     * Transforms input data (VariationsData) to VariationData
+     * accepted by VariationRenderer.
+     *
+     * Main purpose is to add a custom source field according to the constructor
+     * parameter.
+     *
+     * Creates a tooltip (it takes overwrite predictions from constructor)
+     *
+     */
+    private transformData(data: VariationsData, uniprotId: string): VariationData {
         const { sequence, features } = data;
         const variants = features.map((variant: VariantWithSources) => {
             if (variant.alternativeSequence === undefined) {
@@ -84,10 +92,10 @@ export default class VariationParser implements Parser<VariationsData> {
                     variantWithoutTooltip,
                     uniprotId,
                     undefined,
-                    overwritePredictions,
+                    this.overwritePredictions,
                     this.customSource
                 ),
-                color: variantsFill(variantWithoutTooltip, otherSources, overwritePredictions),
+                color: variantsFill(variantWithoutTooltip, otherSources, this.overwritePredictions),
                 otherSources: otherSources
             };
         });

@@ -3,6 +3,15 @@ import { TrackFragment } from "../types/accession";
 import { createEmitter } from "ts-typed-events";
 import { FragmentWrapper, MarkEvent } from "./fragment-wrapper";
 
+/**
+ * Contains array of FragmentWrappers and remembers which ones are
+ * highlighted and which are marked (highlighted fragments are subset
+ * of marked fragments). It also supports bulk operation using arrow
+ * to mark all fragments on this row and subsequently their correspoding
+ * twins on other rows.
+ *
+ * Arrow is marked when all fragments are marked.
+ */
 export class RowWrapper {
     private readonly emitOnHighlightChange = createEmitter<TrackFragment[]>();
     public readonly onHighlightChange = this.emitOnHighlightChange.event;
@@ -23,6 +32,7 @@ export class RowWrapper {
                         this.higlightedFragments.add(fragmentWrapper);
                     }
                     this.markedFragments.add(fragmentWrapper);
+                    //check if all fragments are marked
                     if (this.markedFragments.size == this.fragmentWrappers.length) {
                         this.arrowElement.classList.add("clicked");
                     }
@@ -58,6 +68,9 @@ export class RowWrapper {
     public clearHighlightedTrackFragments(): void {
         this.higlightedFragments.clear();
     }
+    /**
+     * Marks or unmarks all fragments based on arrow state.
+     */
     private arrowClick(): () => boolean {
         return () => {
             if (this.arrowElement.classList.contains("clicked")) {

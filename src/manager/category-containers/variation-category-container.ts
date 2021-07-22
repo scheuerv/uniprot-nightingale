@@ -10,7 +10,11 @@ import VariationGraphTrackContainer from "../track-containers/variation-graph-tr
 import { TrackFragment } from "../../types/accession";
 import { VariantWithSources } from "../../types/variants";
 import { safeHexColor } from "../../utils/color-utils";
-
+/**
+ * Contains track containers with ProtvistaVariationGraph and ProtvistaVariation together with
+ * ProtvistaFilter. Manages marked variants and updates them when filter changes.
+ *
+ */
 export default class VariationCategoryContainer implements CategoryContainer {
     private readonly emitOnHighlightChange = createEmitter<TrackFragment[]>();
     public readonly onHighlightChange = this.emitOnHighlightChange.event;
@@ -42,12 +46,14 @@ export default class VariationCategoryContainer implements CategoryContainer {
                         target.addClass("clicked");
                         this.arrowMarked = true;
                         this.emitOnHighlightChange.emit(
-                            this.getFragments(this.variationGraph.track)
+                            this.getHistogramOfVariantsAsFragments(this.variationGraph.track)
                         );
                     }
                     return false;
                 }
             });
+
+        //When filter and arrow is mark we need to update highlights, because of different distribution.
         protvistaFilter.addEventListener("change", (e) => {
             if (
                 e instanceof CustomEvent &&
@@ -55,7 +61,9 @@ export default class VariationCategoryContainer implements CategoryContainer {
                 e.detail.for === "protvista-variation"
             ) {
                 if (this.arrowMarked) {
-                    this.emitOnHighlightChange.emit(this.getFragments(this.variationGraph.track));
+                    this.emitOnHighlightChange.emit(
+                        this.getHistogramOfVariantsAsFragments(this.variationGraph.track)
+                    );
                 }
             }
         });
@@ -64,6 +72,7 @@ export default class VariationCategoryContainer implements CategoryContainer {
                 fragmnetWithElement.element.classList.add("clicked");
             });
         });
+        //unmark variants when data are changed (because currently marked data might not be visible anymore).
         this.variation.track.onDataUpdated.on(() => {
             this.unmarkVariants();
             this.emitOnHighlightChange.emit([]);
@@ -74,6 +83,8 @@ export default class VariationCategoryContainer implements CategoryContainer {
                 this.unmarkVariants();
                 this.emitOnHighlightChange.emit([]);
             });
+
+        //marking variants
         this.variation.track.addEventListener("change", (e) => {
             const event = e as CustomEvent;
             if (event.detail.eventtype == "click" && event.detail.feature) {
@@ -125,13 +136,21 @@ export default class VariationCategoryContainer implements CategoryContainer {
         return this._categoryDiv;
     }
 
+    /**
+     * Set up data to VariationGraph and Variation
+     */
     public addData(): void {
         [this.variationGraph, this.variation].forEach((track) => track.addData());
     }
 
+    /**
+     * It returns currently marked variants, but if the arrow is marked as well it creates
+     * a histogram according to the variants distribution (and color of one item is calculated
+     * as shade of gray from this histogram).
+     */
     public getMarkedTrackFragments(): TrackFragment[] {
         if (this.arrowMarked) {
-            return this.getFragments(this.variationGraph.track).concat(
+            return this.getHistogramOfVariantsAsFragments(this.variationGraph.track).concat(
                 [...this.markedVariants.values()].map((t) => t.trackFragment)
             );
         } else {
@@ -153,7 +172,13 @@ export default class VariationCategoryContainer implements CategoryContainer {
         this.clearHighlightedTrackFragments();
     }
 
-    private getFragments(variationGraph: ProtvistaVariationGraph): TrackFragment[] {
+    /**
+     * Gets histogram from current variants (value of item is represented as shade
+     *  of gray in TrackFragment)
+     */
+    private getHistogramOfVariantsAsFragments(
+        variationGraph: ProtvistaVariationGraph
+    ): TrackFragment[] {
         const histogram = [...variationGraph._totalsArray.total];
         const max = Math.max(...histogram);
         const relativeHist = histogram.map(function (x) {

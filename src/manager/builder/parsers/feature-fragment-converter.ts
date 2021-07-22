@@ -7,6 +7,10 @@ import { Feature } from "../../../types/feature";
 export class FeatureFragmentConverter {
     constructor(private readonly dataSource?: string) {}
 
+    /**
+     * Takes raw data (Feature and its context) from user or api
+     *  and creates Fragment containing tooltip.
+     */
     public convert(
         id: number,
         sequence: string,

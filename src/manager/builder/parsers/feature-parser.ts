@@ -1,7 +1,6 @@
 import BasicCategoryRenderer from "../renderers/basic-category-renderer";
 import FragmentAligner from "./fragment-aligner";
 import Parser, { isErrorResponse } from "./parser";
-import CategoryRenderer from "../renderers/category-renderer";
 import { config as trackConfig } from "protvista-track/src/config";
 import { TrackRow } from "../../../types/accession";
 import { FeatureFragmentConverter } from "./feature-fragment-converter";
@@ -9,6 +8,7 @@ import { FeaturesData } from "../../../types/feature-parser";
 import { ErrorResponse } from "../../../types/error-response";
 import { categoriesConfig } from "../../../config/feature-categories";
 import { Feature } from "../../../types/feature";
+
 export default class FeatureParser implements Parser<FeaturesData> {
     public readonly categoryName = "FEATURES";
     private readonly unique = "UNIQUE";
@@ -19,10 +19,19 @@ export default class FeatureParser implements Parser<FeaturesData> {
         this.featureFragmentConverter = new FeatureFragmentConverter(dataSource);
     }
 
+    /**
+     * Takes raw data from api or user and creates objects of type BasicCategoryRenderer,
+     * which are used to create html element representing raw data. It groups features
+     * according to their categories and types.
+     *
+     * It excludes specific categories that are given in constructor it also
+     * sets data source information to all created fragments according to the
+     * constructor parameter.
+     */
     public async parse(
         uniprotId: string,
         data: FeaturesData | ErrorResponse
-    ): Promise<CategoryRenderer[] | null> {
+    ): Promise<BasicCategoryRenderer[] | null> {
         if (isErrorResponse(data)) {
             return null;
         }
@@ -66,7 +75,7 @@ export default class FeatureParser implements Parser<FeaturesData> {
                 typeTrackRows.set(
                     type,
                     new TrackRow(
-                        fragmentAligner.getAccessions(),
+                        fragmentAligner.alignFragments(),
                         trackConfig[type]?.label ?? this.createLabel(type)
                     )
                 );
@@ -96,6 +105,10 @@ export default class FeatureParser implements Parser<FeaturesData> {
         );
     }
 
+    /**
+     * Proteomics and antigen features are missing category so we are adding
+     * them manually.
+     */
     private prepareFeature(feature: Feature): Feature {
         if (feature.type == "PROTEOMICS") {
             let newType: string;

@@ -3,6 +3,9 @@ import { TemplateResult } from "lit-html";
 import { html } from "lit-element";
 import $ from "jquery";
 
+/**
+ * Adds close icon to the standard ProtvistaTooltip component.
+ */
 export default class CloseableTooltip extends ProtvistaTooltip {
     public render(): TemplateResult {
         let visible = this.title && this.visible ? true : false;

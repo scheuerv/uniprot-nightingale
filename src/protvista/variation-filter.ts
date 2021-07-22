@@ -5,6 +5,12 @@ import { VariantWithSources, VariationData } from "../types/variants";
 import { FilterCase, FilterVariationData } from "../types/variation-filter";
 
 const ProtvistaFilter = MProtvistaFilter || HTMLElement;
+
+/**
+ * Extends standard ProtvistaFilter to support filtration of multiple components.
+ * We are using it to filter ProtvistaVariation and ProtvistaVariationGraph at
+ * the same time.
+ */
 export default class VariationFilter extends ProtvistaFilter {
     public multiFor: Map<
         string,

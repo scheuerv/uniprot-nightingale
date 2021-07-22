@@ -20,6 +20,13 @@ export default class BasicCategoryRenderer implements CategoryRenderer {
         private readonly displayArrow: boolean,
         public readonly categoryName: string
     ) {}
+
+    /**
+     * Creates BasicCategoryRenderer from the combined data of
+     * this BasicCategoryRenderer and other BasicCategoryRenderer.
+     * All data reamins the same only ids of some fragmnets are updated
+     * so they are unique.
+     */
     public combine(other: CategoryRenderer): CategoryRenderer {
         if (other instanceof BasicCategoryRenderer) {
             const combined: Map<string, TrackRow> = new Map();
@@ -83,6 +90,15 @@ export default class BasicCategoryRenderer implements CategoryRenderer {
             throw new Error("Can't combine BasicCategoryRenderer with: " + typeof other);
         }
     }
+
+    /**
+     * From data provided in constructor and using current sequence it assembles
+     * (sub)tracks and main track (aggregated from subtracks) and puts them
+     * inside BasicCategoryContainer together with their data.
+     *
+     * Tracks (TrackContainer) are usually compiled from label and some protvista
+     * component with data.
+     */
     public createCategoryContainer(sequence: string): BasicCategoryContainer {
         [this.mainTrack, this.mainTrackRow] = this.getMainTrack(sequence);
         [this.subtracks, this.subtracksDiv] = this.getSubtracks(sequence);
@@ -96,6 +112,10 @@ export default class BasicCategoryRenderer implements CategoryRenderer {
         categoryDiv.append(this.subtracksDiv);
         return new BasicCategoryContainer(trackContainers, categoryDiv[0]);
     }
+
+    /**
+     * Hides/opens subtracks (when subtracks are displayed main track is not visible).
+     */
     private toggle(): void {
         const parent = $(this.mainTrack.track).parent();
         if (this.subtracksDiv.style.display === "none") {
@@ -116,6 +136,11 @@ export default class BasicCategoryRenderer implements CategoryRenderer {
                 .removeClass("arrow-down");
         }
     }
+
+    /**
+     * Combines all fragments from all subtracks and puts them together using FragmentAligner
+     * into MainTrackContainer together with a new protvista track.
+     */
     private getMainTrack(sequence: string): [MainTrackContainer, JQuery<HTMLElement>] {
         const mainTrackData = [...this.rows.values()].flatMap((row) => row.rowData);
         const fragmentAligner = new FragmentAligner();
@@ -124,7 +149,7 @@ export default class BasicCategoryRenderer implements CategoryRenderer {
                 fragmentAligner.addFragment(fragment)
             )
         );
-        const mainTrackDataAligned = fragmentAligner.getAccessions();
+        const mainTrackDataAligned = fragmentAligner.alignFragments();
         const track = $("<protvista-track/>")
             .attr("highlight-event", "none")
             .attr("height", 44)

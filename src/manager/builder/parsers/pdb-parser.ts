@@ -21,6 +21,21 @@ export default class PdbParser implements Parser<PDBParserData> {
         public readonly categoryName = "EXPERIMENTAL_STRUCTURES"
     ) {}
 
+    /**
+     * Takes raw data from api or user and creates objects of type BasicCategoryRenderer,
+     * which are used to create html element representing raw data.
+     *
+     * Each row created by this parser is representing one structure. Each fragment
+     * is containing information, which can be used to render the structure and
+     * determine mapping between (uniprot) sequence and (pdb) structure.
+     *
+     * Each row can contain two types of fragments. Observed and unobserved. This is
+     * determined using structure coverage (PolymerCoverage) and mapping (mentioned
+     * above).
+     *
+     * Each fragment contains tooltip created in this class.
+     *
+     */
     public async parse(
         uniprotId: string,
         data: PDBParserData
@@ -52,8 +67,8 @@ export default class PdbParser implements Parser<PDBParserData> {
                     const chainId: string = chain.chain_id;
                     const chainMapping = sortedMappings[chainId];
                     if (chainMapping) {
-                        const uniprotStart: number = pdbParserItem.unp_start;
-                        const uniprotEnd: number = pdbParserItem.unp_end;
+                        const sequenceStart: number = pdbParserItem.unp_start;
+                        const sequenceEnd: number = pdbParserItem.unp_end;
                         const structure: StructureData = pdbParserItem.structure;
                         if (structure.url && structure.data) {
                             console.warn(
@@ -105,8 +120,8 @@ export default class PdbParser implements Parser<PDBParserData> {
 
                         const unobservedFragments: Fragment[] = this.getUnobservedFragments(
                             observedFragments,
-                            uniprotStart,
-                            uniprotEnd,
+                            sequenceStart,
+                            sequenceEnd,
                             pdbId,
                             chainId,
                             uniprotId,
@@ -140,8 +155,8 @@ export default class PdbParser implements Parser<PDBParserData> {
 
     private getUnobservedFragments(
         observedFragments: Fragment[],
-        start: number,
-        end: number,
+        sequenceStart: number,
+        sequenceEnd: number,
         pdbId: string,
         chainId: string,
         uniprotId: string,
@@ -156,8 +171,8 @@ export default class PdbParser implements Parser<PDBParserData> {
         if (observedFragmentSorted.length == 0) {
             unobservedFragments = unobservedFragments.concat(
                 this.createUnobservedFragmentsInRange(
-                    start,
-                    end,
+                    sequenceStart,
+                    sequenceEnd,
                     mapping,
                     uniprotId,
                     pdbId,
@@ -167,11 +182,11 @@ export default class PdbParser implements Parser<PDBParserData> {
             );
             return unobservedFragments;
         }
-        if (start < observedFragmentSorted[0].start) {
+        if (sequenceStart < observedFragmentSorted[0].start) {
             const fragmentEnd: number = observedFragmentSorted[0].start - 1;
             unobservedFragments = unobservedFragments.concat(
                 this.createUnobservedFragmentsInRange(
-                    start,
+                    sequenceStart,
                     fragmentEnd,
                     mapping,
                     uniprotId,
@@ -198,13 +213,13 @@ export default class PdbParser implements Parser<PDBParserData> {
             );
         }
 
-        if (end - 1 >= observedFragmentSorted[observedFragmentSorted.length - 1].end) {
+        if (sequenceEnd - 1 >= observedFragmentSorted[observedFragmentSorted.length - 1].end) {
             const fragmentStart: number =
                 observedFragmentSorted[observedFragmentSorted.length - 1].end + 1;
             unobservedFragments = unobservedFragments.concat(
                 this.createUnobservedFragmentsInRange(
                     fragmentStart,
-                    end,
+                    sequenceEnd,
                     mapping,
                     uniprotId,
                     pdbId,

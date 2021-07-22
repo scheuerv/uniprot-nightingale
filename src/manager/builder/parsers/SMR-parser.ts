@@ -7,6 +7,10 @@ import { Fragment, StructureInfo, TrackRow } from "../../../types/accession";
 import { ChainMapping } from "../../../types/mapping";
 import { SMRData, SMRResult, SMRChain, SMRSegment } from "../../../types/SMR-parser";
 import { Interval } from "../../../types/interval";
+
+/**
+ * Parses data received from SWISS-MODEL Repository (SMR).
+ */
 export default class SMRParser implements Parser<SMRData> {
     private readonly categorylabel = "Predicted structures";
     public readonly categoryName = "PREDICTED_STRUCTURES";
@@ -14,6 +18,21 @@ export default class SMRParser implements Parser<SMRData> {
 
     constructor(private readonly smrIds?: string[]) {}
 
+    /**
+     * Takes raw data from api and creates objects of type BasicCategoryRenderer,
+     * which are used to create html element representing raw data.
+     *
+     * Each fragment created by this parser is representing one structure and
+     * is containing information, which can be used to render the structure and
+     * determine mapping between (uniprot) sequence and structure.
+     *
+     * Each row is representing structures modeled by the same template. This
+     * method groups structures by template.
+     *
+     * Each fragment contains tooltip created in this class.
+     *
+     * It excludes specific smrIds (templates) that are given in constructor.
+     */
     public async parse(uniprotId: string, data: SMRData): Promise<BasicCategoryRenderer[] | null> {
         const result: SMRResult = data.result;
         const trackRows: Map<string, TrackRow> = new Map();
@@ -130,7 +149,7 @@ export default class SMRParser implements Parser<SMRData> {
             });
             trackRows.set(
                 key,
-                new TrackRow(fragmentAligner.getAccessions(), key, fragments[0].structureInfo)
+                new TrackRow(fragmentAligner.alignFragments(), key, fragments[0].structureInfo)
             );
         }
         if (trackRows.size > 0) {

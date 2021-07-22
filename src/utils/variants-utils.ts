@@ -113,6 +113,12 @@ export function existAssociation(association: Association[] | undefined): boolea
     return false;
 }
 
+/**
+ * Applies filter to given data. Used for filtering data in Variation component.
+ * @param  {FilterCase} filter Filter to use.
+ * @param  {VariationData} data Data to filter.
+ * @returns Filtered data.
+ */
 export function filterDataVariation(
     filter: FilterCase,
     data: FilterVariationData[]
@@ -133,6 +139,12 @@ export function filterDataVariation(
     return newData;
 }
 
+/**
+ * Applies filter to given data. Used for filtering data in VariationGraph component.
+ * @param  {FilterCase} filter Filter to use.
+ * @param  {VariationData} data Data to filter.
+ * @returns Filtered data.
+ */
 export function filterDataVariationGraph(
     filter: FilterCase,
     data: VariationData

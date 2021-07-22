@@ -10,6 +10,10 @@ import { Evidence } from "protvista-variation-adapter/dist/es/variants";
 import { Xref } from "protvista-variation-adapter/dist/es/variants";
 import { Feature } from "../types/feature";
 
+/**
+ * Classes in this file are used to assemble tooltips.
+ */
+
 export interface TooltipData {
     render(): string;
 }

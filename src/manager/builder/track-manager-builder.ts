@@ -14,6 +14,13 @@ import TrackManager from "../track-manager";
 import { createEmitter } from "ts-typed-events";
 import { VariantWithCategory, VariantWithSources } from "../../types/variants";
 import { CategoryRenderersProvider } from "./category-renderers-provider";
+
+/**
+ * Main purpose of this class is to create TrackManager. It can contain
+ * several CategoryRenderersProviders, which are used to create content
+ * of TrackManager. We can simply add new CategoryRenderersProvider
+ * using several convinient add* methods.
+ */
 export default class TrackManagerBuilder {
     private readonly categoryRenderersProviders: CategoryRenderersProvider<any>[] = [];
     private readonly uniprotId: string;
@@ -39,6 +46,15 @@ export default class TrackManagerBuilder {
         }
     }
 
+    /**
+     * Creates TrackManagerBuilder with default settings. If you dont know
+     * how to create TrackManagerBuilder use this method.
+     *
+     * It uses several public api endpoints to load most commonly used
+     * annotations and list of pdb/smr structures and their mapping and
+     * coverage. TrackMangerBuilder created by this method can also
+     * manage user data.
+     */
     public static createDefault(config: SequenceConfig): TrackManagerBuilder {
         const trackManagerBuilder = new TrackManagerBuilder(
             (uniprotId) =>
@@ -128,6 +144,14 @@ export default class TrackManagerBuilder {
         return trackManagerBuilder;
     }
 
+    /**
+     * This method loads and prepares data for TrackManager and then it creates one.
+     *
+     * Data are loaded and prepared mostly using CategoryRenderersProviders inside
+     * TrackManagerBuilder.
+     *
+     * When done it emits onRendered event.
+     */
     public async load(element: HTMLElement): Promise<TrackManager> {
         const sequence = await this.sequenceUrlGenerator(this.uniprotId).then((data) => {
             const tokens: string[] = data.sequence.split(/\r?\n/);
@@ -154,7 +178,7 @@ export default class TrackManagerBuilder {
                 .flatMap((categoryRenderer) => categoryRenderer)
                 .filter((categoryRenderer) => categoryRenderer != null)
                 .map((categoryRenderer) => categoryRenderer!);
-            const sortedCategoryRenderers = this.sortRenderers(
+            const sortedCategoryRenderers = this.sortAndCombineRenderers(
                 filteredCategoryRenderes,
                 this.config?.categoryOrder
             );
@@ -185,12 +209,16 @@ export default class TrackManagerBuilder {
         this.add(new FetchLoader(urlGenerator), parser);
     }
 
-    private sortRenderers(
-        filteredRenderes: CategoryRenderer[],
+    /**
+     * Combines renderers with same category name and sorts them according
+     * to the configuration.
+     */
+    private sortAndCombineRenderers(
+        renderes: CategoryRenderer[],
         categoryOrder?: string[]
     ): CategoryRenderer[] {
         const map = new Map<string, CategoryRenderer>();
-        filteredRenderes.forEach((renderer) => {
+        renderes.forEach((renderer) => {
             const previousRenderer = map.get(renderer.categoryName);
             if (previousRenderer) {
                 map.set(renderer.categoryName, previousRenderer.combine(renderer));

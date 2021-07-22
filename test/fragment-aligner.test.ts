@@ -11,13 +11,13 @@ describe("FragmentAligner tests", function () {
     });
 
     it("no fragments", async () => {
-        expect(instance.getAccessions()).toEqual([]);
+        expect(instance.alignFragments()).toEqual([]);
     });
 
     it("one fragment", async () => {
         const fragment = new Fragment(1, 1, 10, "#000000");
         instance.addFragment(fragment);
-        expect(instance.getAccessions()).toEqual([new Accession([new Location([fragment])])]);
+        expect(instance.alignFragments()).toEqual([new Accession([new Location([fragment])])]);
     });
 
     it("two fragments, wrong order, no overlapping", async () => {
@@ -25,7 +25,7 @@ describe("FragmentAligner tests", function () {
         const fragment2 = new Fragment(2, 2, 9, "#000000");
         instance.addFragment(fragment1);
         instance.addFragment(fragment2);
-        expect(instance.getAccessions()).toEqual([
+        expect(instance.alignFragments()).toEqual([
             new Accession([new Location([fragment2, fragment1])])
         ]);
     });
@@ -37,7 +37,7 @@ describe("FragmentAligner tests", function () {
         instance.addFragment(fragment1);
         instance.addFragment(fragment2);
         instance.addFragment(fragment3);
-        expect(instance.getAccessions()).toEqual([
+        expect(instance.alignFragments()).toEqual([
             new Accession([new Location([fragment2])]),
             new Accession([new Location([fragment3])]),
             new Accession([new Location([fragment1])])
@@ -51,7 +51,7 @@ describe("FragmentAligner tests", function () {
         instance.addFragment(fragment1);
         instance.addFragment(fragment2);
         instance.addFragment(fragment3);
-        expect(instance.getAccessions()).toEqual([
+        expect(instance.alignFragments()).toEqual([
             new Accession([new Location([fragment2, fragment1])]),
             new Accession([new Location([fragment3])])
         ]);
