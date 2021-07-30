@@ -56,9 +56,7 @@ function createEntryPoint(name) {
         ],
         output: {
             filename: `${name}.js`,
-            path: path.resolve(__dirname, `dist/`),
-            clean: true,
-            publicPath: "/",
+            path: path.resolve(__dirname, `dist`),
             library: {
                 type: "assign",
                 name: "UniprotNightingale"
@@ -70,6 +68,27 @@ function createEntryPoint(name) {
         ...sharedConfig
     };
 }
+
+function createExampleEntryPoint(name) {
+    return {
+        devtool: "inline-source-map",
+        entry: [path.resolve(__dirname, `src/examples/index.ts`)],
+        output: {
+            filename: `${name}.js`,
+            path: path.resolve(__dirname, `dist/examples`),
+            library: {
+                type: 'assign',
+                name: 'UniprotNightingaleExamples'
+            }
+        },
+        externals: {
+            "fs": 'require("fs")'
+        },
+        ...sharedConfig
+    }
+}
+
 module.exports = [
-    createEntryPoint("index")
+    createEntryPoint("index"),
+    createExampleEntryPoint("example")
 ];
